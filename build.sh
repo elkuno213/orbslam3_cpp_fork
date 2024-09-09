@@ -1,40 +1,20 @@
-echo "Configuring and building Thirdparty/DBoW2 ..."
+#!/bin/bash
 
-cd Thirdparty/DBoW2
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j
+echo "Installing dependencies ..."
+./scripts/install_dependencies.sh
+./scripts/install_pangolin.sh
 
-cd ../../g2o
+echo "Uncompressing vocabulary ..."
+tar -xzvf config/vocabulary.txt.tar.gz \
+    -C config \
+    --one-top-level=vocabulary.txt \
+    --strip-components=1
 
-echo "Configuring and building Thirdparty/g2o ..."
-
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j
-
-cd ../../Sophus
-
-echo "Configuring and building Thirdparty/Sophus ..."
-
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j
-
-cd ../../../
-
-echo "Uncompress vocabulary ..."
-
-cd Vocabulary
-tar -xf ORBvoc.txt.tar.gz
-cd ..
-
-echo "Configuring and building ORB_SLAM3 ..."
-
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j4
+echo "Configuring and building orbslam3 ..."
+cmake -B build \
+      -S . \
+      -GNinja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+ninja -C build
+sudo ninja -C build install
