@@ -16,16 +16,15 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef SIM3SOLVER_H
 #define SIM3SOLVER_H
 
-#include <opencv2/opencv.hpp>
+// Standard
 #include <vector>
-
+// 3rdparty
+#include <opencv2/opencv.hpp>
+// Local
 #include "orbslam3/KeyFrame.h"
-
-
 
 namespace ORB_SLAM3
 {

@@ -16,9 +16,10 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "orbslam3/CameraModels/KannalaBrandt8.h"
-
+// 3rdparty
 #include <boost/serialization/export.hpp>
+// Local
+#include "orbslam3/CameraModels/KannalaBrandt8.h"
 
 //BOOST_CLASS_EXPORT_IMPLEMENT(ORB_SLAM3::KannalaBrandt8)
 

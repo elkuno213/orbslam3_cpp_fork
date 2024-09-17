@@ -16,8 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Local
 #include "orbslam3/GeometricTools.h"
-
 #include "orbslam3/KeyFrame.h"
 
 namespace ORB_SLAM3

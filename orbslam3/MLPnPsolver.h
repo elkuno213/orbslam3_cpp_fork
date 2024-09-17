@@ -49,11 +49,12 @@
 #ifndef ORB_SLAM3_MLPNPSOLVER_H
 #define ORB_SLAM3_MLPNPSOLVER_H
 
-#include "orbslam3/MapPoint.h"
+// 3rdparty
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+// Local
 #include "orbslam3/Frame.h"
-
-#include<Eigen/Dense>
-#include<Eigen/Sparse>
+#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3{
     class MLPnPsolver {

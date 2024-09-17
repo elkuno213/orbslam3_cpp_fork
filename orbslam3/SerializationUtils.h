@@ -19,16 +19,15 @@
 #ifndef SERIALIZATION_UTILS_H
 #define SERIALIZATION_UTILS_H
 
+// Standard
+#include <vector>
+// 3rdparty
+#include <Eigen/Core>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
-
-#include <orbslam3/external/Sophus/sophus/se3.hpp>
-#include <Eigen/Core>
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
-
-#include <vector>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 
 namespace ORB_SLAM3
 {

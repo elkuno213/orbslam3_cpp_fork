@@ -16,20 +16,19 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef FRAMEDRAWER_H
 #define FRAMEDRAWER_H
 
-#include "orbslam3/Tracking.h"
-#include "orbslam3/MapPoint.h"
-#include "orbslam3/Atlas.h"
-
-#include<opencv2/core/core.hpp>
-#include<opencv2/features2d/features2d.hpp>
-
-#include<mutex>
+// Standard
+#include <mutex>
 #include <unordered_set>
-
+// 3rdparty
+#include <opencv2/core/core.hpp>
+#include<opencv2/features2d/features2d.hpp>
+// Local
+#include "orbslam3/Atlas.h"
+#include "orbslam3/MapPoint.h"
+#include "orbslam3/Tracking.h"
 
 namespace ORB_SLAM3
 {

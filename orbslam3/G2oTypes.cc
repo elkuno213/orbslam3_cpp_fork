@@ -16,9 +16,11 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Local
+#include "orbslam3/Converter.h"
 #include "orbslam3/G2oTypes.h"
 #include "orbslam3/ImuTypes.h"
-#include "orbslam3/Converter.h"
+
 namespace ORB_SLAM3
 {
 

@@ -16,16 +16,16 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+// Standard
+#include <chrono>
+#include <mutex>
+// Local
+#include "orbslam3/Converter.h"
+#include "orbslam3/GeometricTools.h"
 #include "orbslam3/LocalMapping.h"
 #include "orbslam3/LoopClosing.h"
 #include "orbslam3/ORBmatcher.h"
 #include "orbslam3/Optimizer.h"
-#include "orbslam3/Converter.h"
-#include "orbslam3/GeometricTools.h"
-
-#include<mutex>
-#include<chrono>
 
 namespace ORB_SLAM3
 {

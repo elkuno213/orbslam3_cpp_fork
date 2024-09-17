@@ -16,22 +16,23 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#include "orbslam3/System.h"
-#include "orbslam3/Converter.h"
-#include <thread>
-#include <pangolin/pangolin.h>
+// Standard
 #include <iomanip>
+#include <thread>
+// 3rdparty
 #include <openssl/md5.h>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <pangolin/pangolin.h>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/string.hpp>
+// Local
+#include "orbslam3/Converter.h"
+#include "orbslam3/System.h"
 
 namespace ORB_SLAM3
 {

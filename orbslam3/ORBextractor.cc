@@ -51,16 +51,16 @@
 *
 */
 
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <vector>
+// Standard
 #include <iostream>
-
+#include <vector>
+// 3rdparty
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+// Local
 #include "orbslam3/ORBextractor.h"
-
 
 using namespace cv;
 using namespace std;

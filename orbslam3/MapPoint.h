@@ -16,23 +16,22 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef MAPPOINT_H
 #define MAPPOINT_H
 
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/Frame.h"
-#include "orbslam3/Map.h"
-#include "orbslam3/Converter.h"
-
-#include "orbslam3/SerializationUtils.h"
-
-#include <opencv2/core/core.hpp>
+// Standard
 #include <mutex>
-
-#include <boost/serialization/serialization.hpp>
+// 3rdparty
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <opencv2/core/core.hpp>
+// Local
+#include "orbslam3/Converter.h"
+#include "orbslam3/Frame.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/SerializationUtils.h"
 
 namespace ORB_SLAM3
 {

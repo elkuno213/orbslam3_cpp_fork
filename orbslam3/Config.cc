@@ -16,7 +16,7 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+// Local
 #include "orbslam3/Config.h"
 
 namespace ORB_SLAM3

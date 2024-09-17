@@ -16,28 +16,24 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef FRAME_H
 #define FRAME_H
 
-#include<vector>
-
-#include "orbslam3/external/DBoW2/DBoW2/BowVector.h"
-#include "orbslam3/external/DBoW2/DBoW2/FeatureVector.h"
-
-#include "orbslam3/external/Sophus/sophus/geometry.hpp"
-
+// Standard
+#include <mutex>
+#include <vector>
+// 3rdparty
+#include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
+#include <orbslam3/external/DBoW2/DBoW2/FeatureVector.h>
+#include <Eigen/Core>
+#include <opencv2/opencv.hpp>
+#include <orbslam3/external/Sophus/sophus/geometry.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
+// Local
+#include "orbslam3/Converter.h"
 #include "orbslam3/ImuTypes.h"
 #include "orbslam3/ORBVocabulary.h"
-
-#include "orbslam3/Converter.h"
 #include "orbslam3/Settings.h"
-
-#include <mutex>
-#include <opencv2/opencv.hpp>
-
-#include "Eigen/Core"
-#include "orbslam3/external/Sophus/sophus/se3.hpp"
 
 namespace ORB_SLAM3
 {

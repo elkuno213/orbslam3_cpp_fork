@@ -16,17 +16,18 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef MAPDRAWER_H
 #define MAPDRAWER_H
 
-#include"orbslam3/Atlas.h"
-#include"orbslam3/MapPoint.h"
-#include"orbslam3/KeyFrame.h"
+// Standard
+#include <mutex>
+// 3rdparty
+#include <pangolin/pangolin.h>
+// Local
+#include "orbslam3/Atlas.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/MapPoint.h"
 #include "orbslam3/Settings.h"
-#include<pangolin/pangolin.h>
-
-#include<mutex>
 
 namespace ORB_SLAM3
 {

@@ -16,23 +16,23 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef IMUTYPES_H
 #define IMUTYPES_H
 
-#include <vector>
-#include <utility>
-#include <opencv2/core/core.hpp>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include <Eigen/Dense>
-#include <orbslam3/external/Sophus/sophus/se3.hpp>
+// Standard
 #include <mutex>
-
-#include "orbslam3/SerializationUtils.h"
-
+#include <utility>
+#include <vector>
+// 3rdparty
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
+#include <opencv2/core/core.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
+// Local
+#include "orbslam3/SerializationUtils.h"
 
 namespace ORB_SLAM3
 {

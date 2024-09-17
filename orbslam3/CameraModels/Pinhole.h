@@ -19,10 +19,10 @@
 #ifndef CAMERAMODELS_PINHOLE_H
 #define CAMERAMODELS_PINHOLE_H
 
+// Standard
 #include <assert.h>
-
+// Local
 #include "orbslam3/CameraModels/GeometricCamera.h"
-
 #include "orbslam3/TwoViewReconstruction.h"
 
 namespace ORB_SLAM3 {

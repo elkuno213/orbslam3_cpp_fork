@@ -16,15 +16,14 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "orbslam3/TwoViewReconstruction.h"
-
+// Standard
+#include <thread>
+// 3rdparty
+#include <orbslam3/external/DBoW2/DUtils/Random.h>
+// Local
 #include "orbslam3/Converter.h"
 #include "orbslam3/GeometricTools.h"
-
-#include "orbslam3/external/DBoW2/DUtils/Random.h"
-
-#include<thread>
-
+#include "orbslam3/TwoViewReconstruction.h"
 
 using namespace std;
 namespace ORB_SLAM3

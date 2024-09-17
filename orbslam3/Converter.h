@@ -16,18 +16,16 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
-#include<opencv2/core/core.hpp>
-
-#include<Eigen/Dense>
-#include"orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h"
-#include"orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h"
-
-#include "orbslam3/external/Sophus/sophus/geometry.hpp"
-#include "orbslam3/external/Sophus/sophus/sim3.hpp"
+// 3rdparty
+#include <orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h>
+#include <orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h>
+#include <Eigen/Dense>
+#include <opencv2/core/core.hpp>
+#include <orbslam3/external/Sophus/sophus/geometry.hpp>
+#include <orbslam3/external/Sophus/sophus/sim3.hpp>
 
 namespace ORB_SLAM3
 {

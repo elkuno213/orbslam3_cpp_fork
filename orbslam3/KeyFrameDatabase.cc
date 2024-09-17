@@ -16,13 +16,13 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include "orbslam3/KeyFrameDatabase.h"
-
+// Standard
+#include <mutex>
+// 3rdparty
+#include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
+// Local
 #include "orbslam3/KeyFrame.h"
-#include "orbslam3/external/DBoW2/DBoW2/BowVector.h"
-
-#include<mutex>
+#include "orbslam3/KeyFrameDatabase.h"
 
 using namespace std;
 

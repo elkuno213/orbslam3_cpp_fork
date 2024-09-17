@@ -16,19 +16,18 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef LOCALMAPPING_H
 #define LOCALMAPPING_H
 
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/Atlas.h"
-#include "orbslam3/LoopClosing.h"
-#include "orbslam3/Tracking.h"
-#include "orbslam3/KeyFrameDatabase.h"
-#include "orbslam3/Settings.h"
-
+// Standard
 #include <mutex>
-
+// Local
+#include "orbslam3/Atlas.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/LoopClosing.h"
+#include "orbslam3/Settings.h"
+#include "orbslam3/Tracking.h"
 
 namespace ORB_SLAM3
 {

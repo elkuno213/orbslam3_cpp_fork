@@ -19,18 +19,19 @@
 #ifndef ATLAS_H
 #define ATLAS_H
 
-#include "orbslam3/Map.h"
-#include "orbslam3/MapPoint.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/CameraModels/GeometricCamera.h"
-#include "orbslam3/CameraModels/Pinhole.h"
-#include "orbslam3/CameraModels/KannalaBrandt8.h"
-
-#include <set>
+// Standard
 #include <mutex>
+#include <set>
+// 3rdparty
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/export.hpp>
-
+// Local
+#include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/CameraModels/KannalaBrandt8.h"
+#include "orbslam3/CameraModels/Pinhole.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3
 {

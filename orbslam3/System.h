@@ -16,30 +16,29 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-
+// Standard
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string>
-#include<thread>
-#include<opencv2/core/core.hpp>
-
-#include "orbslam3/Tracking.h"
-#include "orbslam3/FrameDrawer.h"
-#include "orbslam3/MapDrawer.h"
+#include <string>
+#include <thread>
+// 3rdparty
+#include <opencv2/core/core.hpp>
+// Local
 #include "orbslam3/Atlas.h"
+#include "orbslam3/FrameDrawer.h"
+#include "orbslam3/ImuTypes.h"
+#include "orbslam3/KeyFrameDatabase.h"
 #include "orbslam3/LocalMapping.h"
 #include "orbslam3/LoopClosing.h"
-#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/MapDrawer.h"
 #include "orbslam3/ORBVocabulary.h"
-#include "orbslam3/Viewer.h"
-#include "orbslam3/ImuTypes.h"
 #include "orbslam3/Settings.h"
-
+#include "orbslam3/Tracking.h"
+#include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3
 {

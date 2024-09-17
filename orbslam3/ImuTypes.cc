@@ -16,12 +16,12 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Standard
+#include <iostream>
+// Local
 #include "orbslam3/ImuTypes.h"
 #include "orbslam3/Converter.h"
-
 #include "orbslam3/GeometricTools.h"
-
-#include<iostream>
 
 namespace ORB_SLAM3
 {

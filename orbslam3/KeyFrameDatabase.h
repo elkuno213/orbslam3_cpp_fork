@@ -16,25 +16,24 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef KEYFRAMEDATABASE_H
 #define KEYFRAMEDATABASE_H
 
-#include <vector>
+// Standard
 #include <list>
+#include <mutex>
 #include <set>
-
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/Frame.h"
-#include "orbslam3/ORBVocabulary.h"
-#include "orbslam3/Map.h"
-
+#include <vector>
+// 3rdparty
 #include <boost/serialization/base_object.hpp>
-#include <boost/serialization/vector.hpp>
+#include <boost/serialization/library_version_type.hpp>
 #include <boost/serialization/list.hpp>
-
-#include<mutex>
-
+#include <boost/serialization/vector.hpp>
+// Local
+#include "orbslam3/Frame.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/ORBVocabulary.h"
 
 namespace ORB_SLAM3
 {

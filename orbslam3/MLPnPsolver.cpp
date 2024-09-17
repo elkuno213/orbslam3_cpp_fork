@@ -46,10 +46,10 @@
 * SUCH DAMAGE.                                                               *
 ******************************************************************************/
 
-#include "orbslam3/MLPnPsolver.h"
-
+// 3rdparty
 #include <Eigen/Sparse>
-
+// Local
+#include "orbslam3/MLPnPsolver.h"
 
 namespace ORB_SLAM3 {
     MLPnPsolver::MLPnPsolver(const Frame &F, const vector<MapPoint *> &vpMapPointMatches):

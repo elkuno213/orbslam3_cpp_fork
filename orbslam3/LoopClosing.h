@@ -16,22 +16,22 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef LOOPCLOSING_H
 #define LOOPCLOSING_H
 
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/LocalMapping.h"
+// Standard
+#include <mutex>
+#include <thread>
+// 3rdparty
+#include <orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h>
+#include <boost/algorithm/string.hpp>
+// Local
 #include "orbslam3/Atlas.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/LocalMapping.h"
 #include "orbslam3/ORBVocabulary.h"
 #include "orbslam3/Tracking.h"
-
-#include "orbslam3/KeyFrameDatabase.h"
-
-#include <boost/algorithm/string.hpp>
-#include <thread>
-#include <mutex>
-#include "orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h"
 
 namespace ORB_SLAM3
 {

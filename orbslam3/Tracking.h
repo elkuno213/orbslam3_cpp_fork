@@ -20,27 +20,27 @@
 #ifndef TRACKING_H
 #define TRACKING_H
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-
-#include "orbslam3/Viewer.h"
-#include "orbslam3/FrameDrawer.h"
-#include "orbslam3/Atlas.h"
-#include "orbslam3/LocalMapping.h"
-#include "orbslam3/LoopClosing.h"
-#include "orbslam3/Frame.h"
-#include "orbslam3/ORBVocabulary.h"
-#include "orbslam3/KeyFrameDatabase.h"
-#include "orbslam3/ORBextractor.h"
-#include "orbslam3/MapDrawer.h"
-#include "orbslam3/System.h"
-#include "orbslam3/ImuTypes.h"
-#include "orbslam3/Settings.h"
-
-#include "orbslam3/CameraModels/GeometricCamera.h"
-
+// Standard
 #include <mutex>
 #include <unordered_set>
+// 3rdparty
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+// Local
+#include "orbslam3/Atlas.h"
+#include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Frame.h"
+#include "orbslam3/FrameDrawer.h"
+#include "orbslam3/ImuTypes.h"
+#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/LocalMapping.h"
+#include "orbslam3/LoopClosing.h"
+#include "orbslam3/MapDrawer.h"
+#include "orbslam3/ORBVocabulary.h"
+#include "orbslam3/ORBextractor.h"
+#include "orbslam3/Settings.h"
+#include "orbslam3/System.h"
+#include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3
 {

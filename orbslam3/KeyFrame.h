@@ -16,28 +16,26 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
+// Standard
+#include <mutex>
+// 3rdparty
+#include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
+#include <orbslam3/external/DBoW2/DBoW2/FeatureVector.h>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/vector.hpp>
+// Local
+#include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Frame.h"
+#include "orbslam3/ImuTypes.h"
+#include "orbslam3/KeyFrameDatabase.h"
 #include "orbslam3/MapPoint.h"
-#include "orbslam3/external/DBoW2/DBoW2/BowVector.h"
-#include "orbslam3/external/DBoW2/DBoW2/FeatureVector.h"
 #include "orbslam3/ORBVocabulary.h"
 #include "orbslam3/ORBextractor.h"
-#include "orbslam3/Frame.h"
-#include "orbslam3/KeyFrameDatabase.h"
-#include "orbslam3/ImuTypes.h"
-
-#include "orbslam3/CameraModels/GeometricCamera.h"
 #include "orbslam3/SerializationUtils.h"
-
-#include <mutex>
-
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/map.hpp>
-
 
 namespace ORB_SLAM3
 {

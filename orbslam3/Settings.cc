@@ -16,17 +16,18 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "orbslam3/Settings.h"
-
-#include "orbslam3/CameraModels/Pinhole.h"
-#include "orbslam3/CameraModels/KannalaBrandt8.h"
-
-#include "orbslam3/System.h"
-
-#include <opencv2/core/persistence.hpp>
-#include <opencv2/core/eigen.hpp>
-
+// Standard
 #include <iostream>
+// 3rdparty
+#include <Eigen/Core>
+#include <opencv2/core/eigen.hpp> // Eigen headers must be included before including OpenCV Eigen
+                                  // https://github.com/opencv/opencv/issues/17366
+#include <opencv2/core/persistence.hpp>
+// Local
+#include "orbslam3/CameraModels/KannalaBrandt8.h"
+#include "orbslam3/CameraModels/Pinhole.h"
+#include "orbslam3/Settings.h"
+#include "orbslam3/System.h"
 
 using namespace std;
 

@@ -16,19 +16,18 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef MAP_H
 #define MAP_H
 
-#include "orbslam3/MapPoint.h"
-#include "orbslam3/KeyFrame.h"
-
-#include <set>
-#include <pangolin/pangolin.h>
+// Standard
 #include <mutex>
-
+#include <set>
+// 3rdparty
+#include <pangolin/pangolin.h>
 #include <boost/serialization/base_object.hpp>
-
+// Local
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3
 {

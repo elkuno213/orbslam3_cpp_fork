@@ -16,12 +16,12 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef ORBVOCABULARY_H
 #define ORBVOCABULARY_H
 
-#include"orbslam3/external/DBoW2/DBoW2/FORB.h"
-#include"orbslam3/external/DBoW2/DBoW2/TemplatedVocabulary.h"
+// 3rdparty
+#include <orbslam3/external/DBoW2/DBoW2/FORB.h>
+#include <orbslam3/external/DBoW2/DBoW2/TemplatedVocabulary.h>
 
 namespace ORB_SLAM3
 {

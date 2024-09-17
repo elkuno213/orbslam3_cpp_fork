@@ -16,17 +16,17 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef VIEWER_H
 #define VIEWER_H
 
+// Standard
+#include <mutex>
+// Local
 #include "orbslam3/FrameDrawer.h"
 #include "orbslam3/MapDrawer.h"
-#include "orbslam3/Tracking.h"
-#include "orbslam3/System.h"
 #include "orbslam3/Settings.h"
-
-#include <mutex>
+#include "orbslam3/System.h"
+#include "orbslam3/Tracking.h"
 
 namespace ORB_SLAM3
 {

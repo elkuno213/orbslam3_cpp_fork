@@ -16,19 +16,19 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef ORBMATCHER_H
 #define ORBMATCHER_H
 
-#include<vector>
-#include<opencv2/core/core.hpp>
-#include<opencv2/features2d/features2d.hpp>
-#include"orbslam3/external/Sophus/sophus/sim3.hpp"
-
-#include"orbslam3/MapPoint.h"
-#include"orbslam3/KeyFrame.h"
-#include"orbslam3/Frame.h"
-
+// Standard
+#include <vector>
+// 3rdparty
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <orbslam3/external/Sophus/sophus/sim3.hpp>
+// Local
+#include "orbslam3/Frame.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3
 {

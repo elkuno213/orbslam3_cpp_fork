@@ -19,16 +19,16 @@
 #ifndef ORB_SLAM3_SETTINGS_H
 #define ORB_SLAM3_SETTINGS_H
 
-
 // Flag to activate the measurement of time in each process (track,localmap, place recognition).
 //#define REGISTER_TIMES
 
-#include "orbslam3/CameraModels/GeometricCamera.h"
-
-#include <unistd.h>
+// Standard
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string>
+// Local
+#include "orbslam3/CameraModels/GeometricCamera.h"
 
 namespace ORB_SLAM3 {
 

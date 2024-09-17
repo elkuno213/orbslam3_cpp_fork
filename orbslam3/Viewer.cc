@@ -16,11 +16,12 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include "orbslam3/Viewer.h"
-#include <pangolin/pangolin.h>
-
+// Standard
 #include <mutex>
+// 3rdparty
+#include <pangolin/pangolin.h>
+// Local
+#include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3
 {

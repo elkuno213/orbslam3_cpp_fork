@@ -16,31 +16,26 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include "orbslam3/Optimizer.h"
-
-
+// Standard
 #include <complex>
-
-#include <Eigen/StdVector>
+#include <mutex>
+// 3rdparty
+#include <orbslam3/external/g2o/g2o/core/block_solver.h>
+#include <orbslam3/external/g2o/g2o/core/optimization_algorithm_gauss_newton.h>
+#include <orbslam3/external/g2o/g2o/core/optimization_algorithm_levenberg.h>
+#include <orbslam3/external/g2o/g2o/core/robust_kernel_impl.h>
+#include <orbslam3/external/g2o/g2o/core/sparse_block_matrix.h>
+#include <orbslam3/external/g2o/g2o/solvers/linear_solver_dense.h>
+#include <orbslam3/external/g2o/g2o/solvers/linear_solver_eigen.h>
+#include <orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h>
 #include <Eigen/Dense>
+#include <Eigen/StdVector>
 #include <unsupported/Eigen/MatrixFunctions>
-
-#include "orbslam3/external/g2o/g2o/core/sparse_block_matrix.h"
-#include "orbslam3/external/g2o/g2o/core/block_solver.h"
-#include "orbslam3/external/g2o/g2o/core/optimization_algorithm_levenberg.h"
-#include "orbslam3/external/g2o/g2o/core/optimization_algorithm_gauss_newton.h"
-#include "orbslam3/external/g2o/g2o/solvers/linear_solver_eigen.h"
-#include "orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h"
-#include "orbslam3/external/g2o/g2o/core/robust_kernel_impl.h"
-#include "orbslam3/external/g2o/g2o/solvers/linear_solver_dense.h"
-#include "orbslam3/G2oTypes.h"
+// Local
 #include "orbslam3/Converter.h"
-
-#include<mutex>
-
-#include "OptimizableTypes.h"
-
+#include "orbslam3/G2oTypes.h"
+#include "orbslam3/OptimizableTypes.h"
+#include "orbslam3/Optimizer.h"
 
 namespace ORB_SLAM3
 {

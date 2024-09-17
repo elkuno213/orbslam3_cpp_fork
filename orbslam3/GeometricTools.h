@@ -16,13 +16,13 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef GEOMETRIC_TOOLS_H
 #define GEOMETRIC_TOOLS_H
 
+// 3rdparty
+#include <Eigen/Core>
 #include <opencv2/core/core.hpp>
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
-#include <Eigen/Core>
 
 namespace ORB_SLAM3
 {
