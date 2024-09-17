@@ -444,9 +444,7 @@ void Viewer::Release()
     mbStopped = false;
 }
 
-/*void Viewer::SetTrackingPause()
-{
-    mbStopTrack = true;
-}*/
-
+// void Viewer::SetTrackingPause() {
+//     mbStopTrack = true;
+// }
 }

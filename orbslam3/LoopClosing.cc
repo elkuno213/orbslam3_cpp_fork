@@ -228,7 +228,7 @@ void LoopClosing::Run()
 
                     Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
 
-                    mg2oLoopScw = mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
+                    mg2oLoopScw = mg2oLoopSlw; // *mvg2oSim3LoopTcw[nCurrentIndex];
                     if(mpCurrentKF->GetMap()->IsInertial())
                     {
                         Sophus::SE3d Twc = mpCurrentKF->GetPoseInverse().cast<double>();
@@ -859,10 +859,9 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                     }
                 }
             }
-            /*else
-            {
-                Verbose::PrintMess("BoW candidate: it don't match with the current one", Verbose::VERBOSITY_DEBUG);
-            }*/
+            // else {
+            //     Verbose::PrintMess("BoW candidate: it don't match with the current one", Verbose::VERBOSITY_DEBUG);
+            // }
         }
         index++;
     }
@@ -1024,14 +1023,13 @@ void LoopClosing::CorrectLoop()
     Map* pLoopMap = mpCurrentKF->GetMap();
 
 #ifdef REGISTER_TIMES
-    /*KeyFrame* pKF = mpCurrentKF;
-    int numKFinLoop = 0;
-    while(pKF && pKF->mnId > mpLoopMatchedKF->mnId)
-    {
-        pKF = pKF->GetParent();
-        numKFinLoop += 1;
-    }
-    vnLoopKFs.push_back(numKFinLoop);*/
+    // KeyFrame* pKF = mpCurrentKF;
+    // int numKFinLoop = 0;
+    // while(pKF && pKF->mnId > mpLoopMatchedKF->mnId) {
+    //     pKF = pKF->GetParent();
+    //     numKFinLoop += 1;
+    // }
+    // vnLoopKFs.push_back(numKFinLoop);
 
     std::chrono::steady_clock::time_point time_StartFusion = std::chrono::steady_clock::now();
 #endif
@@ -1075,8 +1073,11 @@ void LoopClosing::CorrectLoop()
             g2o::Sim3 g2oSiw =NonCorrectedSim3[pKFi];
 
             // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
-            /*Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(),g2oCorrectedSiw.translation() / g2oCorrectedSiw.scale());
-            pKFi->SetPose(correctedTiw.cast<float>());*/
+            // Sophus::SE3d correctedTiw(
+            //   g2oCorrectedSiw.rotation(),
+            //   g2oCorrectedSiw.translation() / g2oCorrectedSiw.scale()
+            // );
+            // pKFi->SetPose(correctedTiw.cast<float>());
 
             vector<MapPoint*> vpMPsi = pKFi->GetMapPointMatches();
             for(size_t iMP=0, endMPi = vpMPsi.size(); iMP<endMPi; iMP++)
@@ -1497,11 +1498,15 @@ void LoopClosing::MergeLocal()
 
         itMP++;
     }
-    /*if(numPointsWithCorrection>0)
-    {
-        std::cout << "[Merge]: " << std::to_string(numPointsWithCorrection) << " points removed from Ma due to its reference KF is not in welding area" << std::endl;
-        std::cout << "[Merge]: Ma has " << std::to_string(spLocalWindowMPs.size()) << " points" << std::endl;
-    }*/
+    // if (numPointsWithCorrection > 0) {
+    //     std::cout << "[Merge]: " << std::to_string(numPointsWithCorrection)
+    //               << " points removed from Ma due to its reference KF is not "
+    //                  "in welding area"
+    //               << std::endl;
+    //     std::cout << "[Merge]: Ma has "
+    //               << std::to_string(spLocalWindowMPs.size()) << " points"
+    //               << std::endl;
+    // }
 
     {
         unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
@@ -1926,8 +1931,7 @@ void LoopClosing::MergeLocal2()
 
     // Critical zone
     //bool good = pCurrentMap->CheckEssentialGraph();
-    /*if(!good)
-        cout << "BAD ESSENTIAL GRAPH!!" << endl;*/
+    // if (!good) cout << "BAD ESSENTIAL GRAPH!!" << endl;
 
     //cout << "Update essential graph" << endl;
     // mpCurrentKF->UpdateConnections(); // to put at false mbFirstConnection
@@ -1950,9 +1954,8 @@ void LoopClosing::MergeLocal2()
 
     //cout << "end update essential graph" << endl;
 
-    /*good = pCurrentMap->CheckEssentialGraph();
-    if(!good)
-        cout << "BAD ESSENTIAL GRAPH 1!!" << endl;*/
+    // good = pCurrentMap->CheckEssentialGraph();
+    // if (!good) cout << "BAD ESSENTIAL GRAPH 1!!" << endl;
 
     //cout << "Update relationship between KFs" << endl;
     vector<MapPoint*> vpCheckFuseMapPoint; // MapPoint vector from current map to allow to fuse duplicated points with the old map (merge)
@@ -1963,13 +1966,13 @@ void LoopClosing::MergeLocal2()
     mvpMergeConnectedKFs.insert(mvpMergeConnectedKFs.end(), aux.begin(), aux.end());
     if (mvpMergeConnectedKFs.size()>6)
         mvpMergeConnectedKFs.erase(mvpMergeConnectedKFs.begin()+6,mvpMergeConnectedKFs.end());
-    /*mvpMergeConnectedKFs = mpMergeMatchedKF->GetVectorCovisibleKeyFrames();
-    mvpMergeConnectedKFs.push_back(mpMergeMatchedKF);*/
+    // mvpMergeConnectedKFs = mpMergeMatchedKF->GetVectorCovisibleKeyFrames();
+    // mvpMergeConnectedKFs.push_back(mpMergeMatchedKF);
 
     mpCurrentKF->UpdateConnections();
     vpCurrentConnectedKFs.push_back(mpCurrentKF);
-    /*vpCurrentConnectedKFs = mpCurrentKF->GetVectorCovisibleKeyFrames();
-    vpCurrentConnectedKFs.push_back(mpCurrentKF);*/
+    // vpCurrentConnectedKFs = mpCurrentKF->GetVectorCovisibleKeyFrames();
+    // vpCurrentConnectedKFs.push_back(mpCurrentKF);
     aux = mpCurrentKF->GetVectorCovisibleKeyFrames();
     vpCurrentConnectedKFs.insert(vpCurrentConnectedKFs.end(), aux.begin(), aux.end());
     if (vpCurrentConnectedKFs.size()>6)
@@ -1984,10 +1987,11 @@ void LoopClosing::MergeLocal2()
             break;
     }
 
-    /*cout << "vpCurrentConnectedKFs.size() " << vpCurrentConnectedKFs.size() << endl;
-    cout << "mvpMergeConnectedKFs.size() " << mvpMergeConnectedKFs.size() << endl;
-    cout << "spMapPointMerge.size() " << spMapPointMerge.size() << endl;*/
-
+    // cout << "vpCurrentConnectedKFs.size() " << vpCurrentConnectedKFs.size()
+    //      << endl;
+    // cout << "mvpMergeConnectedKFs.size() " << mvpMergeConnectedKFs.size()
+    //      << endl;
+    // cout << "spMapPointMerge.size() " << spMapPointMerge.size() << endl;
 
     vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
     std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
@@ -1995,9 +1999,8 @@ void LoopClosing::MergeLocal2()
 
     //cout << "MergeMap init ID: " << pMergeMap->GetInitKFid() << "       CurrMap init ID: " << pCurrentMap->GetInitKFid() << endl;
 
-    /*good = pCurrentMap->CheckEssentialGraph();
-    if(!good)
-        cout << "BAD ESSENTIAL GRAPH 2!!" << endl;*/
+    // good = pCurrentMap->CheckEssentialGraph();
+    // if (!good) cout << "BAD ESSENTIAL GRAPH 2!!" << endl;
 
     //cout << "start SearchAndFuse" << endl;
     SearchAndFuse(vpCurrentConnectedKFs, vpCheckFuseMapPoint);
@@ -2005,12 +2008,10 @@ void LoopClosing::MergeLocal2()
 
     //cout << "MergeMap init ID: " << pMergeMap->GetInitKFid() << "       CurrMap init ID: " << pCurrentMap->GetInitKFid() << endl;
 
-    /*good = pCurrentMap->CheckEssentialGraph();
-    if(!good)
-        cout << "BAD ESSENTIAL GRAPH 3!!" << endl;
+    // good = pCurrentMap->CheckEssentialGraph();
+    // if (!good) cout << "BAD ESSENTIAL GRAPH 3!!" << endl;
 
-    cout << "Init to update connections" << endl;*/
-
+    // cout << "Init to update connections" << endl;
 
     for(KeyFrame* pKFi : vpCurrentConnectedKFs)
     {
@@ -2030,9 +2031,8 @@ void LoopClosing::MergeLocal2()
 
     //cout << "MergeMap init ID: " << pMergeMap->GetInitKFid() << "       CurrMap init ID: " << pCurrentMap->GetInitKFid() << endl;
 
-    /*good = pCurrentMap->CheckEssentialGraph();
-    if(!good)
-        cout << "BAD ESSENTIAL GRAPH 4!!" << endl;*/
+    // good = pCurrentMap->CheckEssentialGraph();
+    // if (!good) cout << "BAD ESSENTIAL GRAPH 4!!" << endl;
 
     // TODO Check: If new map is too small, we suppose that not informaiton can be propagated from new to old map
     if (numKFnew<10){
@@ -2040,9 +2040,8 @@ void LoopClosing::MergeLocal2()
         return;
     }
 
-    /*good = pCurrentMap->CheckEssentialGraph();
-    if(!good)
-        cout << "BAD ESSENTIAL GRAPH 5!!" << endl;*/
+    // good = pCurrentMap->CheckEssentialGraph();
+    // if (!good) cout << "BAD ESSENTIAL GRAPH 5!!" << endl;
 
     // Perform BA
     bool bStopFlag=false;
@@ -2051,9 +2050,8 @@ void LoopClosing::MergeLocal2()
     Optimizer::MergeInertialBA(pCurrKF, mpMergeMatchedKF, &bStopFlag, pCurrentMap,CorrectedSim3);
     //cout << "end MergeInertialBA" << endl;
 
-    /*good = pCurrentMap->CheckEssentialGraph();
-    if(!good)
-        cout << "BAD ESSENTIAL GRAPH 6!!" << endl;*/
+    // good = pCurrentMap->CheckEssentialGraph();
+    // if (!good) cout << "BAD ESSENTIAL GRAPH 6!!" << endl;
 
     // Release Local Mapping.
     mpLocalMapper->Release();
@@ -2170,10 +2168,10 @@ void LoopClosing::SearchAndFuse(const vector<KeyFrame*> &vConectedKFs, vector<Ma
         Sophus::SE3f Tcw = pKF->GetPose();
         Sophus::Sim3f Scw(Tcw.unit_quaternion(),Tcw.translation());
         Scw.setScale(1.f);
-        /*std::cout << "These should be zeros: " <<
-            Scw.rotationMatrix() - Tcw.rotationMatrix() << std::endl <<
-            Scw.translation() - Tcw.translation() << std::endl <<
-            Scw.scale() - 1.f << std::endl;*/
+        // std::cout << "These should be zeros: "
+        //           << Scw.rotationMatrix() - Tcw.rotationMatrix() << std::endl
+        //           << Scw.translation() - Tcw.translation() << std::endl
+        //           << Scw.scale() - 1.f << std::endl;
         vector<MapPoint*> vpReplacePoints(vpMapPoints.size(),static_cast<MapPoint*>(NULL));
         matcher.Fuse(pKF,Scw,vpMapPoints,4,vpReplacePoints);
 
@@ -2189,8 +2187,9 @@ void LoopClosing::SearchAndFuse(const vector<KeyFrame*> &vConectedKFs, vector<Ma
                 pRep->Replace(vpMapPoints[i]);
             }
         }
-        /*cout << "FUSE-POSE: KF " << pKF->mnId << " ->" << num_replaces << " MPs fused" << endl;
-        total_replaces += num_replaces;*/
+        // cout << "FUSE-POSE: KF " << pKF->mnId << " ->" << num_replaces
+        //      << " MPs fused" << endl;
+        // total_replaces += num_replaces;
     }
     //cout << "FUSE-POSE: " << total_replaces << " MPs had been fused" << endl;
 }
@@ -2355,7 +2354,7 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap, unsigned long nLoop
                         Sophus::SE3f Tchildc = pChild->GetPose() * Twc;
                         //cout << "Child pose: " << Tchildc << endl;
                         //cout << "pKF->mTcwGBA: " << pKF->mTcwGBA << endl;
-                        pChild->mTcwGBA = Tchildc * pKF->mTcwGBA;//*Tcorc*pKF->mTcwGBA;
+                        pChild->mTcwGBA = Tchildc * pKF->mTcwGBA;// *Tcorc*pKF->mTcwGBA;
 
                         Sophus::SO3f Rcor = pChild->mTcwGBA.so3().inverse() * pChild->GetPose().so3();
                         if(pChild->isVelocitySet()){
@@ -2379,59 +2378,78 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap, unsigned long nLoop
                 pKF->mTcwBefGBA = pKF->GetPose();
                 //cout << "pKF->mTcwBefGBA: " << pKF->mTcwBefGBA << endl;
                 pKF->SetPose(pKF->mTcwGBA);
-                /*cv::Mat Tco_cn = pKF->mTcwBefGBA * pKF->mTcwGBA.inv();
-                cv::Vec3d trasl = Tco_cn.rowRange(0,3).col(3);
-                double dist = cv::norm(trasl);
-                cout << "GBA: KF " << pKF->mnId << " had been moved " << dist << " meters" << endl;
-                double desvX = 0;
-                double desvY = 0;
-                double desvZ = 0;
-                if(pKF->mbHasHessian)
-                {
-                    cv::Mat hessianInv = pKF->mHessianPose.inv();
 
-                    double covX = hessianInv.at<double>(3,3);
-                    desvX = std::sqrt(covX);
-                    double covY = hessianInv.at<double>(4,4);
-                    desvY = std::sqrt(covY);
-                    double covZ = hessianInv.at<double>(5,5);
-                    desvZ = std::sqrt(covZ);
-                    pKF->mbHasHessian = false;
-                }
-                if(dist > 1)
-                {
-                    cout << "--To much distance correction: It has " << pKF->GetConnectedKeyFrames().size() << " connected KFs" << endl;
-                    cout << "--It has " << pKF->GetCovisiblesByWeight(80).size() << " connected KF with 80 common matches or more" << endl;
-                    cout << "--It has " << pKF->GetCovisiblesByWeight(50).size() << " connected KF with 50 common matches or more" << endl;
-                    cout << "--It has " << pKF->GetCovisiblesByWeight(20).size() << " connected KF with 20 common matches or more" << endl;
+                // cv::Mat Tco_cn  = pKF->mTcwBefGBA * pKF->mTcwGBA.inv();
+                // cv::Vec3d trasl = Tco_cn.rowRange(0, 3).col(3);
+                // double dist     = cv::norm(trasl);
+                // cout << "GBA: KF " << pKF->mnId << " had been moved " << dist
+                //      << " meters" << endl;
+                // double desvX = 0;
+                // double desvY = 0;
+                // double desvZ = 0;
+                // if (pKF->mbHasHessian) {
+                //     cv::Mat hessianInv = pKF->mHessianPose.inv();
 
-                    cout << "--STD in meters(x, y, z): " << desvX << ", " << desvY << ", " << desvZ << endl;
+                //     double covX       = hessianInv.at<double>(3, 3);
+                //     desvX             = std::sqrt(covX);
+                //     double covY       = hessianInv.at<double>(4, 4);
+                //     desvY             = std::sqrt(covY);
+                //     double covZ       = hessianInv.at<double>(5, 5);
+                //     desvZ             = std::sqrt(covZ);
+                //     pKF->mbHasHessian = false;
+                // }
+                // if (dist > 1) {
+                //     cout << "--To much distance correction: It has "
+                //          << pKF->GetConnectedKeyFrames().size()
+                //          << " connected KFs" << endl;
+                //     cout << "--It has " << pKF->GetCovisiblesByWeight(80).size()
+                //          << " connected KF with 80 common matches or more"
+                //          << endl;
+                //     cout << "--It has " << pKF->GetCovisiblesByWeight(50).size()
+                //          << " connected KF with 50 common matches or more"
+                //          << endl;
+                //     cout << "--It has " << pKF->GetCovisiblesByWeight(20).size()
+                //          << " connected KF with 20 common matches or more"
+                //          << endl;
 
+                //     cout << "--STD in meters(x, y, z): " << desvX << ", "
+                //          << desvY << ", " << desvZ << endl;
 
-                    string strNameFile = pKF->mNameFile;
-                    cv::Mat imLeft = cv::imread(strNameFile, CV_LOAD_IMAGE_UNCHANGED);
+                //     string strNameFile = pKF->mNameFile;
+                //     cv::Mat imLeft
+                //       = cv::imread(strNameFile, CV_LOAD_IMAGE_UNCHANGED);
 
-                    cv::cvtColor(imLeft, imLeft, CV_GRAY2BGR);
+                //     cv::cvtColor(imLeft, imLeft, CV_GRAY2BGR);
 
-                    vector<MapPoint*> vpMapPointsKF = pKF->GetMapPointMatches();
-                    int num_MPs = 0;
-                    for(int i=0; i<vpMapPointsKF.size(); ++i)
-                    {
-                        if(!vpMapPointsKF[i] || vpMapPointsKF[i]->isBad())
-                        {
-                            continue;
-                        }
-                        num_MPs += 1;
-                        string strNumOBs = to_string(vpMapPointsKF[i]->Observations());
-                        cv::circle(imLeft, pKF->mvKeys[i].pt, 2, cv::Scalar(0, 255, 0));
-                        cv::putText(imLeft, strNumOBs, pKF->mvKeys[i].pt, CV_FONT_HERSHEY_DUPLEX, 1, cv::Scalar(255, 0, 0));
-                    }
-                    cout << "--It has " << num_MPs << " MPs matched in the map" << endl;
+                //     vector<MapPoint*> vpMapPointsKF = pKF->GetMapPointMatches();
+                //     int num_MPs                     = 0;
+                //     for (int i = 0; i < vpMapPointsKF.size(); ++i) {
+                //         if (!vpMapPointsKF[i] || vpMapPointsKF[i]->isBad()) {
+                //             continue;
+                //         }
+                //         num_MPs += 1;
+                //         string strNumOBs
+                //           = to_string(vpMapPointsKF[i]->Observations());
+                //         cv::circle(
+                //           imLeft, pKF->mvKeys[i].pt, 2, cv::Scalar(0, 255, 0)
+                //         );
+                //         cv::putText(
+                //           imLeft,
+                //           strNumOBs,
+                //           pKF->mvKeys[i].pt,
+                //           CV_FONT_HERSHEY_DUPLEX,
+                //           1,
+                //           cv::Scalar(255, 0, 0)
+                //         );
+                //     }
+                //     cout << "--It has " << num_MPs << " MPs matched in the map"
+                //          << endl;
 
-                    string namefile = "./test_GBA/GBA_" + to_string(nLoopKF) + "_KF" + to_string(pKF->mnId) +"_D" + to_string(dist) +".png";
-                    cv::imwrite(namefile, imLeft);
-                }*/
-
+                //     string namefile = "./test_GBA/GBA_" + to_string(nLoopKF)
+                //                     + "_KF" + to_string(pKF->mnId) + "_D"
+                //                     + to_string(dist) + ".png";
+                //     cv::imwrite(namefile, imLeft);
+                // }
 
                 if(pKF->bImu)
                 {
@@ -2472,8 +2490,7 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap, unsigned long nLoop
                     if(pRefKF->mnBAGlobalForKF!=nLoopKF)
                         continue;
 
-                    /*if(pRefKF->mTcwBefGBA.empty())
-                        continue;*/
+                    // if (pRefKF->mTcwBefGBA.empty()) continue;
 
                     // Map to non-corrected camera
                     // cv::Mat Rcw = pRefKF->mTcwBefGBA.rowRange(0,3).colRange(0,3);

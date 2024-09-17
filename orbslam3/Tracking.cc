@@ -2157,8 +2157,7 @@ void Tracking::Track()
             else
                 mState=RECENTLY_LOST; // visual to lost
 
-            /*if(mCurrentFrame.mnId>mnLastRelocFrameId+mMaxFrames)
-            {*/
+            // if (mCurrentFrame.mnId>mnLastRelocFrameId+mMaxFrames) {
                 mTimeStampLost = mCurrentFrame.mTimeStamp;
             //}
         }
@@ -3078,10 +3077,9 @@ bool Tracking::NeedNewKeyFrame()
 
     // If Local Mapping is freezed by a Loop Closure do not insert keyframes
     if(mpLocalMapper->isStopped() || mpLocalMapper->stopRequested()) {
-        /*if(mSensor == System::MONOCULAR)
-        {
-            std::cout << "NeedNewKeyFrame: localmap stopped" << std::endl;
-        }*/
+        // if (mSensor == System::MONOCULAR) {
+        //     std::cout << "NeedNewKeyFrame: localmap stopped" << std::endl;
+        // }
         return false;
     }
 
@@ -3131,13 +3129,13 @@ bool Tracking::NeedNewKeyFrame()
     if(nKFs<2)
         thRefRatio = 0.4f;
 
-    /*int nClosedPoints = nTrackedClose + nNonTrackedClose;
-    const int thStereoClosedPoints = 15;
-    if(nClosedPoints < thStereoClosedPoints && (mSensor==System::STEREO || mSensor==System::IMU_STEREO))
-    {
-        //Pseudo-monocular, there are not enough close points to be confident about the stereo observations.
-        thRefRatio = 0.9f;
-    }*/
+    // int nClosedPoints              = nTrackedClose + nNonTrackedClose;
+    // const int thStereoClosedPoints = 15;
+    // if (nClosedPoints < thStereoClosedPoints && (mSensor == System::STEREO || mSensor == System::IMU_STEREO)) {
+    //     // Pseudo-monocular, there are not enough close points to be confident
+    //     // about the stereo observations.
+    //     thRefRatio = 0.9f;
+    // }
 
     if(mSensor==System::MONOCULAR)
         thRefRatio = 0.9f;

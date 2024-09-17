@@ -236,11 +236,12 @@ void Atlas::clearMap()
 void Atlas::clearAtlas()
 {
     unique_lock<mutex> lock(mMutexAtlas);
-    /*for(std::set<Map*>::iterator it=mspMaps.begin(), send=mspMaps.end(); it!=send; it++)
-    {
-        (*it)->clear();
-        delete *it;
-    }*/
+    // for (std::set<Map*>::iterator it = mspMaps.begin(), send = mspMaps.end();
+    //      it != send;
+    //      it++) {
+    //     (*it)->clear();
+    //     delete *it;
+    // }
     mspMaps.clear();
     mpCurrentMap = static_cast<Map*>(NULL);
     mnLastInitKFidMap = 0;
@@ -267,11 +268,10 @@ void Atlas::SetMapBad(Map* pMap)
 
 void Atlas::RemoveBadMaps()
 {
-    /*for(Map* pMap : mspBadMaps)
-    {
-        delete pMap;
-        pMap = static_cast<Map*>(NULL);
-    }*/
+    // for (Map* pMap : mspBadMaps) {
+    //     delete pMap;
+    //     pMap = static_cast<Map*>(NULL);
+    // }
     mspBadMaps.clear();
 }
 

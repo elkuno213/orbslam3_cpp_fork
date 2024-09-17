@@ -56,22 +56,22 @@ void serializeSophusSE3(Archive &ar, Sophus::SE3f &T, const unsigned int version
     }
 }
 
-/*template <class Archive, size_t dim>
-void serializeDiagonalMatrix(Archive &ar, Eigen::DiagonalMatrix<float, dim> &D, const unsigned int version)
-{
-    Eigen::Matrix<float,dim,dim> dense;
-    if(Archive::is_saving::value)
-    {
-        dense = D.toDenseMatrix();
-    }
+// template <class Archive, size_t dim>
+// void serializeDiagonalMatrix(
+//   Archive& ar, Eigen::DiagonalMatrix<float, dim>& D,
+//   const unsigned int version
+// ) {
+//     Eigen::Matrix<float, dim, dim> dense;
+//     if (Archive::is_saving::value) {
+//         dense = D.toDenseMatrix();
+//     }
 
-    ar & boost::serialization::make_array(dense.data(), dense.size());
+//     ar& boost::serialization::make_array(dense.data(), dense.size());
 
-    if (Archive::is_loading::value)
-    {
-        D = dense.diagonal().asDiagonal();
-    }
-}*/
+//     if (Archive::is_loading::value) {
+//         D = dense.diagonal().asDiagonal();
+//     }
+// }
 
 template<class Archive>
 void serializeMatrix(Archive& ar, cv::Mat& mat, const unsigned int version)

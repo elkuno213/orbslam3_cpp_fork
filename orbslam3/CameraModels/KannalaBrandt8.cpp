@@ -83,13 +83,13 @@ namespace ORB_SLAM3 {
 
         return res;
 
-        /*cv::Point2f cvres = this->project(cv::Point3f(v3D[0],v3D[1],v3D[2]));
+        // cv::Point2f cvres = this->project(cv::Point3f(v3D[0], v3D[1], v3D[2]));
 
-        Eigen::Vector2d res;
-        res[0] = cvres.x;
-        res[1] = cvres.y;
+        // Eigen::Vector2d res;
+        // res[0] = cvres.x;
+        // res[1] = cvres.y;
 
-        return res;*/
+        // return res;
     }
 
     Eigen::Vector2f KannalaBrandt8::projectMat(const cv::Point3f &p3D) {
@@ -99,12 +99,12 @@ namespace ORB_SLAM3 {
 
     float KannalaBrandt8::uncertainty2(const Eigen::Matrix<double,2,1> &p2D)
     {
-        /*Eigen::Matrix<double,2,1> c;
-        c << mvParameters[2], mvParameters[3];
-        if ((p2D-c).squaredNorm()>57600) // 240*240 (256)
-            return 100.f;
-        else
-            return 1.0f;*/
+        // Eigen::Matrix<double, 2, 1> c;
+        // c << mvParameters[2], mvParameters[3];
+        // if ((p2D - c).squaredNorm() > 57600) // 240*240 (256)
+        //   return 100.f;
+        // else
+        //   return 1.0f;
         return 1.f;
     }
 

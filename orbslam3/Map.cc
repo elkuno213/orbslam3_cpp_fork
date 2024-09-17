@@ -33,10 +33,22 @@ mbFail(false), mIsInUse(false), mHasTumbnail(false), mbBad(false), mnMapChangeNo
     mThumbnail = static_cast<GLubyte*>(NULL);
 }
 
-Map::Map(int initKFid):mnInitKFid(initKFid), mnMaxKFid(initKFid),/*mnLastLoopKFid(initKFid),*/ mnBigChangeIdx(0), mIsInUse(false),
-                       mHasTumbnail(false), mbBad(false), mbImuInitialized(false), mpFirstRegionKF(static_cast<KeyFrame*>(NULL)),
-                       mnMapChange(0), mbFail(false), mnMapChangeNotified(0), mbIsInertial(false), mbIMU_BA1(false), mbIMU_BA2(false)
-{
+Map::Map(int initKFid)
+  : mnInitKFid(initKFid)
+  , mnMaxKFid(initKFid)
+//   , mnLastLoopKFid(initKFid)
+  , mnBigChangeIdx(0)
+  , mIsInUse(false)
+  , mHasTumbnail(false)
+  , mbBad(false)
+  , mbImuInitialized(false)
+  , mpFirstRegionKF(static_cast<KeyFrame*>(NULL))
+  , mnMapChange(0)
+  , mbFail(false)
+  , mnMapChangeNotified(0)
+  , mbIsInertial(false)
+  , mbIMU_BA1(false)
+  , mbIMU_BA2(false) {
     mnId=nNextId++;
     mThumbnail = static_cast<GLubyte*>(NULL);
 }
@@ -424,8 +436,14 @@ void Map::PreSave(std::set<GeometricCamera*> &spCams)
 
 }
 
-void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long unsigned int, KeyFrame*>& mpKeyFrameId*/, map<unsigned int, GeometricCamera*> &mpCams)
-{
+void Map::PostLoad(
+  KeyFrameDatabase* pKFDB,
+  ORBVocabulary* pORBVoc,
+//   map<long unsigned int,
+//   KeyFrame*>& mpKeyFrameId
+  map<unsigned int,
+  GeometricCamera*>& mpCams
+) {
     std::copy(mvpBackupMapPoints.begin(), mvpBackupMapPoints.end(), std::inserter(mspMapPoints, mspMapPoints.begin()));
     std::copy(mvpBackupKeyFrames.begin(), mvpBackupKeyFrames.end(), std::inserter(mspKeyFrames, mspKeyFrames.begin()));
 
@@ -489,6 +507,5 @@ void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long u
 
     mvpBackupMapPoints.clear();
 }
-
 
 } //namespace ORB_SLAM3

@@ -1677,7 +1677,12 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
         for(vector<KeyFrame*>::const_iterator vit=vpConnectedKFs.begin(); vit!=vpConnectedKFs.end(); vit++)
         {
             KeyFrame* pKFn = *vit;
-            if(pKFn && pKFn!=pParentKF && !pKF->hasChild(pKFn) /*&& !sLoopEdges.count(pKFn)*/)
+            if (
+                   pKFn
+                && pKFn!=pParentKF
+                && !pKF->hasChild(pKFn)
+                // && !sLoopEdges.count(pKFn)
+            )
             {
                 if(!pKFn->isBad() && pKFn->mnId<pKF->mnId)
                 {
