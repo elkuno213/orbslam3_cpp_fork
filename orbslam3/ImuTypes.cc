@@ -39,7 +39,7 @@ Eigen::Matrix3f RightJacobianSO3(const float &x, const float &y, const float &z)
     Eigen::Matrix3f I;
     I.setIdentity();
     const float d2 = x*x+y*y+z*z;
-    const float d = sqrt(d2);
+    const float d = std::sqrt(d2);
     Eigen::Vector3f v;
     v << x, y, z;
     Eigen::Matrix3f W = Sophus::SO3f::hat(v);
@@ -47,7 +47,7 @@ Eigen::Matrix3f RightJacobianSO3(const float &x, const float &y, const float &z)
         return I;
     }
     else {
-        return I - W*(1.0f-cos(d))/d2 + W*W*(d-sin(d))/(d2*d);
+        return I - W*(1.0f-std::cos(d))/d2 + W*W*(d-std::sin(d))/(d2*d);
     }
 }
 
@@ -61,7 +61,7 @@ Eigen::Matrix3f InverseRightJacobianSO3(const float &x, const float &y, const fl
     Eigen::Matrix3f I;
     I.setIdentity();
     const float d2 = x*x+y*y+z*z;
-    const float d = sqrt(d2);
+    const float d = std::sqrt(d2);
     Eigen::Vector3f v;
     v << x, y, z;
     Eigen::Matrix3f W = Sophus::SO3f::hat(v);
@@ -70,7 +70,7 @@ Eigen::Matrix3f InverseRightJacobianSO3(const float &x, const float &y, const fl
         return I;
     }
     else {
-        return I + W/2 + W*W*(1.0f/d2 - (1.0f+cos(d))/(2.0f*d*sin(d)));
+        return I + W/2 + W*W*(1.0f/d2 - (1.0f+std::cos(d))/(2.0f*d*std::sin(d)));
     }
 }
 
@@ -85,7 +85,7 @@ IntegratedRotation::IntegratedRotation(const Eigen::Vector3f &angVel, const Bias
     const float z = (angVel(2)-imuBias.bwz)*time;
 
     const float d2 = x*x+y*y+z*z;
-    const float d = sqrt(d2);
+    const float d = std::sqrt(d2);
 
     Eigen::Vector3f v;
     v << x, y, z;
@@ -97,8 +97,8 @@ IntegratedRotation::IntegratedRotation(const Eigen::Vector3f &angVel, const Bias
     }
     else
     {
-        deltaR = Eigen::Matrix3f::Identity() + W*sin(d)/d + W*W*(1.0f-cos(d))/d2;
-        rightJ = Eigen::Matrix3f::Identity() - W*(1.0f-cos(d))/d2 + W*W*(d-sin(d))/(d2*d);
+        deltaR = Eigen::Matrix3f::Identity() + W*std::sin(d)/d + W*W*(1.0f-std::cos(d))/d2;
+        rightJ = Eigen::Matrix3f::Identity() - W*(1.0f-std::cos(d))/d2 + W*W*(d-std::sin(d))/(d2*d);
     }
 }
 
@@ -168,7 +168,7 @@ void Preintegrated::Reintegrate()
     std::unique_lock<std::mutex> lock(mMutex);
     const std::vector<integrable> aux = mvMeasurements;
     Initialize(bu);
-    for(size_t i=0;i<aux.size();i++)
+    for(std::size_t i=0;i<aux.size();i++)
         IntegrateNewMeasurement(aux[i].a,aux[i].w,aux[i].t);
 }
 
@@ -251,9 +251,9 @@ void Preintegrated::MergePrevious(Preintegrated* pPrev)
     const std::vector<integrable> aux2 = mvMeasurements;
 
     Initialize(bav);
-    for(size_t i=0;i<aux1.size();i++)
+    for(std::size_t i=0;i<aux1.size();i++)
         IntegrateNewMeasurement(aux1[i].a,aux1[i].w,aux1[i].t);
-    for(size_t i=0;i<aux2.size();i++)
+    for(std::size_t i=0;i<aux2.size();i++)
         IntegrateNewMeasurement(aux2[i].a,aux2[i].w,aux2[i].t);
 
 }

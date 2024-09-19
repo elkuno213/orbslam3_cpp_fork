@@ -136,7 +136,7 @@ namespace ORB_SLAM3 {
 
     std::istream & operator>>(std::istream &is, Pinhole &ph) {
         float nextParam;
-        for(size_t i = 0; i < 4; i++){
+        for(std::size_t i = 0; i < 4; i++){
             assert(is.good());  //Make sure the input stream is good
             is >> nextParam;
             ph.mvParameters[i] = nextParam;
@@ -156,9 +156,9 @@ namespace ORB_SLAM3 {
             return false;
 
         bool is_same_camera = true;
-        for(size_t i=0; i<size(); ++i)
+        for(std::size_t i=0; i<size(); ++i)
         {
-            if(abs(mvParameters[i] - pPinholeCam->getParameter(i)) > 1e-6)
+            if(std::abs(mvParameters[i] - pPinholeCam->getParameter(i)) > 1e-6)
             {
                 is_same_camera = false;
                 break;

@@ -55,7 +55,7 @@
 #include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3 {
-    MLPnPsolver::MLPnPsolver(const Frame &F, const vector<MapPoint *> &vpMapPointMatches):
+    MLPnPsolver::MLPnPsolver(const Frame &F, const std::vector<MapPoint *> &vpMapPointMatches):
             mnInliersi(0), mnIterations(0), mnBestInliers(0), N(0), mpCamera(F.mpCamera){
         mvpMapPointMatches = vpMapPointMatches;
         mvBearingVecs.reserve(F.mvpMapPoints.size());
@@ -66,7 +66,7 @@ namespace ORB_SLAM3 {
         mvAllIndices.reserve(F.mvpMapPoints.size());
 
         int idx = 0;
-        for(size_t i = 0, iend = mvpMapPointMatches.size(); i < iend; i++){
+        for(std::size_t i = 0, iend = mvpMapPointMatches.size(); i < iend; i++){
             MapPoint* pMP = vpMapPointMatches[i];
 
             if(pMP){
@@ -100,7 +100,7 @@ namespace ORB_SLAM3 {
     }
 
     //RANSAC methods
-    bool MLPnPsolver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers, Eigen::Matrix4f &Tout){
+    bool MLPnPsolver::iterate(int nIterations, bool &bNoMore, std::vector<bool> &vbInliers, int &nInliers, Eigen::Matrix4f &Tout){
         Tout.setIdentity();
         bNoMore = false;
 	    vbInliers.clear();
@@ -112,7 +112,7 @@ namespace ORB_SLAM3 {
 	        return false;
 	    }
 
-	    vector<size_t> vAvailableIndices;
+	    std::vector<std::size_t> vAvailableIndices;
 
 	    int nCurrentIterations = 0;
 	    while(mnIterations<mRansacMaxIts || nCurrentIterations<nIterations)
@@ -125,7 +125,7 @@ namespace ORB_SLAM3 {
             //Bearing vectors and 3D points used for this ransac iteration
             bearingVectors_t bearingVecs(mRansacMinSet);
             points_t p3DS(mRansacMinSet);
-            vector<int> indexes(mRansacMinSet);
+            std::vector<int> indexes(mRansacMinSet);
 
 	        // Get min set of points
 	        for(short i = 0; i < mRansacMinSet; ++i)
@@ -192,7 +192,7 @@ namespace ORB_SLAM3 {
 	            if(Refine())
 	            {
 	                nInliers = mnRefinedInliers;
-	                vbInliers = vector<bool>(mvpMapPointMatches.size(),false);
+	                vbInliers = std::vector<bool>(mvpMapPointMatches.size(),false);
 	                for(int i=0; i<N; i++)
 	                {
 	                    if(mvbRefinedInliers[i])
@@ -211,7 +211,7 @@ namespace ORB_SLAM3 {
 	        if(mnBestInliers>=mRansacMinInliers)
 	        {
 	            nInliers=mnBestInliers;
-	            vbInliers = vector<bool>(mvpMapPointMatches.size(),false);
+	            vbInliers = std::vector<bool>(mvpMapPointMatches.size(),false);
 	            for(int i=0; i<N; i++)
 	            {
 	                if(mvbBestInliers[i])
@@ -253,12 +253,12 @@ namespace ORB_SLAM3 {
 	    if(mRansacMinInliers==N)
 	        nIterations=1;
 	    else
-	        nIterations = ceil(log(1-mRansacProb)/log(1-pow(mRansacEpsilon,3)));
+	        nIterations = std::ceil(std::log(1-mRansacProb)/std::log(1-std::pow(mRansacEpsilon,3)));
 
-	    mRansacMaxIts = max(1,min(nIterations,mRansacMaxIts));
+	    mRansacMaxIts = std::max(1,std::min(nIterations,mRansacMaxIts));
 
 	    mvMaxError.resize(mvSigma2.size());
-	    for(size_t i=0; i<mvSigma2.size(); i++)
+	    for(std::size_t i=0; i<mvSigma2.size(); i++)
 	        mvMaxError[i] = mvSigma2[i]*th2;
 	}
 
@@ -296,10 +296,10 @@ namespace ORB_SLAM3 {
     }
 
     bool MLPnPsolver::Refine(){
-        vector<int> vIndices;
+        std::vector<int> vIndices;
         vIndices.reserve(mvbBestInliers.size());
 
-        for(size_t i=0; i<mvbBestInliers.size(); i++)
+        for(std::size_t i=0; i<mvbBestInliers.size(); i++)
         {
             if(mvbBestInliers[i])
             {
@@ -310,9 +310,9 @@ namespace ORB_SLAM3 {
         //Bearing vectors and 3D points used for this ransac iteration
         bearingVectors_t bearingVecs;
         points_t p3DS;
-        vector<int> indexes;
+        std::vector<int> indexes;
 
-        for(size_t i=0; i<vIndices.size(); i++)
+        for(std::size_t i=0; i<vIndices.size(); i++)
         {
             int idx = vIndices[i];
 
@@ -358,7 +358,7 @@ namespace ORB_SLAM3 {
 	//MLPnP methods
     void MLPnPsolver::computePose(const bearingVectors_t &f, const points_t &p, const cov3_mats_t &covMats,
                                   const std::vector<int> &indices, transformation_t &result) {
-        size_t numberCorrespondences = indices.size();
+        std::size_t numberCorrespondences = indices.size();
         assert(numberCorrespondences > 5);
 
         bool planar = false;
@@ -367,7 +367,7 @@ namespace ORB_SLAM3 {
         Eigen::MatrixXd points3(3, numberCorrespondences);
         points_t points3v(numberCorrespondences);
         points4_t points4v(numberCorrespondences);
-        for (size_t i = 0; i < numberCorrespondences; i++) {
+        for (std::size_t i = 0; i < numberCorrespondences; i++) {
             bearingVector_t f_current = f[indices[i]];
             points3.col(i) = p[indices[i]];
             // nullspace of right vector
@@ -397,7 +397,7 @@ namespace ORB_SLAM3 {
             Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigen_solver(planarTest);
             eigenRot = eigen_solver.eigenvectors().real();
             eigenRot.transposeInPlace();
-            for (size_t i = 0; i < numberCorrespondences; i++)
+            for (std::size_t i = 0; i < numberCorrespondences; i++)
                 points3.col(i) = eigenRot * points3.col(i);
         }
         //////////////////////////////////////
@@ -413,7 +413,7 @@ namespace ORB_SLAM3 {
         if (covMats.size() == numberCorrespondences) {
             use_cov = true;
             int l = 0;
-            for (size_t i = 0; i < numberCorrespondences; ++i) {
+            for (std::size_t i = 0; i < numberCorrespondences; ++i) {
                 // invert matrix
                 cov2_mat_t temp = nullspaces[i].transpose() * covMats[i] * nullspaces[i];
                 temp = temp.inverse().eval();
@@ -440,7 +440,7 @@ namespace ORB_SLAM3 {
 
         // fill design matrix
         if (planar) {
-            for (size_t i = 0; i < numberCorrespondences; ++i) {
+            for (std::size_t i = 0; i < numberCorrespondences; ++i) {
                 point_t pt3_current = points3.col(i);
 
                 // r12
@@ -472,7 +472,7 @@ namespace ORB_SLAM3 {
                 A(2 * i + 1, 8) = nullspaces[i](2, 1);
             }
         } else {
-            for (size_t i = 0; i < numberCorrespondences; ++i) {
+            for (std::size_t i = 0; i < numberCorrespondences; ++i) {
                 point_t pt3_current = points3.col(i);
 
                 // r11
@@ -568,7 +568,7 @@ namespace ORB_SLAM3 {
             R2.col(1) = -Rout1.col(1);
             R2.col(2) = Rout1.col(2);
 
-            vector<transformation_t, Eigen::aligned_allocator<transformation_t>> Ts(4);
+            std::vector<transformation_t, Eigen::aligned_allocator<transformation_t>> Ts(4);
             Ts[0].block<3, 3>(0, 0) = R1;
             Ts[0].block<3, 1>(0, 3) = t;
             Ts[1].block<3, 3>(0, 0) = R1;
@@ -578,7 +578,7 @@ namespace ORB_SLAM3 {
             Ts[3].block<3, 3>(0, 0) = R2;
             Ts[3].block<3, 1>(0, 3) = -t;
 
-            vector<double> normVal(4);
+            std::vector<double> normVal(4);
             for (int i = 0; i < 4; ++i) {
                 point_t reproPt;
                 double norms = 0.0;
@@ -614,8 +614,8 @@ namespace ORB_SLAM3 {
             tout = Rout * (scale * translation_t(result1(9, 0), result1(10, 0), result1(11, 0)));
 
             // find correct direction in terms of reprojection error, just take the first 6 correspondences
-            vector<double> error(2);
-            vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>> Ts(2);
+            std::vector<double> error(2);
+            std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>> Ts(2);
             for (int s = 0; s < 2; ++s) {
                 error[s] = 0.0;
                 Ts[s] = Eigen::Matrix4d::Identity();
@@ -671,8 +671,8 @@ namespace ORB_SLAM3 {
         double omega_norm = omega.norm();
 
         if (omega_norm > std::numeric_limits<double>::epsilon())
-            R = R + sin(omega_norm) / omega_norm * skewW
-                + (1 - cos(omega_norm)) / (omega_norm * omega_norm) * (skewW * skewW);
+            R = R + std::sin(omega_norm) / omega_norm * skewW
+                + (1 - std::cos(omega_norm)) / (omega_norm * omega_norm) * (skewW * skewW);
 
         return R;
     }
@@ -682,13 +682,13 @@ namespace ORB_SLAM3 {
         omega << 0.0, 0.0, 0.0;
 
         double trace = R.trace() - 1.0;
-        double wnorm = acos(trace / 2.0);
+        double wnorm = std::acos(trace / 2.0);
         if (wnorm > std::numeric_limits<double>::epsilon())
         {
             omega[0] = (R(2, 1) - R(1, 2));
             omega[1] = (R(0, 2) - R(2, 0));
             omega[2] = (R(1, 0) - R(0, 1));
-            double sc = wnorm / (2.0*sin(wnorm));
+            double sc = wnorm / (2.0*std::sin(wnorm));
             omega *= sc;
         }
         return omega;
@@ -835,10 +835,10 @@ namespace ORB_SLAM3 {
 		 double t6 = w2*w2;
 		 double t7 = w3*w3;
 		 double t8 = t5+t6+t7;
-		 double t9 = sqrt(t8);
-		 double t10 = sin(t9);
-		 double t11 = 1.0/sqrt(t8);
-		 double t12 = cos(t9);
+		 double t9 = std::sqrt(t8);
+		 double t10 = std::sin(t9);
+		 double t11 = 1.0/std::sqrt(t8);
+		 double t12 = std::cos(t9);
 		 double  t13 = t12-1.0;
 		 double  t14 = 1.0/t8;
 		 double  t16 = t10*t11*w3;
@@ -874,7 +874,7 @@ namespace ORB_SLAM3 {
 		 double t43 = t42+1.0;
 		 double t44 = Z1*t43;
 		 double t23 = t3-t39+t41+t44;
-		 double t25 = 1.0/pow(t8,3.0/2.0);
+		 double t25 = 1.0/std::pow(t8,3.0/2.0);
 		 double t26 = 1.0/(t8*t8);
 		 double t35 = t12*t14*w1*w2;
 		 double t36 = t5*t10*t25*w3;
@@ -891,7 +891,7 @@ namespace ORB_SLAM3 {
 		 double t62 = t23*t23;
 		 double t63 = t60+t61+t62;
 		 double t64 = t5*t10*t25;
-		 double t65 = 1.0/sqrt(t63);
+		 double t65 = 1.0/std::sqrt(t63);
 		 double t66 = Y1*r2*t6;
 		 double t67 = Z1*r3*t7;
 		 double t68 = r1*t1*t5;
@@ -936,7 +936,7 @@ namespace ORB_SLAM3 {
 		 double  t98 = t6*t10*t25*w1;
 		 double  t99 = t6*t13*t26*w1*2.0;
 		 double  t100 = t6*t10*t25;
-		 double  t101 = 1.0/pow(t63,3.0/2.0);
+		 double  t101 = 1.0/std::pow(t63,3.0/2.0);
 		 double  t111 = t6*t12*t14;
 		 double  t112 = t10*t25*w2*w3;
 		 double  t113 = t12*t14*w1*w3;

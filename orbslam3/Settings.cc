@@ -29,8 +29,6 @@
 #include "orbslam3/Settings.h"
 #include "orbslam3/System.h"
 
-using namespace std;
-
 namespace ORB_SLAM3 {
 
     template<>
@@ -82,7 +80,7 @@ namespace ORB_SLAM3 {
     }
 
     template<>
-    string Settings::readParameter<string>(cv::FileStorage& fSettings, const std::string& name, bool& found, const bool required){
+    std::string Settings::readParameter<std::string>(cv::FileStorage& fSettings, const std::string& name, bool& found, const bool required){
         cv::FileNode node = fSettings[name];
         if(node.empty()){
             if(required){
@@ -132,63 +130,63 @@ namespace ORB_SLAM3 {
         //Open settings file
         cv::FileStorage fSettings(configFile, cv::FileStorage::READ);
         if (!fSettings.isOpened()) {
-            cerr << "[ERROR]: could not open configuration file at: " << configFile << endl;
-            cerr << "Aborting..." << endl;
+            std::cerr << "[ERROR]: could not open configuration file at: " << configFile << std::endl;
+            std::cerr << "Aborting..." << std::endl;
 
             exit(-1);
         }
         else{
-            cout << "Loading settings from " << configFile << endl;
+            std::cout << "Loading settings from " << configFile << std::endl;
         }
 
         //Read first camera
         readCamera1(fSettings);
-        cout << "\t-Loaded camera 1" << endl;
+        std::cout << "\t-Loaded camera 1" << std::endl;
 
         //Read second camera if stereo (not rectified)
         if(sensor_ == System::STEREO || sensor_ == System::IMU_STEREO){
             readCamera2(fSettings);
-            cout << "\t-Loaded camera 2" << endl;
+            std::cout << "\t-Loaded camera 2" << std::endl;
         }
 
         //Read image info
         readImageInfo(fSettings);
-        cout << "\t-Loaded image info" << endl;
+        std::cout << "\t-Loaded image info" << std::endl;
 
         if(sensor_ == System::IMU_MONOCULAR || sensor_ == System::IMU_STEREO || sensor_ == System::IMU_RGBD){
             readIMU(fSettings);
-            cout << "\t-Loaded IMU calibration" << endl;
+            std::cout << "\t-Loaded IMU calibration" << std::endl;
         }
 
         if(sensor_ == System::RGBD || sensor_ == System::IMU_RGBD){
             readRGBD(fSettings);
-            cout << "\t-Loaded RGB-D calibration" << endl;
+            std::cout << "\t-Loaded RGB-D calibration" << std::endl;
         }
 
         readORB(fSettings);
-        cout << "\t-Loaded ORB settings" << endl;
+        std::cout << "\t-Loaded ORB settings" << std::endl;
         readViewer(fSettings);
-        cout << "\t-Loaded viewer settings" << endl;
+        std::cout << "\t-Loaded viewer settings" << std::endl;
         readLoadAndSave(fSettings);
-        cout << "\t-Loaded Atlas settings" << endl;
+        std::cout << "\t-Loaded Atlas settings" << std::endl;
         readOtherParameters(fSettings);
-        cout << "\t-Loaded misc parameters" << endl;
+        std::cout << "\t-Loaded misc parameters" << std::endl;
 
         if(bNeedToRectify_){
             precomputeRectificationMaps();
-            cout << "\t-Computed rectification maps" << endl;
+            std::cout << "\t-Computed rectification maps" << std::endl;
         }
 
-        cout << "----------------------------------" << endl;
+        std::cout << "----------------------------------" << std::endl;
     }
 
     void Settings::readCamera1(cv::FileStorage &fSettings) {
         bool found;
 
         //Read camera model
-        string cameraModel = readParameter<string>(fSettings,"Camera.type",found);
+        std::string cameraModel = readParameter<std::string>(fSettings,"Camera.type",found);
 
-        vector<float> vCalibration;
+        std::vector<float> vCalibration;
         if (cameraModel == "PinHole") {
             cameraType_ = PinHole;
 
@@ -263,20 +261,20 @@ namespace ORB_SLAM3 {
             if(sensor_ == System::STEREO || sensor_ == System::IMU_STEREO){
                 int colBegin = readParameter<int>(fSettings,"Camera1.overlappingBegin",found);
                 int colEnd = readParameter<int>(fSettings,"Camera1.overlappingEnd",found);
-                vector<int> vOverlapping = {colBegin, colEnd};
+                std::vector<int> vOverlapping = {colBegin, colEnd};
 
                 static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea = vOverlapping;
             }
         }
         else{
-            cerr << "Error: " << cameraModel << " not known" << endl;
+            std::cerr << "Error: " << cameraModel << " not known" << std::endl;
             exit(-1);
         }
     }
 
     void Settings::readCamera2(cv::FileStorage &fSettings) {
         bool found;
-        vector<float> vCalibration;
+        std::vector<float> vCalibration;
         if (cameraType_ == PinHole) {
             bNeedToRectify_ = true;
 
@@ -329,7 +327,7 @@ namespace ORB_SLAM3 {
 
             int colBegin = readParameter<int>(fSettings,"Camera2.overlappingBegin",found);
             int colEnd = readParameter<int>(fSettings,"Camera2.overlappingEnd",found);
-            vector<int> vOverlapping = {colBegin, colEnd};
+            std::vector<int> vOverlapping = {colBegin, colEnd};
 
             static_cast<KannalaBrandt8*>(calibration2_)->mvLappingArea = vOverlapping;
         }
@@ -473,8 +471,8 @@ namespace ORB_SLAM3 {
     void Settings::readLoadAndSave(cv::FileStorage &fSettings) {
         bool found;
 
-        sLoadFrom_ = readParameter<string>(fSettings,"System.LoadAtlasFromFile",found,false);
-        sSaveto_ = readParameter<string>(fSettings,"System.SaveAtlasToFile",found,false);
+        sLoadFrom_ = readParameter<std::string>(fSettings,"System.LoadAtlasFromFile",found,false);
+        sSaveto_ = readParameter<std::string>(fSettings,"System.SaveAtlasToFile",found,false);
     }
 
     void Settings::readOtherParameters(cv::FileStorage& fSettings) {
@@ -528,7 +526,7 @@ namespace ORB_SLAM3 {
     }
 
     ostream &operator<<(std::ostream& output, const Settings& settings){
-        output << "SLAM settings: " << endl;
+        output << "SLAM settings: " << std::endl;
 
         output << "\t-Camera 1 parameters (";
         if(settings.cameraType_ == Settings::PinHole || settings.cameraType_ ==  Settings::Rectified){
@@ -538,17 +536,17 @@ namespace ORB_SLAM3 {
             output << "Kannala-Brandt";
         }
         output << ")" << ": [";
-        for(size_t i = 0; i < settings.originalCalib1_->size(); i++){
+        for(std::size_t i = 0; i < settings.originalCalib1_->size(); i++){
             output << " " << settings.originalCalib1_->getParameter(i);
         }
-        output << " ]" << endl;
+        output << " ]" << std::endl;
 
         if(!settings.vPinHoleDistorsion1_.empty()){
             output << "\t-Camera 1 distortion parameters: [ ";
             for(float d : settings.vPinHoleDistorsion1_){
                 output << " " << d;
             }
-            output << " ]" << endl;
+            output << " ]" << std::endl;
         }
 
         if(settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO){
@@ -560,79 +558,79 @@ namespace ORB_SLAM3 {
                 output << "Kannala-Brandt";
             }
             output << "" << ": [";
-            for(size_t i = 0; i < settings.originalCalib2_->size(); i++){
+            for(std::size_t i = 0; i < settings.originalCalib2_->size(); i++){
                 output << " " << settings.originalCalib2_->getParameter(i);
             }
-            output << " ]" << endl;
+            output << " ]" << std::endl;
 
             if(!settings.vPinHoleDistorsion2_.empty()){
                 output << "\t-Camera 1 distortion parameters: [ ";
                 for(float d : settings.vPinHoleDistorsion2_){
                     output << " " << d;
                 }
-                output << " ]" << endl;
+                output << " ]" << std::endl;
             }
         }
 
-        output << "\t-Original image size: [ " << settings.originalImSize_.width << " , " << settings.originalImSize_.height << " ]" << endl;
-        output << "\t-Current image size: [ " << settings.newImSize_.width << " , " << settings.newImSize_.height << " ]" << endl;
+        output << "\t-Original image size: [ " << settings.originalImSize_.width << " , " << settings.originalImSize_.height << " ]" << std::endl;
+        output << "\t-Current image size: [ " << settings.newImSize_.width << " , " << settings.newImSize_.height << " ]" << std::endl;
 
         if(settings.bNeedToRectify_){
             output << "\t-Camera 1 parameters after rectification: [ ";
-            for(size_t i = 0; i < settings.calibration1_->size(); i++){
+            for(std::size_t i = 0; i < settings.calibration1_->size(); i++){
                 output << " " << settings.calibration1_->getParameter(i);
             }
-            output << " ]" << endl;
+            output << " ]" << std::endl;
         }
         else if(settings.bNeedToResize1_){
             output << "\t-Camera 1 parameters after resize: [ ";
-            for(size_t i = 0; i < settings.calibration1_->size(); i++){
+            for(std::size_t i = 0; i < settings.calibration1_->size(); i++){
                 output << " " << settings.calibration1_->getParameter(i);
             }
-            output << " ]" << endl;
+            output << " ]" << std::endl;
 
             if((settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO) &&
                 settings.cameraType_ == Settings::KannalaBrandt){
                 output << "\t-Camera 2 parameters after resize: [ ";
-                for(size_t i = 0; i < settings.calibration2_->size(); i++){
+                for(std::size_t i = 0; i < settings.calibration2_->size(); i++){
                     output << " " << settings.calibration2_->getParameter(i);
                 }
-                output << " ]" << endl;
+                output << " ]" << std::endl;
             }
         }
 
-        output << "\t-Sequence FPS: " << settings.fps_ << endl;
+        output << "\t-Sequence FPS: " << settings.fps_ << std::endl;
 
         //Stereo stuff
         if(settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO){
-            output << "\t-Stereo baseline: " << settings.b_ << endl;
-            output << "\t-Stereo depth threshold : " << settings.thDepth_ << endl;
+            output << "\t-Stereo baseline: " << settings.b_ << std::endl;
+            output << "\t-Stereo depth threshold : " << settings.thDepth_ << std::endl;
 
             if(settings.cameraType_ == Settings::KannalaBrandt){
                 auto vOverlapping1 = static_cast<KannalaBrandt8*>(settings.calibration1_)->mvLappingArea;
                 auto vOverlapping2 = static_cast<KannalaBrandt8*>(settings.calibration2_)->mvLappingArea;
-                output << "\t-Camera 1 overlapping area: [ " << vOverlapping1[0] << " , " << vOverlapping1[1] << " ]" << endl;
-                output << "\t-Camera 2 overlapping area: [ " << vOverlapping2[0] << " , " << vOverlapping2[1] << " ]" << endl;
+                output << "\t-Camera 1 overlapping area: [ " << vOverlapping1[0] << " , " << vOverlapping1[1] << " ]" << std::endl;
+                output << "\t-Camera 2 overlapping area: [ " << vOverlapping2[0] << " , " << vOverlapping2[1] << " ]" << std::endl;
             }
         }
 
         if(settings.sensor_ == System::IMU_MONOCULAR || settings.sensor_ == System::IMU_STEREO || settings.sensor_ == System::IMU_RGBD) {
-            output << "\t-Gyro noise: " << settings.noiseGyro_ << endl;
-            output << "\t-Accelerometer noise: " << settings.noiseAcc_ << endl;
-            output << "\t-Gyro walk: " << settings.gyroWalk_ << endl;
-            output << "\t-Accelerometer walk: " << settings.accWalk_ << endl;
-            output << "\t-IMU frequency: " << settings.imuFrequency_ << endl;
+            output << "\t-Gyro noise: " << settings.noiseGyro_ << std::endl;
+            output << "\t-Accelerometer noise: " << settings.noiseAcc_ << std::endl;
+            output << "\t-Gyro walk: " << settings.gyroWalk_ << std::endl;
+            output << "\t-Accelerometer walk: " << settings.accWalk_ << std::endl;
+            output << "\t-IMU frequency: " << settings.imuFrequency_ << std::endl;
         }
 
         if(settings.sensor_ == System::RGBD || settings.sensor_ == System::IMU_RGBD){
-            output << "\t-RGB-D depth map factor: " << settings.depthMapFactor_ << endl;
+            output << "\t-RGB-D depth map factor: " << settings.depthMapFactor_ << std::endl;
         }
 
-        output << "\t-Features per image: " << settings.nFeatures_ << endl;
-        output << "\t-ORB scale factor: " << settings.scaleFactor_ << endl;
-        output << "\t-ORB number of scales: " << settings.nLevels_ << endl;
-        output << "\t-Initial FAST threshold: " << settings.initThFAST_ << endl;
-        output << "\t-Min FAST threshold: " << settings.minThFAST_ << endl;
+        output << "\t-Features per image: " << settings.nFeatures_ << std::endl;
+        output << "\t-ORB scale factor: " << settings.scaleFactor_ << std::endl;
+        output << "\t-ORB number of scales: " << settings.nLevels_ << std::endl;
+        output << "\t-Initial FAST threshold: " << settings.initThFAST_ << std::endl;
+        output << "\t-Min FAST threshold: " << settings.minThFAST_ << std::endl;
 
         return output;
     }

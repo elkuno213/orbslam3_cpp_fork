@@ -54,19 +54,19 @@ Atlas::~Atlas()
 
 void Atlas::CreateNewMap()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
-    cout << "Creation of new map with id: " << Map::nNextId << endl;
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
+    std::cout << "Creation of new map with id: " << Map::nNextId << std::endl;
     if(mpCurrentMap){
         if(!mspMaps.empty() && mnLastInitKFidMap < mpCurrentMap->GetMaxKFid())
             mnLastInitKFidMap = mpCurrentMap->GetMaxKFid()+1; //The init KF is the next of current maximum
 
         mpCurrentMap->SetStoredMap();
-        cout << "Stored map with ID: " << mpCurrentMap->GetId() << endl;
+        std::cout << "Stored map with ID: " << mpCurrentMap->GetId() << std::endl;
 
         //if(mHasViewer)
         //    mpViewer->AddMapToCreateThumbnail(mpCurrentMap);
     }
-    cout << "Creation of new map with last KF id: " << mnLastInitKFidMap << endl;
+    std::cout << "Creation of new map with last KF id: " << mnLastInitKFidMap << std::endl;
 
     mpCurrentMap = new Map(mnLastInitKFidMap);
     mpCurrentMap->SetCurrentMap();
@@ -75,8 +75,8 @@ void Atlas::CreateNewMap()
 
 void Atlas::ChangeMap(Map* pMap)
 {
-    unique_lock<mutex> lock(mMutexAtlas);
-    cout << "Change to map with id: " << pMap->GetId() << endl;
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
+    std::cout << "Change to map with id: " << pMap->GetId() << std::endl;
     if(mpCurrentMap){
         mpCurrentMap->SetStoredMap();
     }
@@ -87,7 +87,7 @@ void Atlas::ChangeMap(Map* pMap)
 
 unsigned long int Atlas::GetLastInitKFid()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mnLastInitKFidMap;
 }
 
@@ -114,7 +114,7 @@ GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam)
     //Check if the camera already exists
     bool bAlreadyInMap = false;
     int index_cam = -1;
-    for(size_t i=0; i < mvpCameras.size(); ++i)
+    for(std::size_t i=0; i < mvpCameras.size(); ++i)
     {
         GeometricCamera* pCam_i = mvpCameras[i];
         if(!pCam) std::cout << "Not pCam" << std::endl;
@@ -157,55 +157,55 @@ std::vector<GeometricCamera*> Atlas::GetAllCameras()
 
 void Atlas::SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs)
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     mpCurrentMap->SetReferenceMapPoints(vpMPs);
 }
 
 void Atlas::InformNewBigChange()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     mpCurrentMap->InformNewBigChange();
 }
 
 int Atlas::GetLastBigChangeIdx()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->GetLastBigChangeIdx();
 }
 
 long unsigned int Atlas::MapPointsInMap()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->MapPointsInMap();
 }
 
 long unsigned Atlas::KeyFramesInMap()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->KeyFramesInMap();
 }
 
 std::vector<KeyFrame*> Atlas::GetAllKeyFrames()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->GetAllKeyFrames();
 }
 
 std::vector<MapPoint*> Atlas::GetAllMapPoints()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->GetAllMapPoints();
 }
 
 std::vector<MapPoint*> Atlas::GetReferenceMapPoints()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->GetReferenceMapPoints();
 }
 
-vector<Map*> Atlas::GetAllMaps()
+std::vector<Map*> Atlas::GetAllMaps()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     struct compFunctor
     {
         inline bool operator()(Map* elem1 ,Map* elem2)
@@ -213,26 +213,26 @@ vector<Map*> Atlas::GetAllMaps()
             return elem1->GetId() < elem2->GetId();
         }
     };
-    vector<Map*> vMaps(mspMaps.begin(),mspMaps.end());
-    sort(vMaps.begin(), vMaps.end(), compFunctor());
+    std::vector<Map*> vMaps(mspMaps.begin(),mspMaps.end());
+    std::sort(vMaps.begin(), vMaps.end(), compFunctor());
     return vMaps;
 }
 
 int Atlas::CountMaps()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mspMaps.size();
 }
 
 void Atlas::clearMap()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     mpCurrentMap->clear();
 }
 
 void Atlas::clearAtlas()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     // for (std::set<Map*>::iterator it = mspMaps.begin(), send = mspMaps.end();
     //      it != send;
     //      it++) {
@@ -246,7 +246,7 @@ void Atlas::clearAtlas()
 
 Map* Atlas::GetCurrentMap()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     if(!mpCurrentMap)
         CreateNewMap();
     while(mpCurrentMap->IsBad())
@@ -274,25 +274,25 @@ void Atlas::RemoveBadMaps()
 
 bool Atlas::isInertial()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->IsInertial();
 }
 
 void Atlas::SetInertialSensor()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     mpCurrentMap->SetInertialSensor();
 }
 
 void Atlas::SetImuInitialized()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     mpCurrentMap->SetImuInitialized();
 }
 
 bool Atlas::isImuInitialized()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     return mpCurrentMap->isImuInitialized();
 }
 
@@ -311,7 +311,7 @@ void Atlas::PreSave()
         }
     };
     std::copy(mspMaps.begin(), mspMaps.end(), std::back_inserter(mvpBackupMaps));
-    sort(mvpBackupMaps.begin(), mvpBackupMaps.end(), compFunctor());
+    std::sort(mvpBackupMaps.begin(), mvpBackupMaps.end(), compFunctor());
 
     std::set<GeometricCamera*> spCams(mvpCameras.begin(), mvpCameras.end());
     for(Map* pMi : mvpBackupMaps)
@@ -331,7 +331,7 @@ void Atlas::PreSave()
 
 void Atlas::PostLoad()
 {
-    map<unsigned int,GeometricCamera*> mpCams;
+    std::map<unsigned int,GeometricCamera*> mpCams;
     for(GeometricCamera* pCam : mvpCameras)
     {
         mpCams[pCam->GetId()] = pCam;
@@ -371,7 +371,7 @@ ORBVocabulary* Atlas::GetORBVocabulary()
 
 long unsigned int Atlas::GetNumLivedKF()
 {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     long unsigned int num = 0;
     for(Map* pMap_i : mspMaps)
     {
@@ -382,7 +382,7 @@ long unsigned int Atlas::GetNumLivedKF()
 }
 
 long unsigned int Atlas::GetNumLivedMP() {
-    unique_lock<mutex> lock(mMutexAtlas);
+    std::unique_lock<std::mutex> lock(mMutexAtlas);
     long unsigned int num = 0;
     for (Map* pMap_i : mspMaps) {
         num += pMap_i->GetAllMapPoints().size();
@@ -391,12 +391,12 @@ long unsigned int Atlas::GetNumLivedMP() {
     return num;
 }
 
-map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes()
+std::map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes()
 {
-    map<long unsigned int, KeyFrame*> mpIdKFs;
+    std::map<long unsigned int, KeyFrame*> mpIdKFs;
     for(Map* pMap_i : mvpBackupMaps)
     {
-        vector<KeyFrame*> vpKFs_Mi = pMap_i->GetAllKeyFrames();
+        std::vector<KeyFrame*> vpKFs_Mi = pMap_i->GetAllKeyFrames();
 
         for(KeyFrame* pKF_j_Mi : vpKFs_Mi)
         {

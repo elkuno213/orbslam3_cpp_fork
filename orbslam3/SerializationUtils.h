@@ -54,7 +54,7 @@ void serializeSophusSE3(Archive &ar, Sophus::SE3f &T, const unsigned int version
     }
 }
 
-// template <class Archive, size_t dim>
+// template <class Archive, std::size_t dim>
 // void serializeDiagonalMatrix(
 //   Archive& ar, Eigen::DiagonalMatrix<float, dim>& D,
 //   const unsigned int version

@@ -118,8 +118,8 @@ class KeyFrame
         // KeyPoints
         serializeVectorKeyPoints<Archive>(ar, mvKeys, version);
         serializeVectorKeyPoints<Archive>(ar, mvKeysUn, version);
-        ar & const_cast<vector<float>& >(mvuRight);
-        ar & const_cast<vector<float>& >(mvDepth);
+        ar & const_cast<std::vector<float>& >(mvuRight);
+        ar & const_cast<std::vector<float>& >(mvDepth);
         serializeMatrix<Archive>(ar,mDescriptors,version);
         // BOW
         ar & mBowVec;
@@ -130,9 +130,9 @@ class KeyFrame
         ar & const_cast<int&>(mnScaleLevels);
         ar & const_cast<float&>(mfScaleFactor);
         ar & const_cast<float&>(mfLogScaleFactor);
-        ar & const_cast<vector<float>& >(mvScaleFactors);
-        ar & const_cast<vector<float>& >(mvLevelSigma2);
-        ar & const_cast<vector<float>& >(mvInvLevelSigma2);
+        ar & const_cast<std::vector<float>& >(mvScaleFactors);
+        ar & const_cast<std::vector<float>& >(mvLevelSigma2);
+        ar & const_cast<std::vector<float>& >(mvInvLevelSigma2);
         // Image bounds and calibration
         ar & const_cast<int&>(mnMinX);
         ar & const_cast<int&>(mnMinY);
@@ -239,21 +239,21 @@ public:
 
     // Merge Edges
     void AddMergeEdge(KeyFrame* pKF);
-    set<KeyFrame*> GetMergeEdges();
+    std::set<KeyFrame*> GetMergeEdges();
 
     // MapPoint observation functions
     int GetNumberMPs();
-    void AddMapPoint(MapPoint* pMP, const size_t &idx);
+    void AddMapPoint(MapPoint* pMP, const std::size_t &idx);
     void EraseMapPointMatch(const int &idx);
     void EraseMapPointMatch(MapPoint* pMP);
     void ReplaceMapPointMatch(const int &idx, MapPoint* pMP);
     std::set<MapPoint*> GetMapPoints();
     std::vector<MapPoint*> GetMapPointMatches();
     int TrackedMapPoints(const int &minObs);
-    MapPoint* GetMapPoint(const size_t &idx);
+    MapPoint* GetMapPoint(const std::size_t &idx);
 
     // KeyPoint functions
-    std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r, const bool bRight = false) const;
+    std::vector<std::size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r, const bool bRight = false) const;
     bool UnprojectStereo(int i, Eigen::Vector3f &x3D);
 
     // Image
@@ -291,8 +291,8 @@ public:
     bool ProjectPointDistort(MapPoint* pMP, cv::Point2f &kp, float &u, float &v);
     bool ProjectPointUnDistort(MapPoint* pMP, cv::Point2f &kp, float &u, float &v);
 
-    void PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP, set<GeometricCamera*>& spCam);
-    void PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid, map<unsigned int, GeometricCamera*>& mpCamId);
+    void PreSave(std::set<KeyFrame*>& spKF,std::set<MapPoint*>& spMP, std::set<GeometricCamera*>& spCam);
+    void PostLoad(std::map<long unsigned int, KeyFrame*>& mpKFid, std::map<long unsigned int, MapPoint*>& mpMPid, std::map<unsigned int, GeometricCamera*>& mpCamId);
 
 
     void SetORBVocabulary(ORBVocabulary* pORBVoc);
@@ -409,7 +409,7 @@ public:
 
     unsigned int mnOriginMapId;
 
-    string mNameFile;
+    std::string mNameFile;
 
     int mnDataset;
 
@@ -450,7 +450,7 @@ protected:
     ORBVocabulary* mpORBvocabulary;
 
     // Grid over the image to speed up feature matching
-    std::vector< std::vector <std::vector<size_t> > > mGrid;
+    std::vector< std::vector <std::vector<std::size_t> > > mGrid;
 
     std::map<KeyFrame*,int> mConnectedKeyFrameWeights;
     std::vector<KeyFrame*> mvpOrderedConnectedKeyFrames;
@@ -510,7 +510,7 @@ public:
 
     const int NLeft, NRight;
 
-    std::vector< std::vector <std::vector<size_t> > > mGridRight;
+    std::vector< std::vector <std::vector<std::size_t> > > mGridRight;
 
     Sophus::SE3<float> GetRightPose();
     Sophus::SE3<float> GetRightPoseInverse();
@@ -528,7 +528,7 @@ public:
                 else right++;
             }
         }
-        cout << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right << endl;
+        std::cout << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right << std::endl;
     }
 
 

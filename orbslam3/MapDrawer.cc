@@ -27,7 +27,7 @@ namespace ORB_SLAM3
 {
 
 
-MapDrawer::MapDrawer(Atlas* pAtlas, const string &strSettingPath, Settings* settings):mpAtlas(pAtlas)
+MapDrawer::MapDrawer(Atlas* pAtlas, const std::string &strSettingPath, Settings* settings):mpAtlas(pAtlas)
 {
     if(settings){
         newParameterLoader(settings);
@@ -43,7 +43,7 @@ MapDrawer::MapDrawer(Atlas* pAtlas, const string &strSettingPath, Settings* sett
             {
                 throw -1;
             }
-            catch(exception &e)
+            catch(std::exception &e)
             {
 
             }
@@ -139,10 +139,10 @@ void MapDrawer::DrawMapPoints()
     if(!pActiveMap)
         return;
 
-    const vector<MapPoint*> &vpMPs = pActiveMap->GetAllMapPoints();
-    const vector<MapPoint*> &vpRefMPs = pActiveMap->GetReferenceMapPoints();
+    const std::vector<MapPoint*> &vpMPs = pActiveMap->GetAllMapPoints();
+    const std::vector<MapPoint*> &vpRefMPs = pActiveMap->GetReferenceMapPoints();
 
-    set<MapPoint*> spRefMPs(vpRefMPs.begin(), vpRefMPs.end());
+    std::set<MapPoint*> spRefMPs(vpRefMPs.begin(), vpRefMPs.end());
 
     if(vpMPs.empty())
         return;
@@ -151,7 +151,7 @@ void MapDrawer::DrawMapPoints()
     glBegin(GL_POINTS);
     glColor3f(0.0,0.0,0.0);
 
-    for(size_t i=0, iend=vpMPs.size(); i<iend;i++)
+    for(std::size_t i=0, iend=vpMPs.size(); i<iend;i++)
     {
         if(vpMPs[i]->isBad() || spRefMPs.count(vpMPs[i]))
             continue;
@@ -164,7 +164,7 @@ void MapDrawer::DrawMapPoints()
     glBegin(GL_POINTS);
     glColor3f(1.0,0.0,0.0);
 
-    for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
+    for(std::set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
     {
         if((*sit)->isBad())
             continue;
@@ -190,11 +190,11 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
     if(!pActiveMap)
         return;
 
-    const vector<KeyFrame*> vpKFs = pActiveMap->GetAllKeyFrames();
+    const std::vector<KeyFrame*> vpKFs = pActiveMap->GetAllKeyFrames();
 
     if(bDrawKF)
     {
-        for(size_t i=0; i<vpKFs.size(); i++)
+        for(std::size_t i=0; i<vpKFs.size(); i++)
         {
             KeyFrame* pKF = vpKFs[i];
             Eigen::Matrix4f Twc = pKF->GetPoseInverse().matrix();
@@ -212,7 +212,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
             }
             else
             {
-                //cout << "Child KF: " << vpKFs[i]->mnId << endl;
+                //std::cout << "Child KF: " << vpKFs[i]->mnId << std::endl;
                 glLineWidth(mKeyFrameLineWidth);
                 if (bDrawOptLba) {
                     if(sOptKFs.find(pKF->mnId) != sOptKFs.end())
@@ -269,15 +269,15 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
         glColor4f(0.0f,1.0f,0.0f,0.6f);
         glBegin(GL_LINES);
 
-        // cout << "-----------------Draw graph-----------------" << endl;
-        for(size_t i=0; i<vpKFs.size(); i++)
+        // std::cout << "-----------------Draw graph-----------------" << std::endl;
+        for(std::size_t i=0; i<vpKFs.size(); i++)
         {
             // Covisibility Graph
-            const vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
+            const std::vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
             Eigen::Vector3f Ow = vpKFs[i]->GetCameraCenter();
             if(!vCovKFs.empty())
             {
-                for(vector<KeyFrame*>::const_iterator vit=vCovKFs.begin(), vend=vCovKFs.end(); vit!=vend; vit++)
+                for(std::vector<KeyFrame*>::const_iterator vit=vCovKFs.begin(), vend=vCovKFs.end(); vit!=vend; vit++)
                 {
                     if((*vit)->mnId<vpKFs[i]->mnId)
                         continue;
@@ -297,8 +297,8 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
             }
 
             // Loops
-            set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
-            for(set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
+            std::set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
+            for(std::set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
             {
                 if((*sit)->mnId<vpKFs[i]->mnId)
                     continue;
@@ -318,7 +318,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
         glBegin(GL_LINES);
 
         //Draw inertial links
-        for(size_t i=0; i<vpKFs.size(); i++)
+        for(std::size_t i=0; i<vpKFs.size(); i++)
         {
             KeyFrame* pKFi = vpKFs[i];
             Eigen::Vector3f Ow = pKFi->GetCameraCenter();
@@ -334,7 +334,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
         glEnd();
     }
 
-    vector<Map*> vpMaps = mpAtlas->GetAllMaps();
+    std::vector<Map*> vpMaps = mpAtlas->GetAllMaps();
 
     if(bDrawKF)
     {
@@ -343,9 +343,9 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
             if(pMap == pActiveMap)
                 continue;
 
-            vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
+            std::vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
 
-            for(size_t i=0; i<vpKFs.size(); i++)
+            for(std::size_t i=0; i<vpKFs.size(); i++)
             {
                 KeyFrame* pKF = vpKFs[i];
                 Eigen::Matrix4f Twc = pKF->GetPoseInverse().matrix();
@@ -441,7 +441,7 @@ void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
 
 void MapDrawer::SetCurrentCameraPose(const Sophus::SE3f &Tcw)
 {
-    unique_lock<mutex> lock(mMutexCamera);
+    std::unique_lock<std::mutex> lock(mMutexCamera);
     mCameraPose = Tcw.inverse();
 }
 
@@ -449,7 +449,7 @@ void MapDrawer::GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M, pangolin
 {
     Eigen::Matrix4f Twc;
     {
-        unique_lock<mutex> lock(mMutexCamera);
+        std::unique_lock<std::mutex> lock(mMutexCamera);
         Twc = mCameraPose.matrix();
     }
 

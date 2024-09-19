@@ -37,14 +37,14 @@ class Sim3Solver
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Sim3Solver(KeyFrame* pKF1, KeyFrame* pKF2, const std::vector<MapPoint*> &vpMatched12, const bool bFixScale = true,
-               const vector<KeyFrame*> vpKeyFrameMatchedMP = vector<KeyFrame*>());
+               const std::vector<KeyFrame*> vpKeyFrameMatchedMP = std::vector<KeyFrame*>());
 
     void SetRansacParameters(double probability = 0.99, int minInliers = 6 , int maxIterations = 300);
 
     Eigen::Matrix4f find(std::vector<bool> &vbInliers12, int &nInliers);
 
     Eigen::Matrix4f iterate(int nIterations, bool &bNoMore, std::vector<bool> &vbInliers, int &nInliers);
-    Eigen::Matrix4f iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers, bool &bConverge);
+    Eigen::Matrix4f iterate(int nIterations, bool &bNoMore, std::vector<bool> &vbInliers, int &nInliers, bool &bConverge);
 
     Eigen::Matrix4f GetEstimatedTransformation();
     Eigen::Matrix3f GetEstimatedRotation();
@@ -74,11 +74,11 @@ protected:
     std::vector<MapPoint*> mvpMapPoints1;
     std::vector<MapPoint*> mvpMapPoints2;
     std::vector<MapPoint*> mvpMatches12;
-    std::vector<size_t> mvnIndices1;
-    std::vector<size_t> mvSigmaSquare1;
-    std::vector<size_t> mvSigmaSquare2;
-    std::vector<size_t> mvnMaxError1;
-    std::vector<size_t> mvnMaxError2;
+    std::vector<std::size_t> mvnIndices1;
+    std::vector<std::size_t> mvSigmaSquare1;
+    std::vector<std::size_t> mvSigmaSquare2;
+    std::vector<std::size_t> mvnMaxError1;
+    std::vector<std::size_t> mvnMaxError2;
 
     int N;
     int mN1;
@@ -105,7 +105,7 @@ protected:
     bool mbFixScale;
 
     // Indices for random selection
-    std::vector<size_t> mvAllIndices;
+    std::vector<std::size_t> mvAllIndices;
 
     // Projections
     std::vector<Eigen::Vector2f> mvP1im1;

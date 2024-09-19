@@ -77,9 +77,9 @@ namespace ORB_SLAM3 {
         virtual bool epipolarConstrain(GeometricCamera* otherCamera, const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc) = 0;
 
         float getParameter(const int i){return mvParameters[i];}
-        void setParameter(const float p, const size_t i){mvParameters[i] = p;}
+        void setParameter(const float p, const std::size_t i){mvParameters[i] = p;}
 
-        size_t size(){return mvParameters.size();}
+        std::size_t size(){return mvParameters.size();}
 
         virtual bool matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, GeometricCamera* pOther,
                                  Sophus::SE3f& Tcw1, Sophus::SE3f& Tcw2,

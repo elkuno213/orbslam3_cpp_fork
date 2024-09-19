@@ -272,21 +272,21 @@ bool Converter::isRotationMatrix(const cv::Mat &R)
 std::vector<float> Converter::toEuler(const cv::Mat &R)
 {
     assert(isRotationMatrix(R));
-    float sy = sqrt(R.at<float>(0,0) * R.at<float>(0,0) +  R.at<float>(1,0) * R.at<float>(1,0) );
+    float sy = std::sqrt(R.at<float>(0,0) * R.at<float>(0,0) +  R.at<float>(1,0) * R.at<float>(1,0) );
 
     bool singular = sy < 1e-6; // If
 
     float x, y, z;
     if (!singular)
     {
-        x = atan2(R.at<float>(2,1) , R.at<float>(2,2));
-        y = atan2(-R.at<float>(2,0), sy);
-        z = atan2(R.at<float>(1,0), R.at<float>(0,0));
+        x = std::atan2(R.at<float>(2,1) , R.at<float>(2,2));
+        y = std::atan2(-R.at<float>(2,0), sy);
+        z = std::atan2(R.at<float>(1,0), R.at<float>(0,0));
     }
     else
     {
-        x = atan2(-R.at<float>(1,2), R.at<float>(1,1));
-        y = atan2(-R.at<float>(2,0), sy);
+        x = std::atan2(-R.at<float>(1,2), R.at<float>(1,1));
+        y = std::atan2(-R.at<float>(2,0), sy);
         z = 0;
     }
 

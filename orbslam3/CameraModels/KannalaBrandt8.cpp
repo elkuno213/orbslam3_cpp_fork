@@ -16,6 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Standard
+#include <cmath>
 // 3rdparty
 #include <boost/serialization/export.hpp>
 #include <opencv2/calib3d.hpp>
@@ -29,8 +31,8 @@ namespace ORB_SLAM3 {
 
     cv::Point2f KannalaBrandt8::project(const cv::Point3f &p3D) {
         const float x2_plus_y2 = p3D.x * p3D.x + p3D.y * p3D.y;
-        const float theta = atan2f(sqrtf(x2_plus_y2), p3D.z);
-        const float psi = atan2f(p3D.y, p3D.x);
+        const float theta =atan2f(sqrtf(x2_plus_y2), p3D.z);
+        const float psi =atan2f(p3D.y, p3D.x);
 
         const float theta2 = theta * theta;
         const float theta3 = theta * theta2;
@@ -40,15 +42,15 @@ namespace ORB_SLAM3 {
         const float r = theta + mvParameters[4] * theta3 + mvParameters[5] * theta5
                         + mvParameters[6] * theta7 + mvParameters[7] * theta9;
 
-        return cv::Point2f(mvParameters[0] * r * cos(psi) + mvParameters[2],
-                           mvParameters[1] * r * sin(psi) + mvParameters[3]);
+        return cv::Point2f(mvParameters[0] * r * std::cos(psi) + mvParameters[2],
+                           mvParameters[1] * r * std::sin(psi) + mvParameters[3]);
 
     }
 
     Eigen::Vector2d KannalaBrandt8::project(const Eigen::Vector3d &v3D) {
         const double x2_plus_y2 = v3D[0] * v3D[0] + v3D[1] * v3D[1];
-        const double theta = atan2f(sqrtf(x2_plus_y2), v3D[2]);
-        const double psi = atan2f(v3D[1], v3D[0]);
+        const double theta =atan2f(sqrtf(x2_plus_y2), v3D[2]);
+        const double psi =atan2f(v3D[1], v3D[0]);
 
         const double theta2 = theta * theta;
         const double theta3 = theta * theta2;
@@ -59,8 +61,8 @@ namespace ORB_SLAM3 {
                         + mvParameters[6] * theta7 + mvParameters[7] * theta9;
 
         Eigen::Vector2d res;
-        res[0] = mvParameters[0] * r * cos(psi) + mvParameters[2];
-        res[1] = mvParameters[1] * r * sin(psi) + mvParameters[3];
+        res[0] = mvParameters[0] * r * std::cos(psi) + mvParameters[2];
+        res[1] = mvParameters[1] * r * std::sin(psi) + mvParameters[3];
 
         return res;
 
@@ -68,8 +70,8 @@ namespace ORB_SLAM3 {
 
     Eigen::Vector2f KannalaBrandt8::project(const Eigen::Vector3f &v3D) {
         const float x2_plus_y2 = v3D[0] * v3D[0] + v3D[1] * v3D[1];
-        const float theta = atan2f(sqrtf(x2_plus_y2), v3D[2]);
-        const float psi = atan2f(v3D[1], v3D[0]);
+        const float theta =atan2f(sqrtf(x2_plus_y2), v3D[2]);
+        const float psi =atan2f(v3D[1], v3D[0]);
 
         const float theta2 = theta * theta;
         const float theta3 = theta * theta2;
@@ -80,8 +82,8 @@ namespace ORB_SLAM3 {
                          + mvParameters[6] * theta7 + mvParameters[7] * theta9;
 
         Eigen::Vector2f res;
-        res[0] = mvParameters[0] * r * cos(psi) + mvParameters[2];
-        res[1] = mvParameters[1] * r * sin(psi) + mvParameters[3];
+        res[0] = mvParameters[0] * r * std::cos(psi) + mvParameters[2];
+        res[1] = mvParameters[1] * r * std::sin(psi) + mvParameters[3];
 
         return res;
 
@@ -120,7 +122,7 @@ namespace ORB_SLAM3 {
         cv::Point2f pw((p2D.x - mvParameters[2]) / mvParameters[0], (p2D.y - mvParameters[3]) / mvParameters[1]);
         float scale = 1.f;
         float theta_d = sqrtf(pw.x * pw.x + pw.y * pw.y);
-        theta_d = fminf(fmaxf(-CV_PI / 2.f, theta_d), CV_PI / 2.f);
+        theta_d = std::fminf(std::fmaxf(-CV_PI / 2.f, theta_d), CV_PI / 2.f);
 
         if (theta_d > 1e-8) {
             //Compensate distortion iteratively
@@ -147,9 +149,9 @@ namespace ORB_SLAM3 {
     Eigen::Matrix<double, 2, 3> KannalaBrandt8::projectJac(const Eigen::Vector3d &v3D) {
         double x2 = v3D[0] * v3D[0], y2 = v3D[1] * v3D[1], z2 = v3D[2] * v3D[2];
         double r2 = x2 + y2;
-        double r = sqrt(r2);
+        double r =std::sqrt(r2);
         double r3 = r2 * r;
-        double theta = atan2(r, v3D[2]);
+        double theta =std::atan2(r, v3D[2]);
 
         double theta2 = theta * theta, theta3 = theta2 * theta;
         double theta4 = theta2 * theta2, theta5 = theta4 * theta;
@@ -187,8 +189,8 @@ namespace ORB_SLAM3 {
         std::vector<cv::KeyPoint> vKeysUn1 = vKeys1, vKeysUn2 = vKeys2;
         std::vector<cv::Point2f> vPts1(vKeys1.size()), vPts2(vKeys2.size());
 
-        for(size_t i = 0; i < vKeys1.size(); i++) vPts1[i] = vKeys1[i].pt;
-        for(size_t i = 0; i < vKeys2.size(); i++) vPts2[i] = vKeys2[i].pt;
+        for(std::size_t i = 0; i < vKeys1.size(); i++) vPts1[i] = vKeys1[i].pt;
+        for(std::size_t i = 0; i < vKeys2.size(); i++) vPts2[i] = vKeys2[i].pt;
 
         cv::Mat D = (cv::Mat_<float>(4,1) << mvParameters[4], mvParameters[5], mvParameters[6], mvParameters[7]);
         cv::Mat R = cv::Mat::eye(3,3,CV_32F);
@@ -196,8 +198,8 @@ namespace ORB_SLAM3 {
         cv::fisheye::undistortPoints(vPts1,vPts1,K,D,R,K);
         cv::fisheye::undistortPoints(vPts2,vPts2,K,D,R,K);
 
-        for(size_t i = 0; i < vKeys1.size(); i++) vKeysUn1[i].pt = vPts1[i];
-        for(size_t i = 0; i < vKeys2.size(); i++) vKeysUn2[i].pt = vPts2[i];
+        for(std::size_t i = 0; i < vKeys1.size(); i++) vKeysUn1[i].pt = vPts1[i];
+        for(std::size_t i = 0; i < vKeys2.size(); i++) vKeysUn2[i].pt = vPts2[i];
 
         return tvr->Reconstruct(vKeysUn1,vKeysUn2,vMatches12,T21,vP3D,vbTriangulated);
     }
@@ -298,7 +300,7 @@ namespace ORB_SLAM3 {
             return false;
         }
 
-        //Since parallax is big enough and reprojection errors are low, this pair of points
+        //Since parallax is big enough and reprojection errors are low, this std::pair of points
         //can be considered as a match
         x3Dtriangulated = x3D;
 
@@ -384,7 +386,7 @@ namespace ORB_SLAM3 {
 
     std::istream & operator>>(std::istream &is, KannalaBrandt8 &kb) {
         float nextParam;
-        for(size_t i = 0; i < 8; i++){
+        for(std::size_t i = 0; i < 8; i++){
             assert(is.good());  //Make sure the input stream is good
             is >> nextParam;
             kb.mvParameters[i] = nextParam;
@@ -414,16 +416,16 @@ namespace ORB_SLAM3 {
 
         KannalaBrandt8* pKBCam = (KannalaBrandt8*) pCam;
 
-        if(abs(precision - pKBCam->GetPrecision()) > 1e-6)
+        if(std::abs(precision - pKBCam->GetPrecision()) > 1e-6)
             return false;
 
         if(size() != pKBCam->size())
             return false;
 
         bool is_same_camera = true;
-        for(size_t i=0; i<size(); ++i)
+        for(std::size_t i=0; i<size(); ++i)
         {
-            if(abs(mvParameters[i] - pKBCam->getParameter(i)) > 1e-6)
+            if(std::abs(mvParameters[i] - pKBCam->getParameter(i)) > 1e-6)
             {
                 is_same_camera = false;
                 break;
