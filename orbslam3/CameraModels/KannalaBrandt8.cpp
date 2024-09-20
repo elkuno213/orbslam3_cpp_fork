@@ -87,7 +87,7 @@ namespace ORB_SLAM3 {
 
         return res;
 
-        // cv::Point2f cvres = this->project(cv::Point3f(v3D[0], v3D[1], v3D[2]));
+        // cv::Point2f cvres = project(cv::Point3f(v3D[0], v3D[1], v3D[2]));
 
         // Eigen::Vector2d res;
         // res[0] = cvres.x;
@@ -97,7 +97,7 @@ namespace ORB_SLAM3 {
     }
 
     Eigen::Vector2f KannalaBrandt8::projectMat(const cv::Point3f &p3D) {
-        cv::Point2f point = this->project(p3D);
+        cv::Point2f point = project(p3D);
         return Eigen::Vector2f(point.x, point.y);
     }
 
@@ -113,7 +113,7 @@ namespace ORB_SLAM3 {
     }
 
     Eigen::Vector3f KannalaBrandt8::unprojectEig(const cv::Point2f &p2D) {
-        cv::Point3f ray = this->unproject(p2D);
+        cv::Point3f ray = unproject(p2D);
         return Eigen::Vector3f(ray.x, ray.y, ray.z);
     }
 
@@ -181,7 +181,7 @@ namespace ORB_SLAM3 {
     bool KannalaBrandt8::ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1, const std::vector<cv::KeyPoint>& vKeys2, const std::vector<int> &vMatches12,
                                           Sophus::SE3f &T21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated){
         if(!tvr){
-            Eigen::Matrix3f K = this->toK_();
+            Eigen::Matrix3f K = toK_();
             tvr = new TwoViewReconstruction(K);
         }
 
@@ -194,7 +194,7 @@ namespace ORB_SLAM3 {
 
         cv::Mat D = (cv::Mat_<float>(4,1) << mvParameters[4], mvParameters[5], mvParameters[6], mvParameters[7]);
         cv::Mat R = cv::Mat::eye(3,3,CV_32F);
-        cv::Mat K = this->toK();
+        cv::Mat K = toK();
         cv::fisheye::undistortPoints(vPts1,vPts1,K,D,R,K);
         cv::fisheye::undistortPoints(vPts2,vPts2,K,D,R,K);
 
@@ -220,7 +220,7 @@ namespace ORB_SLAM3 {
     bool KannalaBrandt8::epipolarConstrain(GeometricCamera* pCamera2, const cv::KeyPoint &kp1, const cv::KeyPoint &kp2,
                                            const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc) {
         Eigen::Vector3f p3D;
-        return this->TriangulateMatches(pCamera2,kp1,kp2,R12,t12,sigmaLevel,unc,p3D) > 0.0001f;
+        return TriangulateMatches(pCamera2,kp1,kp2,R12,t12,sigmaLevel,unc,p3D) > 0.0001f;
     }
 
     bool KannalaBrandt8::matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, GeometricCamera* pOther,
@@ -234,7 +234,7 @@ namespace ORB_SLAM3 {
         Eigen::Matrix3f Rcw2 = eigTcw2.block<3,3>(0,0);
         Eigen::Matrix3f Rwc2 = Rcw2.transpose();
 
-        cv::Point3f ray1c = this->unproject(kp1.pt);
+        cv::Point3f ray1c = unproject(kp1.pt);
         cv::Point3f ray2c = pOther->unproject(kp2.pt);
 
         Eigen::Vector3f r1(ray1c.x, ray1c.y, ray1c.z);
@@ -279,7 +279,7 @@ namespace ORB_SLAM3 {
         //Check reprojection error in first keyframe
         //  -Transform point into camera reference system
         Eigen::Vector3f x3D1 = Rcw1 * x3D + Tcw1.translation();
-        Eigen::Vector2f uv1 = this->project(x3D1);
+        Eigen::Vector2f uv1 = project(x3D1);
 
         float errX1 = uv1(0) - kp1.pt.x;
         float errY1 = uv1(1) - kp1.pt.y;
@@ -309,7 +309,7 @@ namespace ORB_SLAM3 {
 
     float KannalaBrandt8::TriangulateMatches(GeometricCamera *pCamera2, const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc, Eigen::Vector3f& p3D) {
 
-        Eigen::Vector3f r1 = this->unprojectEig(kp1.pt);
+        Eigen::Vector3f r1 = unprojectEig(kp1.pt);
         Eigen::Vector3f r2 = pCamera2->unprojectEig(kp2.pt);
 
         //Check parallax
@@ -354,7 +354,7 @@ namespace ORB_SLAM3 {
         }
 
         //Check reprojection error
-        Eigen::Vector2f uv1 = this->project(x3D);
+        Eigen::Vector2f uv1 = project(x3D);
 
         float errX1 = uv1(0) - kp1.pt.x;
         float errY1 = uv1(1) - kp1.pt.y;

@@ -50,7 +50,7 @@ namespace ORB_SLAM3 {
     }
 
     Eigen::Vector2f Pinhole::projectMat(const cv::Point3f &p3D) {
-        cv::Point2f point = this->project(p3D);
+        cv::Point2f point = project(p3D);
         return Eigen::Vector2f(point.x, point.y);
     }
 
@@ -84,7 +84,7 @@ namespace ORB_SLAM3 {
     bool Pinhole::ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1, const std::vector<cv::KeyPoint>& vKeys2, const std::vector<int> &vMatches12,
                                  Sophus::SE3f &T21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated){
         if(!tvr){
-            Eigen::Matrix3f K = this->toK_();
+            Eigen::Matrix3f K = toK_();
             tvr = new TwoViewReconstruction(K);
         }
 
@@ -108,7 +108,7 @@ namespace ORB_SLAM3 {
     bool Pinhole::epipolarConstrain(GeometricCamera* pCamera2,  const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc) {
         //Compute Fundamental Matrix
         Eigen::Matrix3f t12x = Sophus::SO3f::hat(t12);
-        Eigen::Matrix3f K1 = this->toK_();
+        Eigen::Matrix3f K1 = toK_();
         Eigen::Matrix3f K2 = pCamera2->toK_();
         Eigen::Matrix3f F12 = K1.transpose().inverse() * t12x * R12 * K2.inverse();
 
