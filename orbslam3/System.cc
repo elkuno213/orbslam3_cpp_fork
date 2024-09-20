@@ -598,10 +598,10 @@ void System::SaveTrajectoryTUM(const std::string &filename)
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    std::list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    std::list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    std::list<bool>::iterator lbL = mpTracker->mlbLost.begin();
-    for(std::list<Sophus::SE3f>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
+    auto lRit = mpTracker->mlpReferences.begin();
+    auto lT = mpTracker->mlFrameTimes.begin();
+    auto lbL = mpTracker->mlbLost.begin();
+    for(auto lit=mpTracker->mlRelativeFramePoses.begin(),
         lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
     {
         if(*lbL)
@@ -679,7 +679,7 @@ void System::SaveTrajectoryEuRoC(const std::string &filename)
     int numMaxKFs = 0;
     Map* pBiggerMap;
     std::cout << "There are " << std::to_string(vpMaps.size()) << " maps in the atlas" << std::endl;
-    for(Map* pMap :vpMaps)
+    for(auto pMap :vpMaps)
     {
         std::cout << "  Map " << std::to_string(pMap->GetId()) << " has " << std::to_string(pMap->GetAllKeyFrames().size()) << " KFs" << std::endl;
         if(pMap->GetAllKeyFrames().size() > numMaxKFs)
@@ -711,9 +711,9 @@ void System::SaveTrajectoryEuRoC(const std::string &filename)
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    std::list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    std::list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    std::list<bool>::iterator lbL = mpTracker->mlbLost.begin();
+    auto lRit = mpTracker->mlpReferences.begin();
+    auto lT = mpTracker->mlFrameTimes.begin();
+    auto lbL = mpTracker->mlbLost.begin();
 
     //std::cout << "size mlpReferences: " << mpTracker->mlpReferences.size() << std::endl;
     //std::cout << "size mlRelativeFramePoses: " << mpTracker->mlRelativeFramePoses.size() << std::endl;
@@ -816,9 +816,9 @@ void System::SaveTrajectoryEuRoC(const std::string &filename, Map* pMap)
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    std::list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    std::list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    std::list<bool>::iterator lbL = mpTracker->mlbLost.begin();
+    auto lRit = mpTracker->mlpReferences.begin();
+    auto lT = mpTracker->mlFrameTimes.begin();
+    auto lbL = mpTracker->mlbLost.begin();
 
     //std::cout << "size mlpReferences: " << mpTracker->mlpReferences.size() << std::endl;
     //std::cout << "size mlRelativeFramePoses: " << mpTracker->mlRelativeFramePoses.size() << std::endl;
@@ -898,7 +898,7 @@ void System::SaveTrajectoryEuRoC(const std::string &filename, Map* pMap)
 //     std::vector<Map*> vpMaps = mpAtlas->GetAllMaps();
 //     Map* pBiggerMap;
 //     int numMaxKFs = 0;
-//     for (Map* pMap : vpMaps) {
+//     for (auto pMap : vpMaps) {
 //         if (pMap->GetAllKeyFrames().size() > numMaxKFs) {
 //             numMaxKFs  = pMap->GetAllKeyFrames().size();
 //             pBiggerMap = pMap;
@@ -929,10 +929,9 @@ void System::SaveTrajectoryEuRoC(const std::string &filename, Map* pMap)
 
 //     // For each frame we have a reference keyframe (lRit), the timestamp (lT)
 //     // and a flag which is true when tracking failed (lbL).
-//     std::list<ORB_SLAM3::KeyFrame*>::iterator lRit
-//       = mpTracker->mlpReferences.begin();
-//     std::list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-//     std::list<bool>::iterator lbL  = mpTracker->mlbLost.begin();
+//     auto lRit = mpTracker->mlpReferences.begin();
+//     auto lT = mpTracker->mlFrameTimes.begin();
+//     auto lbL  = mpTracker->mlbLost.begin();
 
 //     // std::cout << "size mlpReferences: " << mpTracker->mlpReferences.size() <<
 //     // std::endl; std::cout << "size mlRelativeFramePoses: " <<
@@ -940,8 +939,7 @@ void System::SaveTrajectoryEuRoC(const std::string &filename, Map* pMap)
 //     // mpTracker->mlFrameTimes: " << mpTracker->mlFrameTimes.size() << std::endl;
 //     // std::cout << "size mpTracker->mlbLost: " << mpTracker->mlbLost.size() << std::endl;
 
-//     for (std::list<Sophus::SE3f>::iterator lit
-//          = mpTracker->mlRelativeFramePoses.begin(),
+//     for (auto lit = mpTracker->mlRelativeFramePoses.begin(),
 //          lend = mpTracker->mlRelativeFramePoses.end();
 //          lit != lend;
 //          lit++, lRit++, lT++, lbL++) {
@@ -1013,7 +1011,7 @@ void System::SaveTrajectoryEuRoC(const std::string &filename, Map* pMap)
 //     std::vector<Map*> vpMaps = mpAtlas->GetAllMaps();
 //     Map* pBiggerMap;
 //     int numMaxKFs = 0;
-//     for (Map* pMap : vpMaps) {
+//     for (auto pMap : vpMaps) {
 //         if (pMap->GetAllKeyFrames().size() > numMaxKFs) {
 //             numMaxKFs  = pMap->GetAllKeyFrames().size();
 //             pBiggerMap = pMap;
@@ -1064,7 +1062,7 @@ void System::SaveKeyFrameTrajectoryEuRoC(const std::string &filename)
     std::vector<Map*> vpMaps = mpAtlas->GetAllMaps();
     Map* pBiggerMap;
     int numMaxKFs = 0;
-    for(Map* pMap :vpMaps)
+    for(auto pMap :vpMaps)
     {
         if(pMap && pMap->GetAllKeyFrames().size() > numMaxKFs)
         {
@@ -1180,11 +1178,10 @@ void System::SaveKeyFrameTrajectoryEuRoC(const std::string &filename, Map* pMap)
 
 //     // For each frame we have a reference keyframe (lRit), the timestamp (lT)
 //     // and a flag which is true when tracking failed (lbL).
-//     std::list<ORB_SLAM3::KeyFrame*>::iterator lRit
-//       = mpTracker->mlpReferences.begin();
-//     std::list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-//     for (std::list<cv::Mat>::iterator lit  = mpTracker->mlRelativeFramePoses.begin(),
-//                                  lend = mpTracker->mlRelativeFramePoses.end();
+//     auto lRit = mpTracker->mlpReferences.begin();
+//     auto lT = mpTracker->mlFrameTimes.begin();
+//     for (auto lit  = mpTracker->mlRelativeFramePoses.begin(),
+//               lend = mpTracker->mlRelativeFramePoses.end();
 //          lit != lend;
 //          lit++, lRit++, lT++) {
 //         KeyFrame* pKF = *lRit;
@@ -1239,9 +1236,9 @@ void System::SaveTrajectoryKITTI(const std::string &filename)
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    std::list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    std::list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    for(std::list<Sophus::SE3f>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
+    auto lRit = mpTracker->mlpReferences.begin();
+    auto lT = mpTracker->mlFrameTimes.begin();
+    for(auto lit=mpTracker->mlRelativeFramePoses.begin(),
         lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++)
     {
         KeyFrame* pKF = *lRit;

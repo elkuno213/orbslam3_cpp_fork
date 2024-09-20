@@ -77,7 +77,7 @@ namespace ORB_SLAM3
                     int bestIdx =-1 ;
 
                     // Get best and second matches with near keypoints
-                    for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+                    for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
                     {
                         const std::size_t idx = *vit;
 
@@ -157,7 +157,7 @@ namespace ORB_SLAM3
                     int bestIdx =-1 ;
 
                     // Get best and second matches with near keypoints
-                    for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+                    for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
                     {
                         const std::size_t idx = *vit;
 
@@ -232,10 +232,10 @@ namespace ORB_SLAM3
         const float factor = 1.0f/HISTO_LENGTH;
 
         // We perform the matching over ORB that belong to the same vocabulary node (at a certain level)
-        DBoW2::FeatureVector::const_iterator KFit = vFeatVecKF.begin();
-        DBoW2::FeatureVector::const_iterator Fit = F.mFeatVec.begin();
-        DBoW2::FeatureVector::const_iterator KFend = vFeatVecKF.end();
-        DBoW2::FeatureVector::const_iterator Fend = F.mFeatVec.end();
+        auto KFit = vFeatVecKF.begin();
+        auto Fit = F.mFeatVec.begin();
+        auto KFend = vFeatVecKF.end();
+        auto Fend = F.mFeatVec.end();
 
         while(KFit != KFend && Fit != Fend)
         {
@@ -494,7 +494,7 @@ namespace ORB_SLAM3
 
             int bestDist = 256;
             int bestIdx = -1;
-            for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+            for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
             {
                 const std::size_t idx = *vit;
                 if(vpMatched[idx])
@@ -607,7 +607,7 @@ namespace ORB_SLAM3
 
             int bestDist = 256;
             int bestIdx = -1;
-            for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+            for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
             {
                 const std::size_t idx = *vit;
                 if(vpMatched[idx])
@@ -672,7 +672,7 @@ namespace ORB_SLAM3
             int bestDist2 = INT_MAX;
             int bestIdx2 = -1;
 
-            for(std::vector<std::size_t>::iterator vit=vIndices2.begin(); vit!=vIndices2.end(); vit++)
+            for(auto vit=vIndices2.begin(); vit!=vIndices2.end(); vit++)
             {
                 std::size_t i2 = *vit;
 
@@ -781,10 +781,10 @@ namespace ORB_SLAM3
 
         int nmatches = 0;
 
-        DBoW2::FeatureVector::const_iterator f1it = vFeatVec1.begin();
-        DBoW2::FeatureVector::const_iterator f2it = vFeatVec2.begin();
-        DBoW2::FeatureVector::const_iterator f1end = vFeatVec1.end();
-        DBoW2::FeatureVector::const_iterator f2end = vFeatVec2.end();
+        auto f1it = vFeatVec1.begin();
+        auto f2it = vFeatVec2.begin();
+        auto f1end = vFeatVec1.end();
+        auto f2end = vFeatVec2.end();
 
         while(f1it != f1end && f2it != f2end)
         {
@@ -951,10 +951,10 @@ namespace ORB_SLAM3
 
         const float factor = 1.0f/HISTO_LENGTH;
 
-        DBoW2::FeatureVector::const_iterator f1it = vFeatVec1.begin();
-        DBoW2::FeatureVector::const_iterator f2it = vFeatVec2.begin();
-        DBoW2::FeatureVector::const_iterator f1end = vFeatVec1.end();
-        DBoW2::FeatureVector::const_iterator f2end = vFeatVec2.end();
+        auto f1it = vFeatVec1.begin();
+        auto f2it = vFeatVec2.begin();
+        auto f1end = vFeatVec1.end();
+        auto f2end = vFeatVec2.end();
 
         while(f1it!=f1end && f2it!=f2end)
         {
@@ -1253,7 +1253,7 @@ namespace ORB_SLAM3
 
             int bestDist = 256;
             int bestIdx = -1;
-            for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+            for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
             {
                 std::size_t idx = *vit;
                 const cv::KeyPoint &kp = (pKF -> NLeft == -1) ? pKF->mvKeysUn[idx]
@@ -1410,7 +1410,7 @@ namespace ORB_SLAM3
 
             int bestDist = INT_MAX;
             int bestIdx = -1;
-            for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(); vit!=vIndices.end(); vit++)
+            for(auto vit=vIndices.cbegin(); vit!=vIndices.cend(); vit++)
             {
                 const std::size_t idx = *vit;
                 const int &kpLevel = pKF->mvKeysUn[idx].octave;
@@ -1542,7 +1542,7 @@ namespace ORB_SLAM3
 
             int bestDist = INT_MAX;
             int bestIdx = -1;
-            for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+            for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
             {
                 const std::size_t idx = *vit;
 
@@ -1622,7 +1622,7 @@ namespace ORB_SLAM3
 
             int bestDist = INT_MAX;
             int bestIdx = -1;
-            for(std::vector<std::size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
+            for(auto vit=vIndices.cbegin(), vend=vIndices.cend(); vit!=vend; vit++)
             {
                 const std::size_t idx = *vit;
 
@@ -1736,7 +1736,7 @@ namespace ORB_SLAM3
                     int bestDist = 256;
                     int bestIdx2 = -1;
 
-                    for(std::vector<std::size_t>::const_iterator vit=vIndices2.begin(), vend=vIndices2.end(); vit!=vend; vit++)
+                    for(auto vit=vIndices2.cbegin(), vend=vIndices2.cend(); vit!=vend; vit++)
                     {
                         const std::size_t i2 = *vit;
 
@@ -1811,7 +1811,7 @@ namespace ORB_SLAM3
                         int bestDist = 256;
                         int bestIdx2 = -1;
 
-                        for(std::vector<std::size_t>::const_iterator vit=vIndices2.begin(), vend=vIndices2.end(); vit!=vend; vit++)
+                        for(auto vit=vIndices2.cbegin(), vend=vIndices2.cend(); vit!=vend; vit++)
                         {
                             const std::size_t i2 = *vit;
                             if(CurrentFrame.mvpMapPoints[i2 + CurrentFrame.Nleft])
@@ -1942,7 +1942,7 @@ namespace ORB_SLAM3
                     int bestDist = 256;
                     int bestIdx2 = -1;
 
-                    for(std::vector<std::size_t>::const_iterator vit=vIndices2.begin(); vit!=vIndices2.end(); vit++)
+                    for(auto vit=vIndices2.cbegin(); vit!=vIndices2.cend(); vit++)
                     {
                         const std::size_t i2 = *vit;
                         if(CurrentFrame.mvpMapPoints[i2])

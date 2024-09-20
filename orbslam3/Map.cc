@@ -228,10 +228,10 @@ void Map::SetStoredMap()
 
 void Map::clear()
 {
-//    for(std::set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
+//    for(auto sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
 //        delete *sit;
 
-    for(std::set<KeyFrame*>::iterator sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
+    for(auto sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
     {
         KeyFrame* pKF = *sit;
         pKF->UpdateMap(static_cast<Map*>(NULL));
@@ -273,7 +273,7 @@ void Map::ApplyScaledRotation(const Sophus::SE3f &T, const float s, const bool b
     Eigen::Matrix3f Ryw = Tyw.rotationMatrix();
     Eigen::Vector3f tyw = Tyw.translation();
 
-    for(std::set<KeyFrame*>::iterator sit=mspKeyFrames.begin(); sit!=mspKeyFrames.end(); sit++)
+    for(auto sit=mspKeyFrames.begin(); sit!=mspKeyFrames.end(); sit++)
     {
         KeyFrame* pKF = *sit;
         Sophus::SE3f Twc = pKF->GetPoseInverse();
@@ -288,7 +288,7 @@ void Map::ApplyScaledRotation(const Sophus::SE3f &T, const float s, const bool b
             pKF->SetVelocity(Ryw*Vw*s);
 
     }
-    for(std::set<MapPoint*>::iterator sit=mspMapPoints.begin(); sit!=mspMapPoints.end(); sit++)
+    for(auto sit=mspMapPoints.begin(); sit!=mspMapPoints.end(); sit++)
     {
         MapPoint* pMP = *sit;
         pMP->SetWorldPos(s * Ryw * pMP->GetWorldPos() + tyw);
@@ -374,7 +374,7 @@ void Map::SetLastMapChange(int currentChangeId)
 void Map::PreSave(std::set<GeometricCamera*> &spCams)
 {
     int nMPWithoutObs = 0;
-    for(MapPoint* pMPi : mspMapPoints)
+    for(auto pMPi : mspMapPoints)
     {
         if(!pMPi || pMPi->isBad())
             continue;
@@ -384,7 +384,7 @@ void Map::PreSave(std::set<GeometricCamera*> &spCams)
             nMPWithoutObs++;
         }
         std::map<KeyFrame*, std::tuple<int,int>> mpObs = pMPi->GetObservations();
-        for(std::map<KeyFrame*, std::tuple<int,int>>::iterator it= mpObs.begin(), end=mpObs.end(); it!=end; ++it)
+        for(auto it= mpObs.begin(), end=mpObs.end(); it!=end; ++it)
         {
             if(it->first->GetMap() != this || it->first->isBad())
             {
@@ -405,7 +405,7 @@ void Map::PreSave(std::set<GeometricCamera*> &spCams)
 
     // Backup of MapPoints
     mvpBackupMapPoints.clear();
-    for(MapPoint* pMPi : mspMapPoints)
+    for(auto pMPi : mspMapPoints)
     {
         if(!pMPi || pMPi->isBad())
             continue;
@@ -416,7 +416,7 @@ void Map::PreSave(std::set<GeometricCamera*> &spCams)
 
     // Backup of KeyFrames
     mvpBackupKeyFrames.clear();
-    for(KeyFrame* pKFi : mspKeyFrames)
+    for(auto pKFi : mspKeyFrames)
     {
         if(!pKFi || pKFi->isBad())
             continue;
@@ -451,7 +451,7 @@ void Map::PostLoad(
     std::copy(mvpBackupKeyFrames.begin(), mvpBackupKeyFrames.end(), std::inserter(mspKeyFrames, mspKeyFrames.begin()));
 
     std::map<long unsigned int,MapPoint*> mpMapPointId;
-    for(MapPoint* pMPi : mspMapPoints)
+    for(auto pMPi : mspMapPoints)
     {
         if(!pMPi || pMPi->isBad())
             continue;
@@ -461,7 +461,7 @@ void Map::PostLoad(
     }
 
     std::map<long unsigned int, KeyFrame*> mpKeyFrameId;
-    for(KeyFrame* pKFi : mspKeyFrames)
+    for(auto pKFi : mspKeyFrames)
     {
         if(!pKFi || pKFi->isBad())
             continue;
@@ -473,7 +473,7 @@ void Map::PostLoad(
     }
 
     // References reconstruction between different instances
-    for(MapPoint* pMPi : mspMapPoints)
+    for(auto pMPi : mspMapPoints)
     {
         if(!pMPi || pMPi->isBad())
             continue;
@@ -481,7 +481,7 @@ void Map::PostLoad(
         pMPi->PostLoad(mpKeyFrameId, mpMapPointId);
     }
 
-    for(KeyFrame* pKFi : mspKeyFrames)
+    for(auto pKFi : mspKeyFrames)
     {
         if(!pKFi || pKFi->isBad())
             continue;

@@ -589,8 +589,7 @@ namespace ORB_SLAM3 {
                 }
                 normVal[i] = norms;
             }
-            std::vector<double>::iterator
-                    findMinRepro = std::min_element(std::begin(normVal), std::end(normVal));
+            auto findMinRepro = std::min_element(std::begin(normVal), std::end(normVal));
             int idx = std::distance(std::begin(normVal), findMinRepro);
             Rout = Ts[idx].block<3, 3>(0, 0);
             tout = Ts[idx].block<3, 1>(0, 3);

@@ -1873,11 +1873,11 @@ void Tracking::Track()
     if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
     {
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
+        auto time_StartPreIMU = std::chrono::steady_clock::now();
 #endif
         PreintegrateIMU();
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_EndPreIMU = std::chrono::steady_clock::now();
+        auto time_EndPreIMU = std::chrono::steady_clock::now();
 
         double timePreImu = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPreIMU - time_StartPreIMU).count();
         vdIMUInteg_ms.push_back(timePreImu);
@@ -1930,7 +1930,7 @@ void Tracking::Track()
         bool bOK;
 
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_StartPosePred = std::chrono::steady_clock::now();
+        auto time_StartPosePred = std::chrono::steady_clock::now();
 #endif
 
         // Initial camera pose estimation using motion model or relocalization (if tracking is lost)
@@ -2113,7 +2113,7 @@ void Tracking::Track()
             mCurrentFrame.mpReferenceKF = mpReferenceKF;
 
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_EndPosePred = std::chrono::steady_clock::now();
+        auto time_EndPosePred = std::chrono::steady_clock::now();
 
         double timePosePred = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPosePred - time_StartPosePred).count();
         vdPosePred_ms.push_back(timePosePred);
@@ -2121,7 +2121,7 @@ void Tracking::Track()
 
 
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_StartLMTrack = std::chrono::steady_clock::now();
+        auto time_StartLMTrack = std::chrono::steady_clock::now();
 #endif
         // If we have an initial estimation of the camera pose and matching. Track the local map.
         if(!mbOnlyTracking)
@@ -2194,7 +2194,7 @@ void Tracking::Track()
         }
 
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_EndLMTrack = std::chrono::steady_clock::now();
+        auto time_EndLMTrack = std::chrono::steady_clock::now();
 
         double timeLMTrack = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLMTrack - time_StartLMTrack).count();
         vdLMTrack_ms.push_back(timeLMTrack);
@@ -2234,7 +2234,7 @@ void Tracking::Track()
             }
 
             // Delete temporal MapPoints
-            for(std::list<MapPoint*>::iterator lit = mlpTemporalPoints.begin(), lend =  mlpTemporalPoints.end(); lit!=lend; lit++)
+            for(auto lit = mlpTemporalPoints.begin(), lend =  mlpTemporalPoints.end(); lit!=lend; lit++)
             {
                 MapPoint* pMP = *lit;
                 delete pMP;
@@ -2242,7 +2242,7 @@ void Tracking::Track()
             mlpTemporalPoints.clear();
 
 #ifdef REGISTER_TIMES
-            std::chrono::steady_clock::time_point time_StartNewKF = std::chrono::steady_clock::now();
+            auto time_StartNewKF = std::chrono::steady_clock::now();
 #endif
             bool bNeedKF = NeedNewKeyFrame();
 
@@ -2253,7 +2253,7 @@ void Tracking::Track()
                 CreateNewKeyFrame();
 
 #ifdef REGISTER_TIMES
-            std::chrono::steady_clock::time_point time_EndNewKF = std::chrono::steady_clock::now();
+            auto time_EndNewKF = std::chrono::steady_clock::now();
 
             double timeNewKF = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndNewKF - time_StartNewKF).count();
             vdNewKF_ms.push_back(timeNewKF);
@@ -3345,7 +3345,7 @@ void Tracking::CreateNewKeyFrame()
 void Tracking::SearchLocalPoints()
 {
     // Do not search map points already matched
-    for(std::vector<MapPoint*>::iterator vit=mCurrentFrame.mvpMapPoints.begin(), vend=mCurrentFrame.mvpMapPoints.end(); vit!=vend; vit++)
+    for(auto vit=mCurrentFrame.mvpMapPoints.begin(), vend=mCurrentFrame.mvpMapPoints.end(); vit!=vend; vit++)
     {
         MapPoint* pMP = *vit;
         if(pMP)
@@ -3367,7 +3367,7 @@ void Tracking::SearchLocalPoints()
     int nToMatch=0;
 
     // Project points in frame and check its visibility
-    for(std::vector<MapPoint*>::iterator vit=mvpLocalMapPoints.begin(), vend=mvpLocalMapPoints.end(); vit!=vend; vit++)
+    for(auto vit=mvpLocalMapPoints.begin(), vend=mvpLocalMapPoints.end(); vit!=vend; vit++)
     {
         MapPoint* pMP = *vit;
 
@@ -3432,12 +3432,12 @@ void Tracking::UpdateLocalPoints()
 
     int count_pts = 0;
 
-    for(std::vector<KeyFrame*>::const_reverse_iterator itKF=mvpLocalKeyFrames.rbegin(), itEndKF=mvpLocalKeyFrames.rend(); itKF!=itEndKF; ++itKF)
+    for(auto itKF=mvpLocalKeyFrames.crbegin(), itEndKF=mvpLocalKeyFrames.crend(); itKF!=itEndKF; ++itKF)
     {
         KeyFrame* pKF = *itKF;
         const std::vector<MapPoint*> vpMPs = pKF->GetMapPointMatches();
 
-        for(std::vector<MapPoint*>::const_iterator itMP=vpMPs.begin(), itEndMP=vpMPs.end(); itMP!=itEndMP; itMP++)
+        for(auto itMP=vpMPs.cbegin(), itEndMP=vpMPs.cend(); itMP!=itEndMP; itMP++)
         {
 
             MapPoint* pMP = *itMP;
@@ -3470,7 +3470,7 @@ void Tracking::UpdateLocalKeyFrames()
                 if(!pMP->isBad())
                 {
                     const std::map<KeyFrame*,std::tuple<int,int>> observations = pMP->GetObservations();
-                    for(std::map<KeyFrame*,std::tuple<int,int>>::const_iterator it=observations.begin(), itend=observations.end(); it!=itend; it++)
+                    for(auto it=observations.cbegin(), itend=observations.cend(); it!=itend; it++)
                         keyframeCounter[it->first]++;
                 }
                 else
@@ -3493,7 +3493,7 @@ void Tracking::UpdateLocalKeyFrames()
                 if(!pMP->isBad())
                 {
                     const std::map<KeyFrame*,std::tuple<int,int>> observations = pMP->GetObservations();
-                    for(std::map<KeyFrame*,std::tuple<int,int>>::const_iterator it=observations.begin(), itend=observations.end(); it!=itend; it++)
+                    for(auto it=observations.cbegin(), itend=observations.cend(); it!=itend; it++)
                         keyframeCounter[it->first]++;
                 }
                 else
@@ -3513,7 +3513,7 @@ void Tracking::UpdateLocalKeyFrames()
     mvpLocalKeyFrames.reserve(3*keyframeCounter.size());
 
     // All keyframes that observe a map point are included in the local map. Also check which keyframe shares most points
-    for(std::map<KeyFrame*,int>::const_iterator it=keyframeCounter.begin(), itEnd=keyframeCounter.end(); it!=itEnd; it++)
+    for(auto it=keyframeCounter.cbegin(), itEnd=keyframeCounter.cend(); it!=itEnd; it++)
     {
         KeyFrame* pKF = it->first;
 
@@ -3531,7 +3531,7 @@ void Tracking::UpdateLocalKeyFrames()
     }
 
     // Include also some not-already-included keyframes that are neighbors to already-included keyframes
-    for(std::vector<KeyFrame*>::const_iterator itKF=mvpLocalKeyFrames.begin(), itEndKF=mvpLocalKeyFrames.end(); itKF!=itEndKF; itKF++)
+    for(auto itKF=mvpLocalKeyFrames.cbegin(), itEndKF=mvpLocalKeyFrames.cend(); itKF!=itEndKF; itKF++)
     {
         // Limit the number of keyframes
         if(mvpLocalKeyFrames.size()>80) // 80
@@ -3542,7 +3542,7 @@ void Tracking::UpdateLocalKeyFrames()
         const std::vector<KeyFrame*> vNeighs = pKF->GetBestCovisibilityKeyFrames(10);
 
 
-        for(std::vector<KeyFrame*>::const_iterator itNeighKF=vNeighs.begin(), itEndNeighKF=vNeighs.end(); itNeighKF!=itEndNeighKF; itNeighKF++)
+        for(auto itNeighKF=vNeighs.cbegin(), itEndNeighKF=vNeighs.cend(); itNeighKF!=itEndNeighKF; itNeighKF++)
         {
             KeyFrame* pNeighKF = *itNeighKF;
             if(!pNeighKF->isBad())
@@ -3557,7 +3557,7 @@ void Tracking::UpdateLocalKeyFrames()
         }
 
         const std::set<KeyFrame*> spChilds = pKF->GetChilds();
-        for(std::set<KeyFrame*>::const_iterator sit=spChilds.begin(), send=spChilds.end(); sit!=send; sit++)
+        for(auto sit=spChilds.cbegin(), send=spChilds.cend(); sit!=send; sit++)
         {
             KeyFrame* pChildKF = *sit;
             if(!pChildKF->isBad())
@@ -3884,7 +3884,7 @@ void Tracking::ResetActiveMap(bool bLocMap)
     // lbLost.reserve(mlbLost.size());
     unsigned int index = mnFirstFrameId;
     std::cout << "mnFirstFrameId = " << mnFirstFrameId << std::endl;
-    for(Map* pMap : mpAtlas->GetAllMaps())
+    for(auto pMap : mpAtlas->GetAllMaps())
     {
         if(pMap->GetAllKeyFrames().size() > 0)
         {
@@ -3897,7 +3897,7 @@ void Tracking::ResetActiveMap(bool bLocMap)
     int num_lost = 0;
     std::cout << "mnInitialFrameId = " << mnInitialFrameId << std::endl;
 
-    for(std::list<bool>::iterator ilbL = mlbLost.begin(); ilbL != mlbLost.end(); ilbL++)
+    for(auto ilbL = mlbLost.begin(); ilbL != mlbLost.end(); ilbL++)
     {
         if(index < mnInitialFrameId)
             lbLost.push_back(*ilbL);
@@ -3983,8 +3983,8 @@ void Tracking::UpdateFrameIMU(const float s, const IMU::Bias &b, KeyFrame* pCurr
 {
     Map * pMap = pCurrentKeyFrame->GetMap();
     unsigned int index = mnFirstFrameId;
-    std::list<ORB_SLAM3::KeyFrame*>::iterator lRit = mlpReferences.begin();
-    std::list<bool>::iterator lbL = mlbLost.begin();
+    auto lRit = mlpReferences.begin();
+    auto lbL = mlbLost.begin();
     for(auto lit=mlRelativeFramePoses.begin(),lend=mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lbL++)
     {
         if(*lbL)

@@ -130,7 +130,7 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
                 cv::line(im,pt1,pt2,standardColor);
             }
         }
-        for(std::vector<std::pair<cv::Point2f, cv::Point2f> >::iterator it=vTracks.begin(); it!=vTracks.end(); it++)
+        for(auto it=vTracks.begin(); it!=vTracks.end(); it++)
         {
             cv::Point2f pt1,pt2;
             if(imageScale != 1.f)

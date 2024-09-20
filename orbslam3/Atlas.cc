@@ -35,7 +35,7 @@ Atlas::Atlas(int initKFid): mnLastInitKFidMap(initKFid), mHasViewer(false)
 
 Atlas::~Atlas()
 {
-    for(std::set<Map*>::iterator it = mspMaps.begin(), end = mspMaps.end(); it != end;)
+    for(auto it = mspMaps.begin(), end = mspMaps.end(); it != end;)
     {
         Map* pMi = *it;
 
@@ -233,7 +233,7 @@ void Atlas::clearMap()
 void Atlas::clearAtlas()
 {
     std::unique_lock<std::mutex> lock(mMutexAtlas);
-    // for (std::set<Map*>::iterator it = mspMaps.begin(), send = mspMaps.end();
+    // for (auto it = mspMaps.begin(), send = mspMaps.end();
     //      it != send;
     //      it++) {
     //     (*it)->clear();
@@ -265,7 +265,7 @@ void Atlas::SetMapBad(Map* pMap)
 
 void Atlas::RemoveBadMaps()
 {
-    // for (Map* pMap : mspBadMaps) {
+    // for (auto pMap : mspBadMaps) {
     //     delete pMap;
     //     pMap = static_cast<Map*>(NULL);
     // }
@@ -314,7 +314,7 @@ void Atlas::PreSave()
     std::sort(mvpBackupMaps.begin(), mvpBackupMaps.end(), compFunctor());
 
     std::set<GeometricCamera*> spCams(mvpCameras.begin(), mvpCameras.end());
-    for(Map* pMi : mvpBackupMaps)
+    for(auto pMi : mvpBackupMaps)
     {
         if(!pMi || pMi->IsBad())
             continue;
@@ -332,14 +332,14 @@ void Atlas::PreSave()
 void Atlas::PostLoad()
 {
     std::map<unsigned int,GeometricCamera*> mpCams;
-    for(GeometricCamera* pCam : mvpCameras)
+    for(auto pCam : mvpCameras)
     {
         mpCams[pCam->GetId()] = pCam;
     }
 
     mspMaps.clear();
     unsigned long int numKF = 0, numMP = 0;
-    for(Map* pMi : mvpBackupMaps)
+    for(auto pMi : mvpBackupMaps)
     {
         mspMaps.insert(pMi);
         pMi->PostLoad(mpKeyFrameDB, mpORBVocabulary, mpCams);
@@ -373,7 +373,7 @@ long unsigned int Atlas::GetNumLivedKF()
 {
     std::unique_lock<std::mutex> lock(mMutexAtlas);
     long unsigned int num = 0;
-    for(Map* pMap_i : mspMaps)
+    for(auto pMap_i : mspMaps)
     {
         num += pMap_i->GetAllKeyFrames().size();
     }
@@ -384,7 +384,7 @@ long unsigned int Atlas::GetNumLivedKF()
 long unsigned int Atlas::GetNumLivedMP() {
     std::unique_lock<std::mutex> lock(mMutexAtlas);
     long unsigned int num = 0;
-    for (Map* pMap_i : mspMaps) {
+    for (auto pMap_i : mspMaps) {
         num += pMap_i->GetAllMapPoints().size();
     }
 
@@ -394,11 +394,11 @@ long unsigned int Atlas::GetNumLivedMP() {
 std::map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes()
 {
     std::map<long unsigned int, KeyFrame*> mpIdKFs;
-    for(Map* pMap_i : mvpBackupMaps)
+    for(auto pMap_i : mvpBackupMaps)
     {
         std::vector<KeyFrame*> vpKFs_Mi = pMap_i->GetAllKeyFrames();
 
-        for(KeyFrame* pKF_j_Mi : vpKFs_Mi)
+        for(auto pKF_j_Mi : vpKFs_Mi)
         {
             mpIdKFs[pKF_j_Mi->mnId] = pKF_j_Mi;
         }

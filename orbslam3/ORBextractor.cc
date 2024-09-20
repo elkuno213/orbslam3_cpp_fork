@@ -462,8 +462,8 @@ namespace ORB_SLAM3
 
     static void computeOrientation(const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints, const std::vector<int>& umax)
     {
-        for (std::vector<KeyPoint>::iterator keypoint = keypoints.begin(),
-                     keypointEnd = keypoints.end(); keypoint != keypointEnd; ++keypoint)
+        for (auto keypoint = keypoints.begin(),
+               keypointEnd = keypoints.end(); keypoint != keypointEnd; ++keypoint)
         {
             keypoint->angle = IC_Angle(image, keypoint->pt, umax);
         }
@@ -577,7 +577,7 @@ namespace ORB_SLAM3
             vpIniNodes[kp.pt.x/hX]->vKeys.push_back(kp);
         }
 
-        std::list<ExtractorNode>::iterator lit = lNodes.begin();
+        auto lit = lNodes.begin();
 
         while(lit!=lNodes.end())
         {
@@ -749,7 +749,7 @@ namespace ORB_SLAM3
         // Retain the best point in each node
         std::vector<cv::KeyPoint> vResultKeys;
         vResultKeys.reserve(nfeatures);
-        for(std::list<ExtractorNode>::iterator lit=lNodes.begin(); lit!=lNodes.end(); lit++)
+        for(auto lit=lNodes.begin(); lit!=lNodes.end(); lit++)
         {
             std::vector<cv::KeyPoint> &vNodeKeys = lit->vKeys;
             cv::KeyPoint* pKP = &vNodeKeys[0];
@@ -871,7 +871,7 @@ namespace ORB_SLAM3
 
                     if(!vKeysCell.empty())
                     {
-                        for(std::vector<cv::KeyPoint>::iterator vit=vKeysCell.begin(); vit!=vKeysCell.end();vit++)
+                        for(auto vit=vKeysCell.begin(); vit!=vKeysCell.end();vit++)
                         {
                             (*vit).pt.x+=j*wCell;
                             (*vit).pt.y+=i*hCell;
@@ -1153,8 +1153,8 @@ namespace ORB_SLAM3
 
             float scale = mvScaleFactor[level]; //getScale(level, firstLevel, scaleFactor);
             int i = 0;
-            for (std::vector<KeyPoint>::iterator keypoint = keypoints.begin(),
-                         keypointEnd = keypoints.end(); keypoint != keypointEnd; ++keypoint){
+            for (auto keypoint = keypoints.begin(),
+                   keypointEnd = keypoints.end(); keypoint != keypointEnd; ++keypoint){
 
                 // Scale keypoint coordinates
                 if (level != 0){
