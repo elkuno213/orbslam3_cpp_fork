@@ -18,14 +18,18 @@
 
 // Standard
 #include <chrono>
-#include <mutex>
 // Local
-#include "orbslam3/Converter.h"
+#include "orbslam3/Atlas.h"
 #include "orbslam3/GeometricTools.h"
+#include "orbslam3/KeyFrame.h"
 #include "orbslam3/LocalMapping.h"
 #include "orbslam3/LoopClosing.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/MapPoint.h"
 #include "orbslam3/ORBmatcher.h"
 #include "orbslam3/Optimizer.h"
+#include "orbslam3/System.h"
+#include "orbslam3/Tracking.h"
 
 namespace ORB_SLAM3
 {

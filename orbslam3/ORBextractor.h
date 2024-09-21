@@ -23,7 +23,7 @@
 #include <list>
 #include <vector>
 // 3rdparty
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3
 {

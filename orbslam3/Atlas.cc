@@ -18,9 +18,6 @@
 
 // Local
 #include "orbslam3/Atlas.h"
-#include "orbslam3/CameraModels/GeometricCamera.h"
-#include "orbslam3/CameraModels/KannalaBrandt8.h"
-#include "orbslam3/CameraModels/Pinhole.h"
 #include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3

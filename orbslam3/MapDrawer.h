@@ -21,17 +21,17 @@
 
 // Standard
 #include <mutex>
+#include <string>
 // 3rdparty
 #include <pangolin/pangolin.h>
-// Local
-#include "orbslam3/Atlas.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/MapPoint.h"
-#include "orbslam3/Settings.h"
+#include <opencv2/core.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 
 namespace ORB_SLAM3
 {
 
+class Atlas;
+class KeyFrame;
 class Settings;
 
 class MapDrawer

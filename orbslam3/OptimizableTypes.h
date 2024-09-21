@@ -19,15 +19,19 @@
 #ifndef ORB_SLAM3_OPTIMIZABLETYPES_H
 #define ORB_SLAM3_OPTIMIZABLETYPES_H
 
+// Standard
+#include <fstream>
 // 3rdparty
 #include <orbslam3/external/g2o/g2o/core/base_unary_edge.h>
 #include <orbslam3/external/g2o/g2o/types/sim3.h>
 #include <orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h>
-#include <Eigen/Geometry>
+#include <Eigen/Core>
 // Local
-#include "orbslam3/CameraModels/GeometricCamera.h"
+#include <orbslam3/CameraModels/GeometricCamera.h>
 
 namespace ORB_SLAM3 {
+class GeometricCamera;
+
 class  EdgeSE3ProjectXYZOnlyPose: public  g2o::BaseUnaryEdge<2, Eigen::Vector2d, g2o::VertexSE3Expmap>{
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

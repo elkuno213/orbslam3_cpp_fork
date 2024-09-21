@@ -20,28 +20,22 @@
 #define OPTIMIZER_H
 
 // Standard
-#include <math.h>
+#include <cmath>
+#include <set>
+#include <vector>
 // 3rdparty
-#include <orbslam3/external/g2o/g2o/core/block_solver.h>
-#include <orbslam3/external/g2o/g2o/core/optimization_algorithm_gauss_newton.h>
-#include <orbslam3/external/g2o/g2o/core/optimization_algorithm_levenberg.h>
-#include <orbslam3/external/g2o/g2o/core/robust_kernel_impl.h>
-#include <orbslam3/external/g2o/g2o/core/sparse_block_matrix.h>
-#include <orbslam3/external/g2o/g2o/solvers/linear_solver_dense.h>
-#include <orbslam3/external/g2o/g2o/solvers/linear_solver_eigen.h>
-#include <orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h>
-#include <orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h>
+#include <Eigen/Core>
+#include <orbslam3/external/g2o/g2o/types/sim3.h>
 // Local
-#include "orbslam3/Frame.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/LoopClosing.h"
-#include "orbslam3/Map.h"
-#include "orbslam3/MapPoint.h"
+#include <orbslam3/LoopClosing.h>
 
 namespace ORB_SLAM3
 {
 
-class LoopClosing;
+class Frame;
+class KeyFrame;
+class Map;
+class MapPoint;
 
 class Optimizer
 {

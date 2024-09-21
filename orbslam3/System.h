@@ -20,25 +20,17 @@
 #define SYSTEM_H
 
 // Standard
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
 // 3rdparty
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 // Local
-#include "orbslam3/Atlas.h"
-#include "orbslam3/FrameDrawer.h"
 #include "orbslam3/ImuTypes.h"
-#include "orbslam3/KeyFrameDatabase.h"
-#include "orbslam3/LocalMapping.h"
-#include "orbslam3/LoopClosing.h"
-#include "orbslam3/MapDrawer.h"
 #include "orbslam3/ORBVocabulary.h"
-#include "orbslam3/Settings.h"
-#include "orbslam3/Tracking.h"
-#include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3
 {
@@ -70,14 +62,17 @@ public:
     }
 };
 
-class Viewer;
-class FrameDrawer;
-class MapDrawer;
 class Atlas;
-class Tracking;
+class FrameDrawer;
+class KeyFrameDatabase;
 class LocalMapping;
 class LoopClosing;
+class Map;
+class MapDrawer;
+class MapPoint;
 class Settings;
+class Tracking;
+class Viewer;
 
 class System
 {

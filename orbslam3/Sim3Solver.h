@@ -22,12 +22,15 @@
 // Standard
 #include <vector>
 // 3rdparty
-#include <opencv2/opencv.hpp>
+#include <Eigen/Core>
 // Local
-#include "orbslam3/KeyFrame.h"
 
 namespace ORB_SLAM3
 {
+
+class GeometricCamera;
+class KeyFrame;
+class MapPoint;
 
 class Sim3Solver
 {

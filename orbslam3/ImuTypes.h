@@ -21,15 +21,12 @@
 
 // Standard
 #include <mutex>
-#include <utility>
 #include <vector>
 // 3rdparty
 #include <Eigen/Core>
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
 // Local
 #include "orbslam3/SerializationUtils.h"

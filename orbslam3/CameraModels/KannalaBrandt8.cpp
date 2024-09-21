@@ -18,6 +18,7 @@
 
 // 3rdparty
 #include <boost/serialization/export.hpp>
+#include <opencv2/calib3d.hpp>
 // Local
 #include "orbslam3/CameraModels/KannalaBrandt8.h"
 

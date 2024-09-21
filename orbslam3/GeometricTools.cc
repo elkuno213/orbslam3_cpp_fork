@@ -16,6 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// 3rdparty
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 // Local
 #include "orbslam3/GeometricTools.h"
 #include "orbslam3/KeyFrame.h"

@@ -16,12 +16,13 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Standard
-#include <mutex>
 // Local
 #include "orbslam3/Converter.h"
-#include "orbslam3/ImuTypes.h"
+#include "orbslam3/Frame.h"
 #include "orbslam3/KeyFrame.h"
+#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3
 {

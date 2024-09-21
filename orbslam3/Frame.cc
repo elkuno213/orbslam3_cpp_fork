@@ -18,13 +18,15 @@
 
 // Standard
 #include <thread>
+// 3rdparty
+#include <opencv2/calib3d.hpp>
+#include <opencv2/imgproc.hpp>
 // Local
 #include "orbslam3/CameraModels/GeometricCamera.h"
 #include "orbslam3/CameraModels/KannalaBrandt8.h"
 #include "orbslam3/CameraModels/Pinhole.h"
 #include "orbslam3/Converter.h"
 #include "orbslam3/Frame.h"
-#include "orbslam3/G2oTypes.h"
 #include "orbslam3/KeyFrame.h"
 #include "orbslam3/MapPoint.h"
 #include "orbslam3/ORBextractor.h"

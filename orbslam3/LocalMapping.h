@@ -20,22 +20,24 @@
 #define LOCALMAPPING_H
 
 // Standard
+#include <fstream>
+#include <list>
 #include <mutex>
-// Local
-#include "orbslam3/Atlas.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/KeyFrameDatabase.h"
-#include "orbslam3/LoopClosing.h"
-#include "orbslam3/Settings.h"
-#include "orbslam3/Tracking.h"
+#include <string>
+#include <vector>
+// 3rdparty
+#include <Eigen/Core>
 
 namespace ORB_SLAM3
 {
 
+class Atlas;
+class KeyFrame;
+class LoopClosing;
+class Map;
+class MapPoint;
 class System;
 class Tracking;
-class LoopClosing;
-class Atlas;
 
 class LocalMapping
 {

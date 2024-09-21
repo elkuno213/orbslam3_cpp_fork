@@ -23,15 +23,15 @@
 //#define REGISTER_TIMES
 
 // Standard
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <iostream>
 #include <string>
-// Local
-#include "orbslam3/CameraModels/GeometricCamera.h"
+// 3rdparty
+#include <opencv2/core.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 
 namespace ORB_SLAM3 {
 
+    class GeometricCamera;
     class System;
 
     //TODO: change to double instead of float

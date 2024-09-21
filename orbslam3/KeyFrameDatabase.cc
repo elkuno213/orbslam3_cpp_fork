@@ -17,12 +17,14 @@
 */
 
 // Standard
-#include <mutex>
+#include <set>
 // 3rdparty
 #include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
 // Local
+#include "orbslam3/Frame.h"
 #include "orbslam3/KeyFrame.h"
 #include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/Map.h"
 
 using namespace std;
 

@@ -51,14 +51,9 @@
 *
 */
 
-// Standard
-#include <iostream>
-#include <vector>
 // 3rdparty
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/imgproc.hpp>
 // Local
 #include "orbslam3/ORBextractor.h"
 

@@ -20,18 +20,17 @@
 #define MAPPOINT_H
 
 // Standard
+#include <map>
 #include <mutex>
+#include <set>
+#include <tuple>
 // 3rdparty
+#include <Eigen/Core>
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/serialization.hpp>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 // Local
-#include "orbslam3/Converter.h"
-#include "orbslam3/Frame.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/Map.h"
-#include "orbslam3/SerializationUtils.h"
 
 namespace ORB_SLAM3
 {

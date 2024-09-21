@@ -20,18 +20,19 @@
 #define ORBMATCHER_H
 
 // Standard
+#include <set>
+#include <utility>
 #include <vector>
 // 3rdparty
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
 #include <orbslam3/external/Sophus/sophus/sim3.hpp>
-// Local
-#include "orbslam3/Frame.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3
 {
+    class Frame;
+    class KeyFrame;
+    class MapPoint;
 
     class ORBmatcher
     {

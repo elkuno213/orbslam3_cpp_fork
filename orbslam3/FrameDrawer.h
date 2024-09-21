@@ -20,21 +20,21 @@
 #define FRAMEDRAWER_H
 
 // Standard
+#include <map>
 #include <mutex>
-#include <unordered_set>
+#include <vector>
 // 3rdparty
-#include <opencv2/core/core.hpp>
-#include<opencv2/features2d/features2d.hpp>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
 // Local
-#include "orbslam3/Atlas.h"
-#include "orbslam3/MapPoint.h"
-#include "orbslam3/Tracking.h"
+#include "orbslam3/Frame.h"
 
 namespace ORB_SLAM3
 {
 
+class Atlas;
+class MapPoint;
 class Tracking;
-class Viewer;
 
 class FrameDrawer
 {

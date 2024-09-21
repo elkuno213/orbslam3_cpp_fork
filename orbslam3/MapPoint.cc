@@ -17,8 +17,10 @@
 */
 
 // Standard
-#include <mutex>
 // Local
+#include "orbslam3/Frame.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/Map.h"
 #include "orbslam3/MapPoint.h"
 #include "orbslam3/ORBmatcher.h"
 

@@ -18,12 +18,13 @@
 
 // Standard
 #include <cmath>
-#include <vector>
 // 3rdparty
 #include <orbslam3/external/DBoW2/DUtils/Random.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 // Local
+#include "orbslam3/CameraModels/GeometricCamera.h"
 #include "orbslam3/KeyFrame.h"
+#include "orbslam3/MapPoint.h"
 #include "orbslam3/ORBmatcher.h"
 #include "orbslam3/Sim3Solver.h"
 

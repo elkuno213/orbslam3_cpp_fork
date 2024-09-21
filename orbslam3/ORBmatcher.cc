@@ -16,13 +16,13 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Standard
-#include <limits.h>
-#include <stdint-gcc.h>
 // 3rdparty
 #include <orbslam3/external/DBoW2/DBoW2/FeatureVector.h>
-#include <opencv2/core/core.hpp>
 // Local
+#include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Frame.h"
+#include "orbslam3/KeyFrame.h"
+#include "orbslam3/MapPoint.h"
 #include "orbslam3/ORBmatcher.h"
 
 using namespace std;

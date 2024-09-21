@@ -22,17 +22,13 @@
 // Standard
 #include <list>
 #include <mutex>
-#include <set>
 #include <vector>
 // 3rdparty
-#include <boost/serialization/base_object.hpp>
+#include <Eigen/Core>
 #include <boost/serialization/library_version_type.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/vector.hpp>
 // Local
-#include "orbslam3/Frame.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/Map.h"
 #include "orbslam3/ORBVocabulary.h"
 
 namespace ORB_SLAM3

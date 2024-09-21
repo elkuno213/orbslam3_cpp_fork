@@ -17,9 +17,10 @@
 */
 
 // Local
-#include "orbslam3/Converter.h"
+#include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Frame.h"
 #include "orbslam3/G2oTypes.h"
-#include "orbslam3/ImuTypes.h"
+#include "orbslam3/KeyFrame.h"
 
 namespace ORB_SLAM3
 {

@@ -25,8 +25,7 @@
 #include <Eigen/Core>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/core.hpp>
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
 
 namespace ORB_SLAM3

@@ -16,9 +16,6 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Standard
-#include <iomanip>
-#include <thread>
 // 3rdparty
 #include <openssl/md5.h>
 #include <pangolin/pangolin.h>
@@ -31,8 +28,19 @@
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/string.hpp>
 // Local
+#include "orbslam3/Atlas.h"
 #include "orbslam3/Converter.h"
+#include "orbslam3/FrameDrawer.h"
+#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/LocalMapping.h"
+#include "orbslam3/LoopClosing.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/MapDrawer.h"
+#include "orbslam3/MapPoint.h"
+#include "orbslam3/Settings.h"
 #include "orbslam3/System.h"
+#include "orbslam3/Tracking.h"
+#include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3
 {

@@ -16,11 +16,17 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Standard
-#include <mutex>
 // 3rdparty
 #include <pangolin/pangolin.h>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 // Local
+#include "orbslam3/Atlas.h"
+#include "orbslam3/FrameDrawer.h"
+#include "orbslam3/MapDrawer.h"
+#include "orbslam3/Settings.h"
+#include "orbslam3/System.h"
+#include "orbslam3/Tracking.h"
 #include "orbslam3/Viewer.h"
 
 namespace ORB_SLAM3

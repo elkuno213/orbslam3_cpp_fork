@@ -20,11 +20,11 @@
 #define CONVERTER_H
 
 // 3rdparty
-#include <orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h>
-#include <orbslam3/external/g2o/g2o/types/types_six_dof_expmap.h>
-#include <Eigen/Dense>
-#include <opencv2/core/core.hpp>
-#include <orbslam3/external/Sophus/sophus/geometry.hpp>
+#include <orbslam3/external/g2o/g2o/types/se3quat.h>
+#include <orbslam3/external/g2o/g2o/types/sim3.h>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 #include <orbslam3/external/Sophus/sophus/sim3.hpp>
 
 namespace ORB_SLAM3

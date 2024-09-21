@@ -20,7 +20,7 @@
 #define CAMERAMODELS_KANNALABRANDT8_H
 
 // Standard
-#include <assert.h>
+#include <cassert>
 // Local
 #include "orbslam3/CameraModels/GeometricCamera.h"
 #include "orbslam3/TwoViewReconstruction.h"

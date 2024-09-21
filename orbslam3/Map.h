@@ -20,22 +20,28 @@
 #define MAP_H
 
 // Standard
+#include <list>
+#include <map>
 #include <mutex>
 #include <set>
+#include <string>
+#include <vector>
 // 3rdparty
 #include <pangolin/pangolin.h>
+#include <Eigen/Core>
 #include <boost/serialization/base_object.hpp>
+#include <orbslam3/external/Sophus/sophus/se3.hpp>
 // Local
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/MapPoint.h"
+#include "orbslam3/ORBVocabulary.h"
 
 namespace ORB_SLAM3
 {
 
-class MapPoint;
-class KeyFrame;
 class Atlas;
+class GeometricCamera;
+class KeyFrame;
 class KeyFrameDatabase;
+class MapPoint;
 
 class Map
 {

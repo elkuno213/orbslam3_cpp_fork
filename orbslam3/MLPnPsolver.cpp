@@ -49,7 +49,10 @@
 // 3rdparty
 #include <Eigen/Sparse>
 // Local
+#include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Frame.h"
 #include "orbslam3/MLPnPsolver.h"
+#include "orbslam3/MapPoint.h"
 
 namespace ORB_SLAM3 {
     MLPnPsolver::MLPnPsolver(const Frame &F, const vector<MapPoint *> &vpMapPointMatches):

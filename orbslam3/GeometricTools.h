@@ -19,10 +19,11 @@
 #ifndef GEOMETRIC_TOOLS_H
 #define GEOMETRIC_TOOLS_H
 
+// Standard
+#include <iostream>
 // 3rdparty
 #include <Eigen/Core>
-#include <opencv2/core/core.hpp>
-#include <orbslam3/external/Sophus/sophus/se3.hpp>
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3
 {

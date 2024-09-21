@@ -20,10 +20,11 @@
 #define TwoViewReconstruction_H
 
 // Standard
-#include <unordered_set>
+#include <utility>
+#include <vector>
 // 3rdparty
-#include <opencv2/opencv.hpp>
 #include <Eigen/Core>
+#include <opencv2/core.hpp>
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
 
 namespace ORB_SLAM3

@@ -26,14 +26,12 @@
 #include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
 #include <orbslam3/external/DBoW2/DBoW2/FeatureVector.h>
 #include <Eigen/Core>
-#include <opencv2/opencv.hpp>
-#include <orbslam3/external/Sophus/sophus/geometry.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/features2d.hpp>
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
 // Local
-#include "orbslam3/Converter.h"
 #include "orbslam3/ImuTypes.h"
 #include "orbslam3/ORBVocabulary.h"
-#include "orbslam3/Settings.h"
 
 namespace ORB_SLAM3
 {

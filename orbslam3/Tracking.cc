@@ -19,18 +19,27 @@
 // Standard
 #include <chrono>
 #include <iostream>
-#include <mutex>
 // Local
+#include "orbslam3/Atlas.h"
+#include "orbslam3/CameraModels/GeometricCamera.h"
 #include "orbslam3/CameraModels/KannalaBrandt8.h"
 #include "orbslam3/CameraModels/Pinhole.h"
 #include "orbslam3/Converter.h"
 #include "orbslam3/FrameDrawer.h"
 #include "orbslam3/G2oTypes.h"
-#include "orbslam3/GeometricTools.h"
+#include "orbslam3/KeyFrameDatabase.h"
+#include "orbslam3/LocalMapping.h"
+#include "orbslam3/LoopClosing.h"
 #include "orbslam3/MLPnPsolver.h"
+#include "orbslam3/Map.h"
+#include "orbslam3/MapDrawer.h"
+#include "orbslam3/ORBextractor.h"
 #include "orbslam3/ORBmatcher.h"
 #include "orbslam3/Optimizer.h"
+#include "orbslam3/Settings.h"
+#include "orbslam3/System.h"
 #include "orbslam3/Tracking.h"
+#include "orbslam3/Viewer.h"
 
 using namespace std;
 

@@ -21,21 +21,19 @@
 
 // Standard
 #include <mutex>
-// Local
-#include "orbslam3/FrameDrawer.h"
-#include "orbslam3/MapDrawer.h"
-#include "orbslam3/Settings.h"
-#include "orbslam3/System.h"
-#include "orbslam3/Tracking.h"
+#include <string>
+// 3rdparty
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3
 {
 
-class Tracking;
 class FrameDrawer;
 class MapDrawer;
-class System;
 class Settings;
+class System;
+class Tracking;
 
 class Viewer
 {

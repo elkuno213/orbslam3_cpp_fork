@@ -20,27 +20,29 @@
 #define LOOPCLOSING_H
 
 // Standard
+#include <list>
 #include <mutex>
+#include <set>
+#include <string>
 #include <thread>
+#include <vector>
 // 3rdparty
-#include <orbslam3/external/g2o/g2o/types/types_seven_dof_expmap.h>
-#include <boost/algorithm/string.hpp>
+#include <Eigen/Core>
+#include <orbslam3/external/g2o/g2o/types/sim3.h>
 // Local
-#include "orbslam3/Atlas.h"
-#include "orbslam3/KeyFrame.h"
-#include "orbslam3/KeyFrameDatabase.h"
-#include "orbslam3/LocalMapping.h"
 #include "orbslam3/ORBVocabulary.h"
-#include "orbslam3/Tracking.h"
 
 namespace ORB_SLAM3
 {
 
-class Tracking;
-class LocalMapping;
+class Atlas;
+class KeyFrame;
 class KeyFrameDatabase;
+class LocalMapping;
 class Map;
-
+class MapPoint;
+class Tracking;
+class Viewer;
 
 class LoopClosing
 {
