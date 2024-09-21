@@ -40,13 +40,13 @@ class KeyFrame;
 class Frame;
 class GeometricCamera;
 
-typedef Eigen::Matrix<double, 6, 1> Vector6d;
-typedef Eigen::Matrix<double, 9, 1> Vector9d;
-typedef Eigen::Matrix<double, 12, 1> Vector12d;
-typedef Eigen::Matrix<double, 15, 1> Vector15d;
-typedef Eigen::Matrix<double, 12, 12> Matrix12d;
-typedef Eigen::Matrix<double, 15, 15> Matrix15d;
-typedef Eigen::Matrix<double, 9, 9> Matrix9d;
+using Vector6d  = Eigen::Matrix<double,  6,  1>;
+using Vector9d  = Eigen::Matrix<double,  9,  1>;
+using Vector12d = Eigen::Matrix<double, 12,  1>;
+using Vector15d = Eigen::Matrix<double, 15,  1>;
+using Matrix12d = Eigen::Matrix<double, 12, 12>;
+using Matrix15d = Eigen::Matrix<double, 15, 15>;
+using Matrix9d  = Eigen::Matrix<double,  9,  9>;
 
 Eigen::Matrix3d ExpSO3(const double x, const double y, const double z);
 Eigen::Matrix3d ExpSO3(const Eigen::Vector3d &w);
