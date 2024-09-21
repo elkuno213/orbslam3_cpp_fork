@@ -16,6 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// 3rdparty
+#include <glog/logging.h>
 // Local
 #include "orbslam3/Atlas.h"
 #include "orbslam3/KeyFrame.h"
@@ -38,7 +40,7 @@ MapDrawer::MapDrawer(Atlas* pAtlas, const std::string &strSettingPath, Settings*
 
         if(!is_correct)
         {
-            std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
+            LOG(ERROR) << "ERROR in the config file, the format is not correct";
             try
             {
                 throw -1;
@@ -71,7 +73,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.KeyFrameSize parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.KeyFrameSize parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -82,7 +84,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.KeyFrameLineWidth parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.KeyFrameLineWidth parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -93,7 +95,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.GraphLineWidth parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.GraphLineWidth parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -104,7 +106,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.PointSize parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.PointSize parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -115,7 +117,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.CameraSize parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.CameraSize parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -126,7 +128,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.CameraLineWidth parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.CameraLineWidth parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -212,7 +214,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
             }
             else
             {
-                //std::cout << "Child KF: " << vpKFs[i]->mnId << std::endl;
+                // LOG(INFO) << "Child KF: " << vpKFs[i]->mnId;
                 glLineWidth(mKeyFrameLineWidth);
                 if (bDrawOptLba) {
                     if(sOptKFs.find(pKF->mnId) != sOptKFs.end())
@@ -269,7 +271,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
         glColor4f(0.0f,1.0f,0.0f,0.6f);
         glBegin(GL_LINES);
 
-        // std::cout << "-----------------Draw graph-----------------" << std::endl;
+        // LOG(INFO) << Draw graph";
         for(std::size_t i=0; i<vpKFs.size(); i++)
         {
             // Covisibility Graph

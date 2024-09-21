@@ -602,7 +602,7 @@ bool Frame::ProjectPointDistort(MapPoint* pMP, cv::Point2f &kp, float &u, float 
     // Check positive depth
     if(PcZ<0.0f)
     {
-        std::cout << "Negative depth: " << PcZ << std::endl;
+        LOG(INFO) << "Negative depth: " << PcZ;
         return false;
     }
 

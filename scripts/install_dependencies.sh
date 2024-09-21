@@ -5,7 +5,10 @@ sudo apt-get install -y \
   stow \
   libeigen3-dev \
   libopencv-dev \
-  libpython3-dev
+  libpython3-dev \
+  libunwind-dev \
+  libgoogle-glog-dev \
+  libboost-serialization-dev
 
 
 # Optional: install librealsense2

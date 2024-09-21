@@ -52,6 +52,7 @@
 */
 
 // 3rdparty
+#include <glog/logging.h>
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgproc.hpp>
 // Local
@@ -1097,7 +1098,7 @@ namespace ORB_SLAM3
     int ORBextractor::operator()( cv::InputArray _image, cv::InputArray _mask, std::vector<cv::KeyPoint>& _keypoints,
                                   cv::OutputArray _descriptors, std::vector<int> &vLappingArea)
     {
-        //std::cout << "[ORBextractor]: Max Features: " << nfeatures << std::endl;
+        // LOG(INFO) << "[ORBextractor]: Max Features: " << nfeatures;
         if(_image.empty())
             return -1;
 
@@ -1174,7 +1175,7 @@ namespace ORB_SLAM3
                 i++;
             }
         }
-        //std::cout << "[ORBextractor]: extracted " << _keypoints.size() << " KeyPoints" << std::endl;
+        // LOG(INFO) << "[ORBextractor]: extracted " << _keypoints.size() << " KeyPoints";
         return monoIndex;
     }
 

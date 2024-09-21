@@ -23,6 +23,7 @@
 #include <mutex>
 #include <vector>
 // 3rdparty
+#include <glog/logging.h>
 #include <Eigen/Core>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
@@ -197,11 +198,11 @@ public:
     Bias GetUpdatedBias();
 
     void printMeasurements() const {
-        std::cout << "pint meas:\n";
+        LOG(INFO) << "pint meas";
         for(int i=0; i<mvMeasurements.size(); i++){
-            std::cout << "meas " << mvMeasurements[i].t << std::endl;
+            LOG(INFO) << "meas " << mvMeasurements[i].t;
         }
-        std::cout << "end pint meas:\n";
+        LOG(INFO) << "end pint meas";
     }
 
 public:

@@ -17,6 +17,7 @@
 */
 
 // Standard
+#include <glog/logging.h>
 // Local
 #include "orbslam3/Frame.h"
 #include "orbslam3/KeyFrame.h"
@@ -550,13 +551,13 @@ int MapPoint::PredictScale(const float &currentDist, Frame* pF)
 
 void MapPoint::PrintObservations()
 {
-    std::cout << "MP_OBS: MP " << mnId << std::endl;
+    LOG(INFO) << "MP_OBS: MP " << mnId;
     for(auto mit=mObservations.begin(), mend=mObservations.end(); mit!=mend; mit++)
     {
         KeyFrame* pKFi = mit->first;
         std::tuple<int,int> indexes = mit->second;
         int leftIndex = std::get<0>(indexes), rightIndex = std::get<1>(indexes);
-        std::cout << "--OBS in KF " << pKFi->mnId << " in map " << pKFi->GetMap()->GetId() << std::endl;
+        LOG(INFO) << "--OBS in KF " << pKFi->mnId << " in map " << pKFi->GetMap()->GetId();
     }
 }
 
@@ -607,7 +608,7 @@ void MapPoint::PostLoad(std::map<long unsigned int, KeyFrame*>& mpKFid, std::map
     mpRefKF = mpKFid[mBackupRefKFId];
     if(!mpRefKF)
     {
-        std::cout << "ERROR: MP without KF reference " << mBackupRefKFId << "; Num obs: " << nObs << std::endl;
+        LOG(ERROR) << "MP without KF reference " << mBackupRefKFId << "; Num obs: " << nObs;
     }
     mpReplaced = static_cast<MapPoint*>(NULL);
     if(mBackupReplacedId>=0)

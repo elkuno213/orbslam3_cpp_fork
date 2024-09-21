@@ -52,6 +52,7 @@ find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(Boost REQUIRED COMPONENTS serialization)
 find_package(OpenSSL REQUIRED)
+find_package(glog REQUIRED)
 
 add_subdirectory(orbslam3/external/DBoW2)
 add_subdirectory(orbslam3/external/g2o)

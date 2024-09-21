@@ -18,6 +18,7 @@ set(ORBSLAM3_DIR "" CACHE STRING "Path to the orbslam3 installation directory")
 
 # Find orbslam3.
 find_package(orbslam3 REQUIRED HINTS ${ORBSLAM3_DIR})
+find_package(glog REQUIRED)
 
 # ──────────────────────────────────────────────────────────────────────────── #
 # Targets                                                                      #

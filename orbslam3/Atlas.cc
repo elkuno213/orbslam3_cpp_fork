@@ -16,6 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// 3rdparty
+#include <glog/logging.h>
 // Local
 #include "orbslam3/Atlas.h"
 #include "orbslam3/Viewer.h"
@@ -55,18 +57,18 @@ Atlas::~Atlas()
 void Atlas::CreateNewMap()
 {
     std::unique_lock<std::mutex> lock(mMutexAtlas);
-    std::cout << "Creation of new map with id: " << Map::nNextId << std::endl;
+    LOG(INFO) << "Creation of new map with id: " << Map::nNextId;
     if(mpCurrentMap){
         if(!mspMaps.empty() && mnLastInitKFidMap < mpCurrentMap->GetMaxKFid())
             mnLastInitKFidMap = mpCurrentMap->GetMaxKFid()+1; //The init KF is the next of current maximum
 
         mpCurrentMap->SetStoredMap();
-        std::cout << "Stored map with ID: " << mpCurrentMap->GetId() << std::endl;
+        LOG(INFO) << "Stored map with ID: " << mpCurrentMap->GetId();
 
         //if(mHasViewer)
         //    mpViewer->AddMapToCreateThumbnail(mpCurrentMap);
     }
-    std::cout << "Creation of new map with last KF id: " << mnLastInitKFidMap << std::endl;
+    LOG(INFO) << "Creation of new map with last KF id: " << mnLastInitKFidMap;
 
     mpCurrentMap = new Map(mnLastInitKFidMap);
     mpCurrentMap->SetCurrentMap();
@@ -76,7 +78,7 @@ void Atlas::CreateNewMap()
 void Atlas::ChangeMap(Map* pMap)
 {
     std::unique_lock<std::mutex> lock(mMutexAtlas);
-    std::cout << "Change to map with id: " << pMap->GetId() << std::endl;
+    LOG(INFO) << "Change to map with id: " << pMap->GetId();
     if(mpCurrentMap){
         mpCurrentMap->SetStoredMap();
     }
@@ -117,8 +119,8 @@ GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam)
     for(std::size_t i=0; i < mvpCameras.size(); ++i)
     {
         GeometricCamera* pCam_i = mvpCameras[i];
-        if(!pCam) std::cout << "Not pCam" << std::endl;
-        if(!pCam_i) std::cout << "Not pCam_i" << std::endl;
+        if(!pCam) LOG(ERROR) << "Not pCam";
+        if(!pCam_i) LOG(ERROR) << "Not pCam_i";
         if(pCam->GetType() != pCam_i->GetType())
             continue;
 

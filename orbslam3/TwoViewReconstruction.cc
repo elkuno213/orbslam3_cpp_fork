@@ -20,6 +20,7 @@
 #include <thread>
 // 3rdparty
 #include <orbslam3/external/DBoW2/DUtils/Random.h>
+#include <glog/logging.h>
 // Local
 #include "orbslam3/GeometricTools.h"
 #include "orbslam3/TwoViewReconstruction.h"
@@ -115,12 +116,12 @@ namespace ORB_SLAM3
         // Try to reconstruct from homography or fundamental depending on the ratio (0.40-0.45)
         if(RH>0.50) // if(RH>0.40)
         {
-            //std::cout << "Initialization from Homography" << std::endl;
+            // LOG(INFO) << "Initialization from Homography";
             return ReconstructH(vbMatchesInliersH,H, mK,T21,vP3D,vbTriangulated,minParallax,50);
         }
         else //if(pF_HF>0.6)
         {
-            //std::cout << "Initialization from Fundamental" << std::endl;
+            // LOG(INFO) << "Initialization from Fundamental";
             return ReconstructF(vbMatchesInliersF,F,mK,T21,vP3D,vbTriangulated,minParallax,50);
         }
     }

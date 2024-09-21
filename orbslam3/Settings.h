@@ -26,6 +26,7 @@
 #include <iostream>
 #include <string>
 // 3rdparty
+#include <glog/logging.h>
 #include <opencv2/core.hpp>
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
 
@@ -128,11 +129,11 @@ namespace ORB_SLAM3 {
             cv::FileNode node = fSettings[name];
             if(node.empty()){
                 if(required){
-                    std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
+                    LOG(ERROR) << name << " required parameter does not exist, aborting...";
                     exit(-1);
                 }
                 else{
-                    std::cerr << name << " optional parameter does not exist..." << std::endl;
+                    LOG(ERROR) << name << " optional parameter does not exist...";
                     found = false;
                     return T();
                 }

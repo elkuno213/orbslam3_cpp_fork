@@ -17,6 +17,7 @@
 */
 
 // 3rdparty
+#include <glog/logging.h>
 #include <pangolin/pangolin.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -47,7 +48,7 @@ Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer
 
         if(!is_correct)
         {
-            std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
+            LOG(ERROR) << "ERROR in the config file, the format is not correct";
             try
             {
                 throw -1;
@@ -98,7 +99,7 @@ bool Viewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Camera.width parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Camera.width parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -109,7 +110,7 @@ bool Viewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Camera.height parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Camera.height parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -126,7 +127,7 @@ bool Viewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.ViewpointX parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.ViewpointX parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -137,7 +138,7 @@ bool Viewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.ViewpointY parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.ViewpointY parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -148,7 +149,7 @@ bool Viewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.ViewpointZ parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.ViewpointZ parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -159,7 +160,7 @@ bool Viewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
     else
     {
-        std::cerr << "*Viewer.ViewpointF parameter doesn't exist or is not a real number*" << std::endl;
+        LOG(ERROR) << "Viewer.ViewpointF parameter doesn't exist or is not a real number";
         b_miss_params = true;
     }
 
@@ -225,7 +226,7 @@ void Viewer::Run()
 
     float trackedImageScale = mpTracker->GetImageScale();
 
-    std::cout << "Starting the Viewer" << std::endl;
+    LOG(INFO) << "Starting the Viewer";
     while(1)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -297,7 +298,7 @@ void Viewer::Run()
 
         if(menuStepByStep && !bStepByStep)
         {
-            //std::cout << "Viewer: step by step" << std::endl;
+            // LOG(INFO) << "Viewer: step by step";
             mpTracker->SetStepByStep(true);
             bStepByStep = true;
         }

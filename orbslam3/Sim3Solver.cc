@@ -19,6 +19,7 @@
 // Standard
 #include <cmath>
 // 3rdparty
+#include <glog/logging.h>
 #include <orbslam3/external/DBoW2/DUtils/Random.h>
 #include <opencv2/core.hpp>
 // Local
@@ -377,7 +378,7 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
         double cvnom = Converter::toCvMat(Pr1).dot(Converter::toCvMat(P3));
         double nom = (Pr1.array() * P3.array()).sum();
         if (std::abs(nom-cvnom)>1e-3)
-            std::cout << "sim3 solver: " << std::abs(nom-cvnom) << std::endl << nom << std::endl;
+            LOG(WARNING) << "sim3 solver: " << std::abs(nom-cvnom) << " | " << nom;
         Eigen::Array<float,3,3> aux_P3;
         aux_P3 = P3.array() * P3.array();
         double den = aux_P3.sum();

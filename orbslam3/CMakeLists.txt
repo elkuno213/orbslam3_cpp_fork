@@ -19,6 +19,7 @@ target_link_libraries(orbslam3 PUBLIC
   Boost::serialization
   OpenSSL::Crypto
   ${Pangolin_LIBRARIES}
+  glog::glog
   DBoW2
   g2o
   sophus

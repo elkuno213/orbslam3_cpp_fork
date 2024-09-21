@@ -528,7 +528,7 @@ public:
                 else right++;
             }
         }
-        std::cout << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right << std::endl;
+        LOG(INFO) << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right;
     }
 
 

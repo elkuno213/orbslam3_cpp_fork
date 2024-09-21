@@ -16,6 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// 3rdparty
+#include <glog/logging.h>
 // Local
 #include "orbslam3/Converter.h"
 #include "orbslam3/Frame.h"
@@ -426,11 +428,11 @@ void KeyFrame::UpdateConnections(bool upParent)
     std::vector<std::pair<int,KeyFrame*> > vPairs;
     vPairs.reserve(KFcounter.size());
     if(!upParent)
-        std::cout << "UPDATE_CONN: current KF " << mnId << std::endl;
+        LOG(INFO) << "UPDATE_CONN: current KF " << mnId;
     for(auto mit=KFcounter.begin(), mend=KFcounter.end(); mit!=mend; mit++)
     {
         if(!upParent)
-            std::cout << "  UPDATE_CONN: KF " << mit->first->mnId << " ; num matches: " << mit->second << std::endl;
+            LOG(INFO) << "  UPDATE_CONN: KF " << mit->first->mnId << " ; num matches: " << mit->second;
         if(mit->second>nmax)
         {
             nmax=mit->second;
@@ -493,7 +495,7 @@ void KeyFrame::ChangeParent(KeyFrame *pKF)
     std::unique_lock<std::mutex> lockCon(mMutexConnections);
     if(pKF == this)
     {
-        std::cout << "ERROR: Change parent KF, the parent and child are the same KF" << std::endl;
+        LOG(ERROR) << "Change parent KF, the parent and child are the same KF";
         throw std::invalid_argument("The parent and child can not be the same");
     }
 
@@ -983,7 +985,7 @@ void KeyFrame::PostLoad(std::map<long unsigned int, KeyFrame*>& mpKFid, std::map
     }
     else
     {
-        std::cout << "ERROR: There is not a main camera in KF " << mnId << std::endl;
+        LOG(ERROR) << "There is not a main camera in KF " << mnId;
     }
     if(mnBackupIdCamera2 >= 0)
     {
@@ -1026,7 +1028,7 @@ bool KeyFrame::ProjectPointDistort(MapPoint* pMP, cv::Point2f &kp, float &u, flo
     // Check positive depth
     if(PcZ<0.0f)
     {
-        std::cout << "Negative depth: " << PcZ << std::endl;
+        LOG(WARNING) << "Negative depth: " << PcZ;
         return false;
     }
 
@@ -1034,8 +1036,6 @@ bool KeyFrame::ProjectPointDistort(MapPoint* pMP, cv::Point2f &kp, float &u, flo
     float invz = 1.0f/PcZ;
     u=fx*PcX*invz+cx;
     v=fy*PcY*invz+cy;
-
-    // std::cout << "c";
 
     if(u<mnMinX || u>mnMaxX)
         return false;
@@ -1089,7 +1089,7 @@ bool KeyFrame::ProjectPointUnDistort(MapPoint* pMP, cv::Point2f &kp, float &u, f
     // Check positive depth
     if(PcZ<0.0f)
     {
-        std::cout << "Negative depth: " << PcZ << std::endl;
+        LOG(WARNING) << "Negative depth: " << PcZ;
         return false;
     }
 

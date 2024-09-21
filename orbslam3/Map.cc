@@ -16,6 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+// 3rdparty
+#include <glog/logging.h>
 // Local
 #include "orbslam3/Atlas.h"
 #include "orbslam3/CameraModels/GeometricCamera.h"
@@ -76,7 +78,7 @@ void Map::AddKeyFrame(KeyFrame *pKF)
 {
     std::unique_lock<std::mutex> lock(mMutexMap);
     if(mspKeyFrames.empty()){
-        std::cout << "First KF:" << pKF->mnId << "; Map init KF:" << mnInitKFid << std::endl;
+        LOG(INFO) << "First KF:" << pKF->mnId << "; Map init KF:" << mnInitKFid;
         mnInitKFid = pKF->mnId;
         mpKFinitial = pKF;
         mpKFlowerID = pKF;

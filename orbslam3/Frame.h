@@ -23,6 +23,7 @@
 #include <mutex>
 #include <vector>
 // 3rdparty
+#include <glog/logging.h>
 #include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
 #include <orbslam3/external/DBoW2/DBoW2/FeatureVector.h>
 #include <Eigen/Core>
@@ -357,7 +358,7 @@ public:
                 else right++;
             }
         }
-        std::cout << "Point distribution in Frame: left-> " << left << " --- right-> " << right << std::endl;
+        LOG(INFO) << "Point distribution in Frame: left-> " << left << " --- right-> " << right;
     }
 
     Sophus::SE3<double> T_test;

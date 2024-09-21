@@ -20,6 +20,7 @@
 #include <mutex>
 #include <utility>
 // 3rdparty
+#include <glog/logging.h>
 #include <orbslam3/external/g2o/g2o/core/block_solver.h>
 #include <orbslam3/external/g2o/g2o/core/optimization_algorithm_gauss_newton.h>
 #include <orbslam3/external/g2o/g2o/core/optimization_algorithm_levenberg.h>
@@ -513,7 +514,7 @@ void Optimizer::FullInertialBA(Map *pMap, int its, const bool bFixLocal, const l
                 {
                     if(!VP1 || !VV1 || !VG1 || !VA1 || !VP2 || !VV2 || !VG2 || !VA2)
                     {
-                        std::cout << "Error" << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<  ", "<< VG2 << ", "<< VA2 <<std::endl;
+                        LOG(ERROR) << "Error" << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<  ", "<< VG2 << ", "<< VA2;
                         continue;
                     }
                 }
@@ -521,7 +522,7 @@ void Optimizer::FullInertialBA(Map *pMap, int its, const bool bFixLocal, const l
                 {
                     if(!VP1 || !VV1 || !VG1 || !VA1 || !VP2 || !VV2)
                     {
-                        std::cout << "Error" << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<std::endl;
+                        LOG(ERROR) << "Error" << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2;
                         continue;
                     }
                 }
@@ -560,7 +561,7 @@ void Optimizer::FullInertialBA(Map *pMap, int its, const bool bFixLocal, const l
                 }
             }
             else
-                std::cout << pKFi->mnId << " or " << pKFi->mPrevKF->mnId << " no imu" << std::endl;
+                LOG(ERROR) << pKFi->mnId << " or " << pKFi->mPrevKF->mnId << " no imu";
         }
     }
 
@@ -2108,7 +2109,7 @@ void Optimizer::OptimizeEssentialGraph(KeyFrame* pCurKF, std::vector<KeyFrame*> 
         }
         else
         {
-            std::cout << "ERROR: MapPoint has a reference KF from another map" << std::endl;
+            LOG(ERROR) << "MapPoint has a reference KF from another map";
         }
 
     }
@@ -2601,7 +2602,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
 
         if(!pKFi->mPrevKF)
         {
-            std::cout << "NOT INERTIAL LINK TO PREVIOUS FRAME!!!!" << std::endl;
+            LOG(WARNING) << "NOT INERTIAL LINK TO PREVIOUS FRAME!!!!";
             continue;
         }
         if(pKFi->bImu && pKFi->mPrevKF->bImu && pKFi->mpImuPreintegrated)
@@ -2618,7 +2619,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
 
             if(!VP1 || !VV1 || !VG1 || !VA1 || !VP2 || !VV2 || !VG2 || !VA2)
             {
-                std::cerr << "Error " << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<  ", "<< VG2 << ", "<< VA2 <<std::endl;
+                LOG(ERROR) << "Error " << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<  ", "<< VG2 << ", "<< VA2;
                 continue;
             }
 
@@ -2661,7 +2662,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
             optimizer.addEdge(vear[i]);
         }
         else
-            std::cout << "ERROR building inertial edge" << std::endl;
+            LOG(ERROR) << "ERROR building inertial edge";
     }
 
     // Set MapPoint vertices
@@ -2833,7 +2834,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
         }
     }
 
-    //std::cout << "Total map points: " << lLocalMapPoints.size() << std::endl;
+    // LOG(INFO) << "Total map points: " << lLocalMapPoints.size();
     for(auto mit=mVisEdges.begin(), mend=mVisEdges.end(); mit!=mend; mit++)
     {
         assert(mit->second>=3);
@@ -2892,7 +2893,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
     // TODO: Some convergence problems have been detected here
     if((2*err < err_end || std::isnan(err) || std::isnan(err_end)) && !bLarge) //bGN)
     {
-        std::cout << "FAIL LOCAL-INERTIAL BA!!!!" << std::endl;
+        LOG(ERROR) << "FAIL LOCAL-INERTIAL BA!!!!";
         return;
     }
 
@@ -3131,7 +3132,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
     vpei.reserve(vpKFs.size());
     std::vector<std::pair<KeyFrame*,KeyFrame*> > vppUsedKF;
     vppUsedKF.reserve(vpKFs.size());
-    //std::cout << "build optimization graph" << std::endl;
+    // LOG(INFO) << "build optimization graph";
 
     for(std::size_t i=0;i<vpKFs.size();i++)
     {
@@ -3142,7 +3143,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
             if(pKFi->isBad() || pKFi->mPrevKF->mnId>maxKFid)
                 continue;
             if(!pKFi->mpImuPreintegrated)
-                std::cout << "Not preintegrated measurement" << std::endl;
+                LOG(ERROR) << "Not preintegrated measurement";
 
             pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
             g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
@@ -3155,7 +3156,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
             g2o::HyperGraph::Vertex* VS = optimizer.vertex(maxKFid*2+5);
             if(!VP1 || !VV1 || !VG || !VA || !VP2 || !VV2 || !VGDir || !VS)
             {
-                std::cout << "Error" << VP1 << ", "<< VV1 << ", "<< VG << ", "<< VA << ", " << VP2 << ", " << VV2 <<  ", "<< VGDir << ", "<< VS <<std::endl;
+                LOG(ERROR) << "Error " << VP1 << ", "<< VV1 << ", "<< VG << ", "<< VA << ", " << VP2 << ", " << VV2 <<  ", "<< VGDir << ", "<< VS;
 
                 continue;
             }
@@ -3326,7 +3327,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Vector3d &bg, Eigen::Vect
             g2o::HyperGraph::Vertex* VS = optimizer.vertex(maxKFid*2+5);
             if(!VP1 || !VV1 || !VG || !VA || !VP2 || !VV2 || !VGDir || !VS)
             {
-                std::cout << "Error" << VP1 << ", "<< VV1 << ", "<< VG << ", "<< VA << ", " << VP2 << ", " << VV2 <<  ", "<< VGDir << ", "<< VS <<std::endl;
+                LOG(ERROR) << "Error " << VP1 << ", "<< VV1 << ", "<< VG << ", "<< VA << ", " << VP2 << ", " << VV2 <<  ", "<< VGDir << ", "<< VS;
 
                 continue;
             }
@@ -4190,7 +4191,7 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool *pbS
     std::vector<EdgeAccRW*> vear(N,(EdgeAccRW*)NULL);
     for(int i=0;i<N;i++)
     {
-        //std::cout << "inserting inertial edge " << i << std::endl;
+        // LOG(INFO) << "inserting inertial edge " << i;
         KeyFrame* pKFi = vpOptimizableKFs[i];
 
         if(!pKFi->mPrevKF)
@@ -4212,7 +4213,7 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool *pbS
 
             if(!VP1 || !VV1 || !VG1 || !VA1 || !VP2 || !VV2 || !VG2 || !VA2)
             {
-                std::cerr << "Error " << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<  ", "<< VG2 << ", "<< VA2 <<std::endl;
+                LOG(ERROR) << "Error " << VP1 << ", "<< VV1 << ", "<< VG1 << ", "<< VA1 << ", " << VP2 << ", " << VV2 <<  ", "<< VG2 << ", "<< VA2;
                 continue;
             }
 
