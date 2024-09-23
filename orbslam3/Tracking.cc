@@ -1730,7 +1730,7 @@ void Tracking::PreintegrateIMU()
 
     mCurrentFrame.setIntegrated();
 
-    // VLOG(4) << "Preintegration is finished!!";
+    // VLOG(1) << "Preintegration is finished!!";
 }
 
 
@@ -1943,12 +1943,12 @@ void Tracking::Track()
 
                 if((!mbVelocity && !pCurrentMap->isImuInitialized()) || mCurrentFrame.mnId<mnLastRelocFrameId+2)
                 {
-                    VLOG(4) << "TRACK: Track with respect to the reference KF";
+                    VLOG(1) << "TRACK: Track with respect to the reference KF";
                     bOK = TrackReferenceKeyFrame();
                 }
                 else
                 {
-                    VLOG(4) << "TRACK: Track with motion model";
+                    VLOG(1) << "TRACK: Track with motion model";
                     bOK = TrackWithMotionModel();
                     if(!bOK)
                         bOK = TrackReferenceKeyFrame();
@@ -2276,7 +2276,7 @@ void Tracking::Track()
             if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
                 if (!pCurrentMap->isImuInitialized())
                 {
-                    VLOG(0) << "Track lost before IMU initialisation, reseting...";
+                    VLOG(1) << "Track lost before IMU initialisation, reseting...";
                     mpSystem->ResetActiveMap();
                     return;
                 }
@@ -2416,7 +2416,7 @@ void Tracking::StereoInitialization()
             }
         }
 
-        VLOG(0) << "New Map created with " << mpAtlas->MapPointsInMap() << " points";
+        VLOG(1) << "New Map created with " << mpAtlas->MapPointsInMap() << " points";
 
         // LOG(INFO) << "Active map: " << mpAtlas->GetCurrentMap()->GetId();
 
@@ -2574,7 +2574,7 @@ void Tracking::CreateInitialMapMonocular()
     sMPs = pKFini->GetMapPoints();
 
     // Bundle Adjustment
-    VLOG(0) << "New Map created with " << mpAtlas->MapPointsInMap() << " points";
+    VLOG(1) << "New Map created with " << mpAtlas->MapPointsInMap() << " points";
     Optimizer::GlobalBundleAdjustemnt(mpAtlas->GetCurrentMap(),20);
 
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
@@ -2586,7 +2586,7 @@ void Tracking::CreateInitialMapMonocular()
 
     if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<50) // TODO Check, originally 100 tracks
     {
-        VLOG(0) << "Wrong initialization, reseting...";
+        VLOG(1) << "Wrong initialization, reseting...";
         mpSystem->ResetActiveMap();
         return;
     }
@@ -2971,7 +2971,7 @@ bool Tracking::TrackLocalMap()
     {
         if(mCurrentFrame.mnId<=mnLastRelocFrameId+mnFramesToResetIMU)
         {
-            VLOG(4) << "TLM: PoseOptimization";
+            VLOG(1) << "TLM: PoseOptimization";
             Optimizer::PoseOptimization(&mCurrentFrame);
         }
         else
@@ -2979,12 +2979,12 @@ bool Tracking::TrackLocalMap()
             // if(!mbMapUpdated && mState == OK) //  && (mnMatchesInliers>30))
             if(!mbMapUpdated) //  && (mnMatchesInliers>30))
             {
-                VLOG(4) << "TLM: PoseInertialOptimizationLastFrame";
+                VLOG(1) << "TLM: PoseInertialOptimizationLastFrame";
                 inliers = Optimizer::PoseInertialOptimizationLastFrame(&mCurrentFrame); // , !mpLastKeyFrame->GetMap()->GetIniertialBA1());
             }
             else
             {
-                VLOG(4) << "TLM: PoseInertialOptimizationLastKeyFrame";
+                VLOG(1) << "TLM: PoseInertialOptimizationLastKeyFrame";
                 inliers = Optimizer::PoseInertialOptimizationLastKeyFrame(&mCurrentFrame); // , !mpLastKeyFrame->GetMap()->GetIniertialBA1());
             }
         }
@@ -3848,9 +3848,9 @@ void Tracking::ResetActiveMap(bool bLocMap)
 
     if (!bLocMap)
     {
-        VLOG(3) << "Reseting Local Mapper...";
+        VLOG(1) << "Reseting Local Mapper...";
         mpLocalMapper->RequestResetActiveMap(pMap);
-        VLOG(3) << "done";
+        VLOG(1) << "done";
     }
 
     // Reset Loop Closing

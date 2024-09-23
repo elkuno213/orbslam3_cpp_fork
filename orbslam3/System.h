@@ -35,12 +35,9 @@
 namespace ORB_SLAM3
 {
 
-// Verbosity level:
-// 0 - Quiet
-// 1 - Normal
-// 2 - Verbose
-// 3 - Very Verbose
-// 4 - Debug
+// Verbosity level, mainly for debugging.
+// 0: Quiet mode
+// 1: Debug messages
 
 class Atlas;
 class FrameDrawer;

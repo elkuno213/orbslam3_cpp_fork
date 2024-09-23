@@ -173,7 +173,7 @@ void LoopClosing::Run()
 
                         //mpTracker->SetStepByStep(true);
 
-                        VLOG(0) << "Merge detected";
+                        VLOG(1) << "Merge detected";
 
 #ifdef REGISTER_TIMES
                         auto time_StartMerge = std::chrono::steady_clock::now();
@@ -193,7 +193,7 @@ void LoopClosing::Run()
                         vdMergeTotal_ms.push_back(timeMergeTotal);
 #endif
 
-                        VLOG(0) << "Merge finished!";
+                        VLOG(1) << "Merge finished!";
                     }
 
                     vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
@@ -230,7 +230,7 @@ void LoopClosing::Run()
                     vdPR_MatchedTime.push_back(mpLoopMatchedKF->mTimeStamp);
                     vnPR_TypeRecogn.push_back(0);
 
-                    VLOG(0) << "Loop detected";
+                    VLOG(1) << "Loop detected";
 
                     mg2oLoopScw = mg2oLoopSlw; // *mvg2oSim3LoopTcw[nCurrentIndex];
                     if(mpCurrentKF->GetMap()->IsInertial())
@@ -548,7 +548,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
 
     if(nNumProjMatches >= nProjMatches)
     {
-        // VLOG(4) << "Sim3 reffine: There are " << nNumProjMatches << " initial matches";
+        // VLOG(1) << "Sim3 reffine: There are " << nNumProjMatches << " initial matches";
         Sophus::SE3d mTwm = pMatchedKF->GetPoseInverse().cast<double>();
         g2o::Sim3 gSwm(mTwm.unit_quaternion(),mTwm.translation(),1.0);
         g2o::Sim3 gScm = gScw * gSwm;
@@ -559,7 +559,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
             bFixedScale=false;
         int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pMatchedKF, vpMatchedMPs, gScm, 10, bFixedScale, mHessian7x7, true);
 
-        // VLOG(4) << "Sim3 reffine: There are " << numOptMatches << " matches after of the optimization";
+        // VLOG(1) << "Sim3 reffine: There are " << numOptMatches << " matches after of the optimization";
 
         if(numOptMatches > nProjOptMatches)
         {
@@ -608,7 +608,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
     std::vector<int> vnMatchesStage(numCandidates, 0);
 
     int index = 0;
-    // VLOG(4) << "BoW candidates: There are " << vpBowCand.size() << " possible candidates";
+    // VLOG(1) << "BoW candidates: There are " << vpBowCand.size() << " possible candidates";
     for(auto pKFi : vpBowCand)
     {
         if(!pKFi || pKFi->isBad())
@@ -710,14 +710,14 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
             while(!bConverge && !bNoMore)
             {
                 mTcm = solver.iterate(20,bNoMore, vbInliers, nInliers, bConverge);
-                // VLOG(4) << "BoW guess: Solver achieve " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches";
+                // VLOG(1) << "BoW guess: Solver achieve " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches";
             }
 
             if(bConverge)
             {
                 // LOG(INFO) << "Check BoW: SolverSim3 converged";
 
-                // VLOG(4) << "BoW guess: Convergende with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches";
+                // VLOG(1) << "BoW guess: Convergende with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches";
                 // Match by reprojection
                 vpCovKFi.clear();
                 vpCovKFi = pMostBoWMatchesKF->GetBestCovisibilityKeyFrames(nNumCovisibles);
@@ -864,7 +864,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 }
             }
             // else {
-            //     VLOG(4) << "BoW candidate: it don't match with the current one";
+            //     VLOG(1) << "BoW candidate: it don't match with the current one";
             // }
         }
         index++;
@@ -1231,7 +1231,7 @@ void LoopClosing::MergeLocal()
     // Flag that is true only when we stopped a running BA, in this case we need relaunch at the end of the merge
     bool bRelaunchBA = false;
 
-    // VLOG(4) << "MERGE-VISUAL: Check Full Bundle Adjustment";
+    // VLOG(1) << "MERGE-VISUAL: Check Full Bundle Adjustment";
     // If a Global Bundle Adjustment is running, abort it
     if(isRunningGBA())
     {
@@ -1248,7 +1248,7 @@ void LoopClosing::MergeLocal()
         bRelaunchBA = true;
     }
 
-    // VLOG(4) << "MERGE-VISUAL: Request Stop Local Mapping";
+    // VLOG(1) << "MERGE-VISUAL: Request Stop Local Mapping";
     // LOG(INFO) << "Request Stop Local Mapping";
     mpLocalMapper->RequestStop();
     // Wait until Local Mapping has effectively stopped
@@ -1426,12 +1426,12 @@ void LoopClosing::MergeLocal()
     {
         if(!pKFi || pKFi->isBad())
         {
-            VLOG(4) << "Bad KF in correction";
+            VLOG(1) << "Bad KF in correction";
             continue;
         }
 
         if(pKFi->GetMap() != pCurrentMap)
-            VLOG(4) << "Other map KF, this should't happen";
+            VLOG(1) << "Other map KF, this should't happen";
 
         g2o::Sim3 g2oCorrectedSiw;
 

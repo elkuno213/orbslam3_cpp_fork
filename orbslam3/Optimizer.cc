@@ -1788,10 +1788,10 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
 void Optimizer::OptimizeEssentialGraph(KeyFrame* pCurKF, std::vector<KeyFrame*> &vpFixedKFs, std::vector<KeyFrame*> &vpFixedCorrectedKFs,
                                        std::vector<KeyFrame*> &vpNonFixedKFs, std::vector<MapPoint*> &vpNonCorrectedMPs)
 {
-    VLOG(4) << "Opt_Essential: There are " << vpFixedKFs.size() << " KFs fixed in the merged map";
-    VLOG(4) << "Opt_Essential: There are " << vpFixedCorrectedKFs.size() << " KFs fixed in the old map";
-    VLOG(4) << "Opt_Essential: There are " << vpNonFixedKFs.size() << " KFs non-fixed in the merged map";
-    VLOG(4) << "Opt_Essential: There are " << vpNonCorrectedMPs.size() << " MPs non-corrected in the merged map";
+    VLOG(1) << "Opt_Essential: There are " << vpFixedKFs.size() << " KFs fixed in the merged map";
+    VLOG(1) << "Opt_Essential: There are " << vpFixedCorrectedKFs.size() << " KFs fixed in the old map";
+    VLOG(1) << "Opt_Essential: There are " << vpNonFixedKFs.size() << " KFs non-fixed in the merged map";
+    VLOG(1) << "Opt_Essential: There are " << vpNonCorrectedMPs.size() << " MPs non-corrected in the merged map";
 
     g2o::SparseOptimizer optimizer;
     optimizer.setVerbose(false);
@@ -1843,7 +1843,7 @@ void Optimizer::OptimizeEssentialGraph(KeyFrame* pCurKF, std::vector<KeyFrame*> 
         vpGoodPose[nIDi] = true;
         vpBadPose[nIDi] = false;
     }
-    VLOG(4) << "Opt_Essential: vpFixedKFs loaded";
+    VLOG(1) << "Opt_Essential: vpFixedKFs loaded";
 
     std::set<unsigned long> sIdKF;
     for(auto pKFi : vpFixedCorrectedKFs)
@@ -2049,7 +2049,7 @@ void Optimizer::OptimizeEssentialGraph(KeyFrame* pCurKF, std::vector<KeyFrame*> 
 
         if(num_connections == 0 )
         {
-            VLOG(4) << "Opt_Essential: KF " << pKFi->mnId << " has 0 connections";
+            VLOG(1) << "Opt_Essential: KF " << pKFi->mnId << " has 0 connections";
         }
     }
 
@@ -2089,7 +2089,7 @@ void Optimizer::OptimizeEssentialGraph(KeyFrame* pCurKF, std::vector<KeyFrame*> 
         {
             if(!pRefKF)
             {
-                VLOG(4) << "MP " << pMPi->mnId << " without a valid reference KF";
+                VLOG(1) << "MP " << pMPi->mnId << " without a valid reference KF";
                 break;
             }
 
@@ -2231,13 +2231,13 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, std::vector<MapPoint
 
         if(i2<0 && !bAllPoints)
         {
-            VLOG(4) << "Remove point -> i2: " << i2 << "; bAllPoints: " << bAllPoints;
+            VLOG(1) << "Remove point -> i2: " << i2 << "; bAllPoints: " << bAllPoints;
             continue;
         }
 
         if(P3D2c(2) < 0)
         {
-            VLOG(4) << "Sim3: Z coordinate is negative";
+            VLOG(1) << "Sim3: Z coordinate is negative";
             continue;
         }
 
@@ -3769,7 +3769,7 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pMainKF,std::vector<KeyFrame*> v
 
             e->setRobustKernel(0);
         }
-        VLOG(4) << "[BA]: First optimization(Huber), there are " << badMonoMP << " monocular and " << badStereoMP << " stereo bad edges";
+        VLOG(1) << "[BA]: First optimization(Huber), there are " << badMonoMP << " monocular and " << badStereoMP << " stereo bad edges";
 
     optimizer.initializeOptimization(0);
     optimizer.optimize(10);
@@ -3822,7 +3822,7 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pMainKF,std::vector<KeyFrame*> v
         }
     }
 
-    VLOG(4) << "[BA]: Second optimization, there are " << badMonoMP << " monocular and " << badStereoMP << " sterero bad edges";
+    VLOG(1) << "[BA]: Second optimization, there are " << badMonoMP << " monocular and " << badStereoMP << " sterero bad edges";
 
     // Get Map Mutex
     std::unique_lock<std::mutex> lock(pMainKF->GetMap()->mMutexMapUpdate);
