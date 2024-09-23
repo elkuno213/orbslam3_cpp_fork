@@ -21,6 +21,7 @@
 #include <iostream>
 // 3rdparty
 #include <glog/logging.h>
+#include <opencv2/imgproc.hpp>
 // Local
 #include "orbslam3/Atlas.h"
 #include "orbslam3/CameraModels/GeometricCamera.h"
@@ -108,17 +109,17 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     LOG(INFO) << "There are " << vpCams.size() << " cameras in the atlas";
     for(GeometricCamera* pCam : vpCams)
     {
-        if(pCam->GetType() == GeometricCamera::CAM_PINHOLE)
+        if(pCam->type() == GeometricCamera::Type::Pinhole)
         {
-            LOG(INFO) << "Camera " << pCam->GetId() << " is pinhole";
+            LOG(INFO) << "Camera " << pCam->id() << " is pinhole";
         }
-        else if(pCam->GetType() == GeometricCamera::CAM_FISHEYE)
+        else if(pCam->type() == GeometricCamera::Type::Fisheye)
         {
-            LOG(INFO) << "Camera " << pCam->GetId() << " is fisheye";
+            LOG(INFO) << "Camera " << pCam->id() << " is fisheye";
         }
         else
         {
-            LOG(WARNING) << "Camera " << pCam->GetId() << " is unknown";
+            LOG(WARNING) << "Camera " << pCam->id() << " is unknown";
         }
     }
 
@@ -2499,7 +2500,7 @@ void Tracking::MonocularInitialization()
         Sophus::SE3f Tcw;
         std::vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
 
-        if(mpCamera->ReconstructWithTwoViews(mInitialFrame.mvKeysUn,mCurrentFrame.mvKeysUn,mvIniMatches,Tcw,mvIniP3D,vbTriangulated))
+        if(mpCamera->reconstructFromTwoViews(mInitialFrame.mvKeysUn,mCurrentFrame.mvKeysUn,mvIniMatches,Tcw,mvIniP3D,vbTriangulated))
         {
             for(std::size_t i=0, iend=mvIniMatches.size(); i<iend;i++)
             {

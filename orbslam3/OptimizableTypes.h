@@ -45,7 +45,7 @@ public:
     void computeError()  {
         const g2o::VertexSE3Expmap* v1 = static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);
-        _error = obs-pCamera->project(v1->estimate().map(Xw));
+        _error = obs-pCamera->project(v1->estimate().map(Xw).cast<float>()).cast<double>();
     }
 
     bool isDepthPositive() {
@@ -73,7 +73,7 @@ public:
     void computeError()  {
         const g2o::VertexSE3Expmap* v1 = static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);
-        _error = obs-pCamera->project((mTrl * v1->estimate()).map(Xw));
+        _error = obs-pCamera->project((mTrl * v1->estimate()).map(Xw).cast<float>()).cast<double>();
     }
 
     bool isDepthPositive() {
@@ -104,7 +104,7 @@ public:
         const g2o::VertexSE3Expmap* v1 = static_cast<const g2o::VertexSE3Expmap*>(_vertices[1]);
         const g2o::VertexSBAPointXYZ* v2 = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);
-        _error = obs-pCamera->project(v1->estimate().map(v2->estimate()));
+        _error = obs-pCamera->project(v1->estimate().map(v2->estimate()).cast<float>()).cast<double>();
     }
 
     bool isDepthPositive() {
@@ -132,7 +132,7 @@ public:
         const g2o::VertexSE3Expmap* v1 = static_cast<const g2o::VertexSE3Expmap*>(_vertices[1]);
         const g2o::VertexSBAPointXYZ* v2 = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);
-        _error = obs-pCamera->project((mTrl * v1->estimate()).map(v2->estimate()));
+        _error = obs-pCamera->project((mTrl * v1->estimate()).map(v2->estimate()).cast<float>()).cast<double>();
     }
 
     bool isDepthPositive() {
@@ -190,7 +190,7 @@ public:
         const g2o::VertexSBAPointXYZ* v2 = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
 
         Eigen::Vector2d obs(_measurement);
-        _error = obs-v1->pCamera1->project(v1->estimate().map(v2->estimate()));
+        _error = obs-v1->pCamera1->project(v1->estimate().map(v2->estimate()).cast<float>()).cast<double>();
     }
 
     // virtual void linearizeOplus();
@@ -211,7 +211,7 @@ public:
         const g2o::VertexSBAPointXYZ* v2 = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
 
         Eigen::Vector2d obs(_measurement);
-        _error = obs-v1->pCamera2->project((v1->estimate().inverse().map(v2->estimate())));
+        _error = obs-v1->pCamera2->project((v1->estimate().inverse().map(v2->estimate())).cast<float>()).cast<double>();
     }
 
     // virtual void linearizeOplus();

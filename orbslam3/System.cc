@@ -28,6 +28,7 @@
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/string.hpp>
+#include <opencv2/imgproc.hpp>
 // Local
 #include "orbslam3/Atlas.h"
 #include "orbslam3/Converter.h"

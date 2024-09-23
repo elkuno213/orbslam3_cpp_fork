@@ -1,437 +1,426 @@
 /**
-* This file is part of ORB-SLAM3
-*
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-*
-* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM3
+ *
+ * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
+ * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
+ * University of Zaragoza.
+ *
+ * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 // Standard
+#include <algorithm>
+#include <cassert>
 #include <cmath>
 // 3rdparty
 #include <boost/serialization/export.hpp>
 #include <opencv2/calib3d.hpp>
 // Local
 #include "orbslam3/CameraModels/KannalaBrandt8.h"
+#include "orbslam3/Converter.h"
+#include "orbslam3/GeometricTools.h"
 
-//BOOST_CLASS_EXPORT_IMPLEMENT(ORB_SLAM3::KannalaBrandt8)
+// BOOST_CLASS_EXPORT_IMPLEMENT(ORB_SLAM3::KannalaBrandt8)
 
 namespace ORB_SLAM3 {
-//BOOST_CLASS_EXPORT_GUID(KannalaBrandt8, "KannalaBrandt8")
 
-    cv::Point2f KannalaBrandt8::project(const cv::Point3f &p3D) {
-        const float x2_plus_y2 = p3D.x * p3D.x + p3D.y * p3D.y;
-        const float theta =atan2f(sqrtf(x2_plus_y2), p3D.z);
-        const float psi =atan2f(p3D.y, p3D.x);
-
-        const float theta2 = theta * theta;
-        const float theta3 = theta * theta2;
-        const float theta5 = theta3 * theta2;
-        const float theta7 = theta5 * theta2;
-        const float theta9 = theta7 * theta2;
-        const float r = theta + mvParameters[4] * theta3 + mvParameters[5] * theta5
-                        + mvParameters[6] * theta7 + mvParameters[7] * theta9;
-
-        return cv::Point2f(mvParameters[0] * r * std::cos(psi) + mvParameters[2],
-                           mvParameters[1] * r * std::sin(psi) + mvParameters[3]);
-
-    }
-
-    Eigen::Vector2d KannalaBrandt8::project(const Eigen::Vector3d &v3D) {
-        const double x2_plus_y2 = v3D[0] * v3D[0] + v3D[1] * v3D[1];
-        const double theta =atan2f(sqrtf(x2_plus_y2), v3D[2]);
-        const double psi =atan2f(v3D[1], v3D[0]);
-
-        const double theta2 = theta * theta;
-        const double theta3 = theta * theta2;
-        const double theta5 = theta3 * theta2;
-        const double theta7 = theta5 * theta2;
-        const double theta9 = theta7 * theta2;
-        const double r = theta + mvParameters[4] * theta3 + mvParameters[5] * theta5
-                        + mvParameters[6] * theta7 + mvParameters[7] * theta9;
-
-        Eigen::Vector2d res;
-        res[0] = mvParameters[0] * r * std::cos(psi) + mvParameters[2];
-        res[1] = mvParameters[1] * r * std::sin(psi) + mvParameters[3];
-
-        return res;
-
-    }
-
-    Eigen::Vector2f KannalaBrandt8::project(const Eigen::Vector3f &v3D) {
-        const float x2_plus_y2 = v3D[0] * v3D[0] + v3D[1] * v3D[1];
-        const float theta =atan2f(sqrtf(x2_plus_y2), v3D[2]);
-        const float psi =atan2f(v3D[1], v3D[0]);
-
-        const float theta2 = theta * theta;
-        const float theta3 = theta * theta2;
-        const float theta5 = theta3 * theta2;
-        const float theta7 = theta5 * theta2;
-        const float theta9 = theta7 * theta2;
-        const float r = theta + mvParameters[4] * theta3 + mvParameters[5] * theta5
-                         + mvParameters[6] * theta7 + mvParameters[7] * theta9;
-
-        Eigen::Vector2f res;
-        res[0] = mvParameters[0] * r * std::cos(psi) + mvParameters[2];
-        res[1] = mvParameters[1] * r * std::sin(psi) + mvParameters[3];
-
-        return res;
-
-        // cv::Point2f cvres = project(cv::Point3f(v3D[0], v3D[1], v3D[2]));
-
-        // Eigen::Vector2d res;
-        // res[0] = cvres.x;
-        // res[1] = cvres.y;
-
-        // return res;
-    }
-
-    Eigen::Vector2f KannalaBrandt8::projectMat(const cv::Point3f &p3D) {
-        cv::Point2f point = project(p3D);
-        return Eigen::Vector2f(point.x, point.y);
-    }
-
-    float KannalaBrandt8::uncertainty2(const Eigen::Matrix<double,2,1> &p2D)
-    {
-        // Eigen::Matrix<double, 2, 1> c;
-        // c << mvParameters[2], mvParameters[3];
-        // if ((p2D - c).squaredNorm() > 57600) // 240*240 (256)
-        //   return 100.f;
-        // else
-        //   return 1.0f;
-        return 1.f;
-    }
-
-    Eigen::Vector3f KannalaBrandt8::unprojectEig(const cv::Point2f &p2D) {
-        cv::Point3f ray = unproject(p2D);
-        return Eigen::Vector3f(ray.x, ray.y, ray.z);
-    }
-
-    cv::Point3f KannalaBrandt8::unproject(const cv::Point2f &p2D) {
-        //Use Newthon method to solve for theta with good precision (err ~ e-6)
-        cv::Point2f pw((p2D.x - mvParameters[2]) / mvParameters[0], (p2D.y - mvParameters[3]) / mvParameters[1]);
-        float scale = 1.f;
-        float theta_d = sqrtf(pw.x * pw.x + pw.y * pw.y);
-        theta_d = std::fminf(std::fmaxf(-CV_PI / 2.f, theta_d), CV_PI / 2.f);
-
-        if (theta_d > 1e-8) {
-            //Compensate distortion iteratively
-            float theta = theta_d;
-
-            for (int j = 0; j < 10; j++) {
-                float theta2 = theta * theta, theta4 = theta2 * theta2, theta6 = theta4 * theta2, theta8 =
-                        theta4 * theta4;
-                float k0_theta2 = mvParameters[4] * theta2, k1_theta4 = mvParameters[5] * theta4;
-                float k2_theta6 = mvParameters[6] * theta6, k3_theta8 = mvParameters[7] * theta8;
-                float theta_fix = (theta * (1 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d) /
-                                  (1 + 3 * k0_theta2 + 5 * k1_theta4 + 7 * k2_theta6 + 9 * k3_theta8);
-                theta = theta - theta_fix;
-                if (fabsf(theta_fix) < precision)
-                    break;
-            }
-            //scale = theta - theta_d;
-            scale = std::tan(theta) / theta_d;
-        }
-
-        return cv::Point3f(pw.x * scale, pw.y * scale, 1.f);
-    }
-
-    Eigen::Matrix<double, 2, 3> KannalaBrandt8::projectJac(const Eigen::Vector3d &v3D) {
-        double x2 = v3D[0] * v3D[0], y2 = v3D[1] * v3D[1], z2 = v3D[2] * v3D[2];
-        double r2 = x2 + y2;
-        double r =std::sqrt(r2);
-        double r3 = r2 * r;
-        double theta =std::atan2(r, v3D[2]);
-
-        double theta2 = theta * theta, theta3 = theta2 * theta;
-        double theta4 = theta2 * theta2, theta5 = theta4 * theta;
-        double theta6 = theta2 * theta4, theta7 = theta6 * theta;
-        double theta8 = theta4 * theta4, theta9 = theta8 * theta;
-
-        double f = theta + theta3 * mvParameters[4] + theta5 * mvParameters[5] + theta7 * mvParameters[6] +
-                  theta9 * mvParameters[7];
-        double fd = 1 + 3 * mvParameters[4] * theta2 + 5 * mvParameters[5] * theta4 + 7 * mvParameters[6] * theta6 +
-                   9 * mvParameters[7] * theta8;
-
-        Eigen::Matrix<double, 2, 3> JacGood;
-        JacGood(0, 0) = mvParameters[0] * (fd * v3D[2] * x2 / (r2 * (r2 + z2)) + f * y2 / r3);
-        JacGood(1, 0) =
-                mvParameters[1] * (fd * v3D[2] * v3D[1] * v3D[0] / (r2 * (r2 + z2)) - f * v3D[1] * v3D[0] / r3);
-
-        JacGood(0, 1) =
-                mvParameters[0] * (fd * v3D[2] * v3D[1] * v3D[0] / (r2 * (r2 + z2)) - f * v3D[1] * v3D[0] / r3);
-        JacGood(1, 1) = mvParameters[1] * (fd * v3D[2] * y2 / (r2 * (r2 + z2)) + f * x2 / r3);
-
-        JacGood(0, 2) = -mvParameters[0] * fd * v3D[0] / (r2 + z2);
-        JacGood(1, 2) = -mvParameters[1] * fd * v3D[1] / (r2 + z2);
-
-        return JacGood;
-    }
-
-    bool KannalaBrandt8::ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1, const std::vector<cv::KeyPoint>& vKeys2, const std::vector<int> &vMatches12,
-                                          Sophus::SE3f &T21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated){
-        if(!tvr){
-            Eigen::Matrix3f K = toK_();
-            tvr = new TwoViewReconstruction(K);
-        }
-
-        //Correct FishEye distortion
-        std::vector<cv::KeyPoint> vKeysUn1 = vKeys1, vKeysUn2 = vKeys2;
-        std::vector<cv::Point2f> vPts1(vKeys1.size()), vPts2(vKeys2.size());
-
-        for(std::size_t i = 0; i < vKeys1.size(); i++) vPts1[i] = vKeys1[i].pt;
-        for(std::size_t i = 0; i < vKeys2.size(); i++) vPts2[i] = vKeys2[i].pt;
-
-        cv::Mat D = (cv::Mat_<float>(4,1) << mvParameters[4], mvParameters[5], mvParameters[6], mvParameters[7]);
-        cv::Mat R = cv::Mat::eye(3,3,CV_32F);
-        cv::Mat K = toK();
-        cv::fisheye::undistortPoints(vPts1,vPts1,K,D,R,K);
-        cv::fisheye::undistortPoints(vPts2,vPts2,K,D,R,K);
-
-        for(std::size_t i = 0; i < vKeys1.size(); i++) vKeysUn1[i].pt = vPts1[i];
-        for(std::size_t i = 0; i < vKeys2.size(); i++) vKeysUn2[i].pt = vPts2[i];
-
-        return tvr->reconstruct(vKeysUn1,vKeysUn2,vMatches12,T21,vP3D,vbTriangulated);
-    }
-
-
-    cv::Mat KannalaBrandt8::toK() {
-        cv::Mat K = (cv::Mat_<float>(3, 3)
-                << mvParameters[0], 0.f, mvParameters[2], 0.f, mvParameters[1], mvParameters[3], 0.f, 0.f, 1.f);
-        return K;
-    }
-    Eigen::Matrix3f KannalaBrandt8::toK_() {
-        Eigen::Matrix3f K;
-        K << mvParameters[0], 0.f, mvParameters[2], 0.f, mvParameters[1], mvParameters[3], 0.f, 0.f, 1.f;
-        return K;
-    }
-
-
-    bool KannalaBrandt8::epipolarConstrain(GeometricCamera* pCamera2, const cv::KeyPoint &kp1, const cv::KeyPoint &kp2,
-                                           const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc) {
-        Eigen::Vector3f p3D;
-        return TriangulateMatches(pCamera2,kp1,kp2,R12,t12,sigmaLevel,unc,p3D) > 0.0001f;
-    }
-
-    bool KannalaBrandt8::matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, GeometricCamera* pOther,
-                                             Sophus::SE3f& Tcw1, Sophus::SE3f& Tcw2,
-                                             const float sigmaLevel1, const float sigmaLevel2,
-                                             Eigen::Vector3f& x3Dtriangulated){
-        Eigen::Matrix<float,3,4> eigTcw1 = Tcw1.matrix3x4();
-        Eigen::Matrix3f Rcw1 = eigTcw1.block<3,3>(0,0);
-        Eigen::Matrix3f Rwc1 = Rcw1.transpose();
-        Eigen::Matrix<float,3,4> eigTcw2 = Tcw2.matrix3x4();
-        Eigen::Matrix3f Rcw2 = eigTcw2.block<3,3>(0,0);
-        Eigen::Matrix3f Rwc2 = Rcw2.transpose();
-
-        cv::Point3f ray1c = unproject(kp1.pt);
-        cv::Point3f ray2c = pOther->unproject(kp2.pt);
-
-        Eigen::Vector3f r1(ray1c.x, ray1c.y, ray1c.z);
-        Eigen::Vector3f r2(ray2c.x, ray2c.y, ray2c.z);
-
-        //Check parallax between rays
-        Eigen::Vector3f ray1 = Rwc1 * r1;
-        Eigen::Vector3f ray2 = Rwc2 * r2;
-
-        const float cosParallaxRays = ray1.dot(ray2)/(ray1.norm() * ray2.norm());
-
-        //If parallax is lower than 0.9998, reject this match
-        if(cosParallaxRays > 0.9998){
-            return false;
-        }
-
-        //Parallax is good, so we try to triangulate
-        cv::Point2f p11,p22;
-
-        p11.x = ray1c.x;
-        p11.y = ray1c.y;
-
-        p22.x = ray2c.x;
-        p22.y = ray2c.y;
-
-        Eigen::Vector3f x3D;
-
-        Triangulate(p11,p22,eigTcw1,eigTcw2,x3D);
-
-        //Check triangulation in front of cameras
-        float z1 = Rcw1.row(2).dot(x3D)+Tcw1.translation()(2);
-        if(z1<=0){  //Point is not in front of the first camera
-            return false;
-        }
-
-
-        float z2 = Rcw2.row(2).dot(x3D)+Tcw2.translation()(2);
-        if(z2<=0){ //Point is not in front of the first camera
-            return false;
-        }
-
-        //Check reprojection error in first keyframe
-        //  -Transform point into camera reference system
-        Eigen::Vector3f x3D1 = Rcw1 * x3D + Tcw1.translation();
-        Eigen::Vector2f uv1 = project(x3D1);
-
-        float errX1 = uv1(0) - kp1.pt.x;
-        float errY1 = uv1(1) - kp1.pt.y;
-
-        if((errX1*errX1+errY1*errY1)>5.991*sigmaLevel1){   //Reprojection error is high
-            return false;
-        }
-
-        //Check reprojection error in second keyframe;
-        //  -Transform point into camera reference system
-        Eigen::Vector3f x3D2 = Rcw2 * x3D + Tcw2.translation(); // avoid using q
-        Eigen::Vector2f uv2 = pOther->project(x3D2);
-
-        float errX2 = uv2(0) - kp2.pt.x;
-        float errY2 = uv2(1) - kp2.pt.y;
-
-        if((errX2*errX2+errY2*errY2)>5.991*sigmaLevel2){   //Reprojection error is high
-            return false;
-        }
-
-        //Since parallax is big enough and reprojection errors are low, this std::pair of points
-        //can be considered as a match
-        x3Dtriangulated = x3D;
-
-        return true;
-    }
-
-    float KannalaBrandt8::TriangulateMatches(GeometricCamera *pCamera2, const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc, Eigen::Vector3f& p3D) {
-
-        Eigen::Vector3f r1 = unprojectEig(kp1.pt);
-        Eigen::Vector3f r2 = pCamera2->unprojectEig(kp2.pt);
-
-        //Check parallax
-        Eigen::Vector3f r21 = R12 * r2;
-
-        const float cosParallaxRays = r1.dot(r21)/(r1.norm() *r21.norm());
-
-        if(cosParallaxRays > 0.9998){
-            return -1;
-        }
-
-        //Parallax is good, so we try to triangulate
-        cv::Point2f p11,p22;
-
-        p11.x = r1[0];
-        p11.y = r1[1];
-
-        p22.x = r2[0];
-        p22.y = r2[1];
-
-        Eigen::Vector3f x3D;
-        Eigen::Matrix<float,3,4> Tcw1;
-        Tcw1 << Eigen::Matrix3f::Identity(), Eigen::Vector3f::Zero();
-
-        Eigen::Matrix<float,3,4> Tcw2;
-
-        Eigen::Matrix3f R21 = R12.transpose();
-        Tcw2 << R21, -R21 * t12;
-
-
-        Triangulate(p11,p22,Tcw1,Tcw2,x3D);
-        // cv::Mat x3Dt = x3D.t();
-
-        float z1 = x3D(2);
-        if(z1 <= 0){
-            return -2;
-        }
-
-        float z2 = R21.row(2).dot(x3D)+Tcw2(2,3);
-        if(z2<=0){
-            return -3;
-        }
-
-        //Check reprojection error
-        Eigen::Vector2f uv1 = project(x3D);
-
-        float errX1 = uv1(0) - kp1.pt.x;
-        float errY1 = uv1(1) - kp1.pt.y;
-
-        if((errX1*errX1+errY1*errY1)>5.991 * sigmaLevel){   //Reprojection error is high
-            return -4;
-        }
-
-        Eigen::Vector3f x3D2 = R21 * x3D + Tcw2.col(3);
-        Eigen::Vector2f uv2 = pCamera2->project(x3D2);
-
-        float errX2 = uv2(0) - kp2.pt.x;
-        float errY2 = uv2(1) - kp2.pt.y;
-
-        if((errX2*errX2+errY2*errY2)>5.991 * unc){   //Reprojection error is high
-            return -5;
-        }
-
-        p3D = x3D;
-
-        return z1;
-    }
-
-    std::ostream & operator<<(std::ostream &os, const KannalaBrandt8 &kb) {
-        os << kb.mvParameters[0] << " " << kb.mvParameters[1] << " " << kb.mvParameters[2] << " " << kb.mvParameters[3] << " "
-           << kb.mvParameters[4] << " " << kb.mvParameters[5] << " " << kb.mvParameters[6] << " " << kb.mvParameters[7];
-        return os;
-    }
-
-    std::istream & operator>>(std::istream &is, KannalaBrandt8 &kb) {
-        float nextParam;
-        for(std::size_t i = 0; i < 8; i++){
-            assert(is.good());  //Make sure the input stream is good
-            is >> nextParam;
-            kb.mvParameters[i] = nextParam;
-
-        }
-        return is;
-    }
-
-    void KannalaBrandt8::Triangulate(const cv::Point2f &p1, const cv::Point2f &p2, const Eigen::Matrix<float,3,4> &Tcw1,
-                                     const Eigen::Matrix<float,3,4> &Tcw2, Eigen::Vector3f &x3D)
-    {
-        Eigen::Matrix<float,4,4> A;
-        A.row(0) = p1.x*Tcw1.row(2)-Tcw1.row(0);
-        A.row(1) = p1.y*Tcw1.row(2)-Tcw1.row(1);
-        A.row(2) = p2.x*Tcw2.row(2)-Tcw2.row(0);
-        A.row(3) = p2.y*Tcw2.row(2)-Tcw2.row(1);
-
-        Eigen::JacobiSVD<Eigen::Matrix4f> svd(A, Eigen::ComputeFullV);
-        Eigen::Vector4f x3Dh = svd.matrixV().col(3);
-        x3D = x3Dh.head(3)/x3Dh(3);
-    }
-
-    bool KannalaBrandt8::IsEqual(GeometricCamera* pCam)
-    {
-        if(pCam->GetType() != GeometricCamera::CAM_FISHEYE)
-            return false;
-
-        KannalaBrandt8* pKBCam = (KannalaBrandt8*) pCam;
-
-        if(std::abs(precision - pKBCam->GetPrecision()) > 1e-6)
-            return false;
-
-        if(size() != pKBCam->size())
-            return false;
-
-        bool is_same_camera = true;
-        for(std::size_t i=0; i<size(); ++i)
-        {
-            if(std::abs(mvParameters[i] - pKBCam->getParameter(i)) > 1e-6)
-            {
-                is_same_camera = false;
-                break;
-            }
-        }
-        return is_same_camera;
-    }
-
+// BOOST_CLASS_EXPORT_GUID(KannalaBrandt8, "KannalaBrandt8")
+
+KannalaBrandt8::KannalaBrandt8()
+  : GeometricCamera(std::vector<float>(8, 0.f))
+  , precision_(1e-6)
+{
+  id_   = next_id++;
+  type_ = Type::Fisheye;
 }
+
+KannalaBrandt8::KannalaBrandt8(const std::vector<float>& params)
+  : GeometricCamera(params)
+  , mvLappingArea(2, 0)
+  , precision_(1e-6)
+{
+  assert(params_.size() == 8);
+  id_   = next_id++;
+  type_ = Type::Fisheye;
+}
+
+Eigen::Vector2f KannalaBrandt8::project(const Eigen::Vector3f& pt) const {
+  // Compute angles theta and psi.
+  const float theta = std::atan2(std::sqrt(pt.x() * pt.x() + pt.y() * pt.y()), pt.z());
+  const float psi   = std::atan2(pt.y(), pt.x());
+
+  // Compute the order 9 polynomial r(theta).
+  const float theta_2nd = theta * theta;
+  const float theta_3rd = theta * theta_2nd;
+  const float theta_5th = theta_3rd * theta_2nd;
+  const float theta_7th = theta_5th * theta_2nd;
+  const float theta_9th = theta_7th * theta_2nd;
+  const float r         = theta                   // theta
+                        + params_[4] * theta_3rd  // k0 * theta^3
+                        + params_[5] * theta_5th  // k1 * theta^5
+                        + params_[6] * theta_7th  // k2 * theta^7
+                        + params_[7] * theta_9th; // k3 * theta^9
+
+  Eigen::Vector2f projected;
+  projected[0] = params_[0] * r * std::cos(psi) + params_[2]; // fx * r * cos(psi) + cx
+  projected[1] = params_[1] * r * std::sin(psi) + params_[3]; // fy * r * sin(psi) + cy
+
+  return projected;
+}
+
+cv::Point2f KannalaBrandt8::project(const cv::Point3f& pt) const {
+  return Converter::toCvPoint2f(project(Converter::toEigenVector3f(pt)));
+}
+
+Eigen::Vector3f KannalaBrandt8::unproject(const Eigen::Vector2f& pt) const {
+  // Convert pixel coordinates to world coordinates.
+  const cv::Point2f pt_w(
+    (pt.x() - params_[2]) / params_[0], // (u - cx) / fx
+    (pt.y() - params_[3]) / params_[1]  // (v - cy) / fy
+  );
+
+  // Compute initial guess for theta, clamp to [-pi/2, pi/2]
+  const float distorted_theta = std::clamp(
+    std::sqrt(pt_w.x * pt_w.x + pt_w.y * pt_w.y),
+    -M_PI_2f,
+    M_PI_2f
+  );
+
+  float scale = 1.f;
+
+  // Use Newton method to correct for the distortion iteratively until
+  // convergence if the distortion is not negligible.
+  if (distorted_theta > 1e-8) {
+    float theta = distorted_theta;
+    for (int j = 0; j < 10; j++) {
+      const float theta_2nd = theta * theta;
+      const float theta_4th = theta_2nd * theta_2nd;
+      const float theta_6th = theta_4th * theta_2nd;
+      const float theta_8th = theta_4th * theta_4th;
+
+      const float k0_term = params_[4] * theta_2nd; // k0 * theta^2
+      const float k1_term = params_[5] * theta_4th; // k1 * theta^4
+      const float k2_term = params_[6] * theta_6th; // k2 * theta^6
+      const float k3_term = params_[7] * theta_8th; // k3 * theta^8
+
+      const float polynomial = theta * (1 + k0_term + k1_term + k2_term + k3_term);
+      const float derivative = 1 + 3 * k0_term + 5 * k1_term + 7 * k2_term + 9 * k3_term;
+
+      const float theta_correction = (polynomial - distorted_theta) / derivative;
+
+      theta -= theta_correction;
+
+      if (std::abs(theta_correction) < precision_) {
+        break;
+      }
+    }
+
+    // scale = theta - distorted_theta;
+    scale = std::tan(theta) / distorted_theta;
+  }
+
+  return Eigen::Vector3f(pt_w.x * scale, pt_w.y * scale, 1.f);
+}
+
+cv::Point3f KannalaBrandt8::unproject(const cv::Point2f& pt) const {
+  return Converter::toCvPoint3f(unproject(Converter::toEigenVector2f(pt)));
+}
+
+GeometricCamera::JacobianMatrix KannalaBrandt8::jacobian(
+  const Eigen::Vector3f& pt
+) const {
+  // Compute squared powers of x, y, and z.
+  const double x_2nd = pt.x() * pt.x();
+  const double y_2nd = pt.y() * pt.y();
+  const double z_2nd = pt.z() * pt.z();
+
+  // Compute radius in the image plane and its powers.
+  const double r_2nd = x_2nd + y_2nd;
+  const double r     = std::sqrt(r_2nd);
+  const double r_3rd = r_2nd * r;
+
+  // Compute powers of theta.
+  const double theta = std::atan2(r, pt.z());
+  const double theta_2nd = theta * theta;
+  const double theta_3rd = theta_2nd * theta;
+  const double theta_4th = theta_2nd * theta_2nd;
+  const double theta_5th = theta_4th * theta;
+  const double theta_6th = theta_2nd * theta_4th;
+  const double theta_7th = theta_6th * theta;
+  const double theta_8th = theta_4th * theta_4th;
+  const double theta_9th = theta_8th * theta;
+
+  // Compute f(theta) - radial distortion polynomial.
+  const double f = theta
+                 + theta_3rd * params_[4]
+                 + theta_5th * params_[5]
+                 + theta_7th * params_[6]
+                 + theta_9th * params_[7];
+
+  // Compute f'(theta) - derivative of the radial distortion polynomial.
+  double f_d = 1
+                      + 3 * params_[4] * theta_2nd
+                      + 5 * params_[5] * theta_4th
+                      + 7 * params_[6] * theta_6th
+                      + 9 * params_[7] * theta_8th;
+
+  // Compute the Jacobian matrix.
+  JacobianMatrix jacobian;
+
+  double factor  = f_d * pt.z() / (r_2nd * (r_2nd + z_2nd));
+  jacobian(0, 0) = params_[0] * (x_2nd * factor + y_2nd * f / r_3rd);
+  jacobian(1, 1) = params_[1] * (y_2nd * factor + x_2nd * f / r_3rd);
+
+  factor = f_d * pt.z() * pt.y() * pt.x() / (r_2nd * (r_2nd + z_2nd)) - f * pt.y() * pt.x() / r_3rd;
+  jacobian(0, 1) = params_[0] * factor;
+  jacobian(1, 0) = params_[1] * factor;
+
+  factor = f_d / (r_2nd + z_2nd);
+  jacobian(0, 2) = -params_[0] * pt.x() * factor;
+  jacobian(1, 2) = -params_[1] * pt.y() * factor;
+
+  return jacobian;
+}
+
+Eigen::Matrix3f KannalaBrandt8::K() const {
+  Eigen::Matrix3f K;
+  K << params_[0],        0.f, params_[2],
+              0.f, params_[1], params_[3],
+              0.f,        0.f,        1.f;
+  return K;
+}
+
+float KannalaBrandt8::uncertainty(const Eigen::Vector2f&) const {
+  return 1.f;
+}
+
+bool KannalaBrandt8::reconstructFromTwoViews(
+  const std::vector<cv::KeyPoint>& keypoints_1,
+  const std::vector<cv::KeyPoint>& keypoints_2,
+  const std::vector<int>& matches_12,
+  Sophus::SE3f& T_21,
+  std::vector<cv::Point3f>& points,
+  std::vector<bool>& triangulated_flags
+) {
+  if (!reconstructor_) {
+    reconstructor_ = std::make_unique<TwoViewReconstruction>(K());
+  }
+
+  // Extract 2D points from keypoints.
+  std::vector<cv::Point2f> points_1(keypoints_1.size());
+  std::transform(
+    keypoints_1.begin(),
+    keypoints_1.end(),
+    points_1.begin(),
+    [](const cv::KeyPoint& kp) {
+      return kp.pt;
+    }
+  );
+  std::vector<cv::Point2f> points_2(keypoints_2.size());
+  std::transform(
+    keypoints_2.begin(),
+    keypoints_2.end(),
+    points_2.begin(),
+    [](const cv::KeyPoint& kp) {
+      return kp.pt;
+    }
+  );
+
+  // Undistort the points using the Fisheye model.
+  const cv::Mat D = (cv::Mat_<float>(4, 1) << params_[4], params_[5], params_[6], params_[7]);
+  const cv::Mat R = cv::Mat::eye(3, 3, CV_32F);
+  const cv::Mat K_cv = Converter::toCvMat(K());
+  cv::fisheye::undistortPoints(points_1, points_1, K_cv, D, R, K_cv);
+  cv::fisheye::undistortPoints(points_2, points_2, K_cv, D, R, K_cv);
+
+  // Update the original keypoints with the undistorted points.
+  std::vector<cv::KeyPoint> undistorted_keypoints_1(keypoints_1.size());
+  std::transform(
+    points_1.begin(),
+    points_1.end(),
+    undistorted_keypoints_1.begin(),
+    [](const cv::Point2f& pt) {
+      cv::KeyPoint kp;
+      kp.pt = pt;
+      return kp;
+    }
+  );
+  std::vector<cv::KeyPoint> undistorted_keypoints_2(keypoints_2.size());
+  std::transform(
+    points_2.begin(),
+    points_2.end(),
+    undistorted_keypoints_2.begin(),
+    [](const cv::Point2f& pt) {
+      cv::KeyPoint kp;
+      kp.pt = pt;
+      return kp;
+    }
+  );
+
+  return reconstructor_->reconstruct(
+    undistorted_keypoints_1,
+    undistorted_keypoints_2,
+    matches_12,
+    T_21,
+    points,
+    triangulated_flags
+  );
+}
+
+bool KannalaBrandt8::checkEpipolarConstrain(
+  const GeometricCamera& camera_2,
+  const cv::KeyPoint& keypoint_1,
+  const cv::KeyPoint& keypoint_2,
+  const Eigen::Matrix3f& R_12,
+  const Eigen::Vector3f& t_12,
+  const float sigma_level,
+  const float uncertainty
+) const {
+  Eigen::Vector3f triangulated_point;
+  const bool success = triangulateKeyPoints(
+    camera_2,
+    keypoint_1,
+    keypoint_2,
+    R_12,
+    t_12,
+    sigma_level,
+    uncertainty,
+    triangulated_point
+  );
+  return success;
+}
+
+bool KannalaBrandt8::triangulateKeyPoints(
+  const GeometricCamera& camera_2,
+  const cv::KeyPoint& keypoint_1,
+  const cv::KeyPoint& keypoint_2,
+  const Eigen::Matrix3f& R_12,
+  const Eigen::Vector3f& t_12,
+  const float sigma_level,
+  const float uncertainty,
+  Eigen::Vector3f& triangulated_point
+) const {
+  // Unproject keypoints to 3D rays.
+  Eigen::Vector3f ray_1 = Converter::toEigenVector3f(unproject(keypoint_1.pt));
+  Eigen::Vector3f ray_2 = Converter::toEigenVector3f(camera_2.unproject(keypoint_2.pt));
+
+  // Rotate the second ray to the first camera frame.
+  Eigen::Vector3f ray_2_in_1 = R_12 * ray_2;
+
+  // Check parallax.
+  const float cos_parallax = ray_1.dot(ray_2_in_1) / (ray_1.norm() * ray_2_in_1.norm());
+  if (cos_parallax > 0.9998f) {
+    return false;
+  }
+
+  // Triangulate 3D point.
+  Eigen::Vector3f point;
+
+  Eigen::Matrix<float, 3, 4> T_c1w;
+  T_c1w << Eigen::Matrix3f::Identity(), Eigen::Vector3f::Zero();
+
+  Eigen::Matrix<float, 3, 4> T_c2w;
+  const Eigen::Matrix3f R_21 = R_12.transpose();
+  T_c2w << R_21, -R_21 * t_12;
+
+  GeometricTools::triangulate(ray_1, ray_2, T_c1w, T_c2w, point);
+
+  // Check depth in camera 1 frame.
+  if (point.z() <= 0.f) {
+    return false;
+  }
+
+  // Check depth in camera 2 frame.
+  if (R_21.row(2).dot(point) + T_c2w(2, 3) <= 0.f) {
+    return false;
+  }
+
+  // Check reprojection error for keypoint 1.
+  if (checkReprojectionError(project(point), keypoint_1.pt, sigma_level)) {
+    return false;
+  }
+
+  // Check reprojection error for keypoint 2.
+  const Eigen::Vector3f triangulated_in_2 = R_21 * point + T_c2w.col(3);
+  if (checkReprojectionError(camera_2.project(triangulated_in_2), keypoint_2.pt, uncertainty)) {
+    return false;
+  }
+
+  triangulated_point = point;
+
+  return true;
+}
+
+float KannalaBrandt8::precision() const {
+  return precision_;
+}
+
+bool KannalaBrandt8::isEqual(const GeometricCamera& other_camera) const {
+  // Check if the type matches.
+  if (other_camera.type() != Type::Fisheye) {
+    return false;
+  }
+
+  const KannalaBrandt8* other_kb = dynamic_cast<const KannalaBrandt8*>(&other_camera);
+
+  // Check if the precision matches.
+  if (std::abs(precision_ - other_kb->precision()) > 1e-6) {
+    return false;
+  }
+
+  // Check if the number of parameters matches.
+  if (getNumParams() != other_kb->getNumParams()) {
+    return false;
+  }
+
+  // Check if the parameters match.
+  bool is_same = true;
+  for (std::size_t i = 0; i < getNumParams(); ++i) {
+    if (std::abs(params_[i] - other_kb->getParameter(i)) > 1e-6) {
+      is_same = false;
+      break;
+    }
+  }
+
+  return is_same;
+}
+
+std::ostream& operator<<(std::ostream& os, const KannalaBrandt8& kb) {
+  os << kb.params_[0] << " " << kb.params_[1] << " " << kb.params_[2] << " "
+     << kb.params_[3] << " " << kb.params_[4] << " " << kb.params_[5] << " "
+     << kb.params_[6] << " " << kb.params_[7];
+  return os;
+}
+
+std::istream& operator>>(std::istream& is, KannalaBrandt8& kb) {
+  float nextParam;
+  for (std::size_t i = 0; i < 8; i++) {
+    assert(is.good()); // Make sure the input stream is good
+    is >> nextParam;
+    kb.params_[i] = nextParam;
+  }
+  return is;
+}
+
+bool KannalaBrandt8::checkReprojectionError(
+  const Eigen::Vector2f& projected_point,
+  const cv::Point2f& keypoint,
+  const float sigma_level
+) const {
+  const float dx = projected_point.x() - keypoint.x;
+  const float dy = projected_point.y() - keypoint.y;
+  return (dx * dx + dy * dy) > 5.991f * sigma_level;
+}
+
+} // namespace ORB_SLAM3

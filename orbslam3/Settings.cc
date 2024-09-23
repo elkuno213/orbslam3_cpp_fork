@@ -25,6 +25,7 @@
 #include "orbslam3/CameraModels/GeometricCamera.h"
 #include "orbslam3/CameraModels/KannalaBrandt8.h"
 #include "orbslam3/CameraModels/Pinhole.h"
+#include "orbslam3/Converter.h"
 #include "orbslam3/Frame.h"
 #include "orbslam3/Settings.h"
 #include "orbslam3/System.h"
@@ -481,9 +482,9 @@ namespace ORB_SLAM3 {
 
     void Settings::precomputeRectificationMaps() {
         //Precompute rectification maps, new calibrations, ...
-        cv::Mat K1 = static_cast<Pinhole*>(calibration1_)->toK();
+        cv::Mat K1 = Converter::toCvMat(static_cast<Pinhole*>(calibration1_)->K());
         K1.convertTo(K1,CV_64F);
-        cv::Mat K2 = static_cast<Pinhole*>(calibration2_)->toK();
+        cv::Mat K2 = Converter::toCvMat(static_cast<Pinhole*>(calibration2_)->K());
         K2.convertTo(K2,CV_64F);
 
         cv::Mat cvTlr;
@@ -534,7 +535,7 @@ namespace ORB_SLAM3 {
             output << "Kannala-Brandt";
         }
         output << ")" << ": [";
-        for(std::size_t i = 0; i < settings.originalCalib1_->size(); i++){
+        for(std::size_t i = 0; i < settings.originalCalib1_->getNumParams(); i++){
             output << " " << settings.originalCalib1_->getParameter(i);
         }
         output << " ]" << std::endl;
@@ -556,7 +557,7 @@ namespace ORB_SLAM3 {
                 output << "Kannala-Brandt";
             }
             output << "" << ": [";
-            for(std::size_t i = 0; i < settings.originalCalib2_->size(); i++){
+            for(std::size_t i = 0; i < settings.originalCalib2_->getNumParams(); i++){
                 output << " " << settings.originalCalib2_->getParameter(i);
             }
             output << " ]" << std::endl;
@@ -575,14 +576,14 @@ namespace ORB_SLAM3 {
 
         if(settings.bNeedToRectify_){
             output << "\t-Camera 1 parameters after rectification: [ ";
-            for(std::size_t i = 0; i < settings.calibration1_->size(); i++){
+            for(std::size_t i = 0; i < settings.calibration1_->getNumParams(); i++){
                 output << " " << settings.calibration1_->getParameter(i);
             }
             output << " ]" << std::endl;
         }
         else if(settings.bNeedToResize1_){
             output << "\t-Camera 1 parameters after resize: [ ";
-            for(std::size_t i = 0; i < settings.calibration1_->size(); i++){
+            for(std::size_t i = 0; i < settings.calibration1_->getNumParams(); i++){
                 output << " " << settings.calibration1_->getParameter(i);
             }
             output << " ]" << std::endl;
@@ -590,7 +591,7 @@ namespace ORB_SLAM3 {
             if((settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO) &&
                 settings.cameraType_ == Settings::KannalaBrandt){
                 output << "\t-Camera 2 parameters after resize: [ ";
-                for(std::size_t i = 0; i < settings.calibration2_->size(); i++){
+                for(std::size_t i = 0; i < settings.calibration2_->getNumParams(); i++){
                     output << " " << settings.calibration2_->getParameter(i);
                 }
                 output << " ]" << std::endl;

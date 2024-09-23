@@ -50,6 +50,7 @@
 #include <Eigen/Sparse>
 // Local
 #include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Converter.h"
 #include "orbslam3/Frame.h"
 #include "orbslam3/MLPnPsolver.h"
 #include "orbslam3/MapPoint.h"

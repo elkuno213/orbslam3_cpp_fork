@@ -22,6 +22,7 @@
 #include <glog/logging.h>
 // Local
 #include "orbslam3/Atlas.h"
+#include "orbslam3/Converter.h"
 #include "orbslam3/GeometricTools.h"
 #include "orbslam3/KeyFrame.h"
 #include "orbslam3/LocalMapping.h"
@@ -561,8 +562,8 @@ void LocalMapping::CreateNewMapPoints()
             }
 
             // Check parallax between rays
-            Eigen::Vector3f xn1 = pCamera1->unprojectEig(kp1.pt);
-            Eigen::Vector3f xn2 = pCamera2->unprojectEig(kp2.pt);
+            Eigen::Vector3f xn1 = Converter::toEigenVector3f(pCamera1->unproject(kp1.pt));
+            Eigen::Vector3f xn2 = Converter::toEigenVector3f(pCamera2->unproject(kp2.pt));
 
             Eigen::Vector3f ray1 = Rwc1 * xn1;
             Eigen::Vector3f ray2 = Rwc2 * xn2;

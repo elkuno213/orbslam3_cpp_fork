@@ -1065,7 +1065,7 @@ namespace ORB_SLAM3
 
                         }
 
-                        if(bCoarse || pCamera1->epipolarConstrain(pCamera2,kp1,kp2,R12,t12,pKF1->mvLevelSigma2[kp1.octave],pKF2->mvLevelSigma2[kp2.octave])) // MODIFICATION_2
+                        if(bCoarse || pCamera1->checkEpipolarConstrain(*pCamera2,kp1,kp2,R12,t12,pKF1->mvLevelSigma2[kp1.octave],pKF2->mvLevelSigma2[kp2.octave])) // MODIFICATION_2
                         {
                             bestIdx2 = idx2;
                             bestDist = dist;

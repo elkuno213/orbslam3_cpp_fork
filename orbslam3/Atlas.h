@@ -67,7 +67,7 @@ class Atlas
         ar & Frame::nNextId;
         ar & KeyFrame::nNextId;
         ar & MapPoint::nNextId;
-        ar & GeometricCamera::nNextId;
+        ar & GeometricCamera::next_id;
         ar & mnLastInitKFidMap;
     }
 

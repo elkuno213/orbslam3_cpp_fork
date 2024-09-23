@@ -60,7 +60,7 @@ namespace ORB_SLAM3 {
                      -z , 0.f, x, 0.f, 1.f, 0.f,
                      y ,  -x , 0.f, 0.f, 0.f, 1.f;
 
-        _jacobianOplusXi = -pCamera->projectJac(xyz_trans) * SE3deriv;
+        _jacobianOplusXi = -pCamera->jacobian(xyz_trans.cast<float>()).cast<double>() * SE3deriv;
     }
 
     bool EdgeSE3ProjectXYZOnlyPoseToBody::read(std::istream& is){
@@ -104,7 +104,7 @@ namespace ORB_SLAM3 {
                 -z_w , 0.f, x_w, 0.f, 1.f, 0.f,
                 y_w ,  -x_w , 0.f, 0.f, 0.f, 1.f;
 
-        _jacobianOplusXi = -pCamera->projectJac(X_r) * mTrl.rotation().toRotationMatrix() * SE3deriv;
+        _jacobianOplusXi = -pCamera->jacobian(X_r.cast<float>()).cast<double>() * mTrl.rotation().toRotationMatrix() * SE3deriv;
     }
 
     EdgeSE3ProjectXYZ::EdgeSE3ProjectXYZ() : BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, g2o::VertexSE3Expmap>() {
@@ -148,7 +148,7 @@ namespace ORB_SLAM3 {
         double y = xyz_trans[1];
         double z = xyz_trans[2];
 
-        auto projectJac = -pCamera->projectJac(xyz_trans);
+        auto projectJac = -pCamera->jacobian(xyz_trans.cast<float>()).cast<double>();
 
         _jacobianOplusXi =  projectJac * T.rotation().toRotationMatrix();
 
@@ -199,7 +199,7 @@ namespace ORB_SLAM3 {
         Eigen::Vector3d X_l = T_lw.map(X_w);
         Eigen::Vector3d X_r = mTrl.map(T_lw.map(X_w));
 
-        _jacobianOplusXi =  -pCamera->projectJac(X_r) * T_rw.rotation().toRotationMatrix();
+        _jacobianOplusXi =  -pCamera->jacobian(X_r.cast<float>()).cast<double>() * T_rw.rotation().toRotationMatrix();
 
         double x = X_l[0];
         double y = X_l[1];
@@ -210,7 +210,7 @@ namespace ORB_SLAM3 {
                 -z , 0.f, x, 0.f, 1.f, 0.f,
                 y ,  -x , 0.f, 0.f, 0.f, 1.f;
 
-        _jacobianOplusXj = -pCamera->projectJac(X_r) * mTrl.rotation().toRotationMatrix() * SE3deriv;
+        _jacobianOplusXj = -pCamera->jacobian(X_r.cast<float>()).cast<double>() * mTrl.rotation().toRotationMatrix() * SE3deriv;
     }
 
 
@@ -229,12 +229,12 @@ namespace ORB_SLAM3 {
         is >> cam2world[6];
 
         float nextParam;
-        for(std::size_t i = 0; i < pCamera1->size(); i++){
+        for(std::size_t i = 0; i < pCamera1->getNumParams(); i++){
             is >> nextParam;
             pCamera1->setParameter(nextParam,i);
         }
 
-        for(std::size_t i = 0; i < pCamera2->size(); i++){
+        for(std::size_t i = 0; i < pCamera2->getNumParams(); i++){
             is >> nextParam;
             pCamera2->setParameter(nextParam,i);
         }
@@ -251,11 +251,11 @@ namespace ORB_SLAM3 {
             os << lv[i] << " ";
         }
 
-        for(std::size_t i = 0; i < pCamera1->size(); i++){
+        for(std::size_t i = 0; i < pCamera1->getNumParams(); i++){
             os << pCamera1->getParameter(i) << " ";
         }
 
-        for(std::size_t i = 0; i < pCamera2->size(); i++){
+        for(std::size_t i = 0; i < pCamera2->getNumParams(); i++){
             os << pCamera2->getParameter(i) << " ";
         }
 

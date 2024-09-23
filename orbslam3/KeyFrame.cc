@@ -905,11 +905,11 @@ void KeyFrame::PreSave(std::set<KeyFrame*>& spKF,std::set<MapPoint*>& spMP, std:
     //Camera data
     mnBackupIdCamera = -1;
     if(mpCamera && spCam.find(mpCamera) != spCam.end())
-        mnBackupIdCamera = mpCamera->GetId();
+        mnBackupIdCamera = mpCamera->id();
 
     mnBackupIdCamera2 = -1;
     if(mpCamera2 && spCam.find(mpCamera2) != spCam.end())
-        mnBackupIdCamera2 = mpCamera2->GetId();
+        mnBackupIdCamera2 = mpCamera2->id();
 
     //Inertial data
     mBackupPrevKFId = -1;

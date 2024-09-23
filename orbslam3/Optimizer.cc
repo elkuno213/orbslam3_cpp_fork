@@ -2750,7 +2750,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pKFi->mpCamera->uncertainty2(obs);
+                    const float unc2 = pKFi->mpCamera->uncertainty(obs.cast<float>());
 
                     const float &invSigma2 = pKFi->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
@@ -2781,7 +2781,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pKFi->mpCamera->uncertainty2(obs.head(2));
+                    const float unc2 = pKFi->mpCamera->uncertainty(obs.head(2).cast<float>());
 
                     const float &invSigma2 = pKFi->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix3d::Identity()*invSigma2);
@@ -2815,7 +2815,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
                         e->setMeasurement(obs);
 
                         // Add here uncerteinty
-                        const float unc2 = pKFi->mpCamera->uncertainty2(obs);
+                        const float unc2 = pKFi->mpCamera->uncertainty(obs.cast<float>());
 
                         const float &invSigma2 = pKFi->mvInvLevelSigma2[kpUn.octave]/unc2;
                         e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
@@ -4573,7 +4573,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pFrame->mpCamera->uncertainty2(obs);
+                    const float unc2 = pFrame->mpCamera->uncertainty(obs.cast<float>());
 
                     const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
@@ -4604,7 +4604,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pFrame->mpCamera->uncertainty2(obs.head(2));
+                    const float unc2 = pFrame->mpCamera->uncertainty(obs.head(2).cast<float>());
 
                     const float &invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix3d::Identity()*invSigma2);
@@ -4635,7 +4635,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pFrame->mpCamera->uncertainty2(obs);
+                    const float unc2 = pFrame->mpCamera->uncertainty(obs.cast<float>());
 
                     const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
@@ -4956,7 +4956,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pFrame->mpCamera->uncertainty2(obs);
+                    const float unc2 = pFrame->mpCamera->uncertainty(obs.cast<float>());
 
                     const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
@@ -4987,7 +4987,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pFrame->mpCamera->uncertainty2(obs.head(2));
+                    const float unc2 = pFrame->mpCamera->uncertainty(obs.head(2).cast<float>());
 
                     const float &invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix3d::Identity()*invSigma2);
@@ -5018,7 +5018,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
                     e->setMeasurement(obs);
 
                     // Add here uncerteinty
-                    const float unc2 = pFrame->mpCamera->uncertainty2(obs);
+                    const float unc2 = pFrame->mpCamera->uncertainty(obs.cast<float>());
 
                     const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave]/unc2;
                     e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);

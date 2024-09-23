@@ -24,6 +24,7 @@
 #include <opencv2/core.hpp>
 // Local
 #include "orbslam3/CameraModels/GeometricCamera.h"
+#include "orbslam3/Converter.h"
 #include "orbslam3/KeyFrame.h"
 #include "orbslam3/MapPoint.h"
 #include "orbslam3/ORBmatcher.h"

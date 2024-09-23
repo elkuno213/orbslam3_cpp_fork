@@ -121,20 +121,20 @@ GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam)
         GeometricCamera* pCam_i = mvpCameras[i];
         if(!pCam) LOG(ERROR) << "Not pCam";
         if(!pCam_i) LOG(ERROR) << "Not pCam_i";
-        if(pCam->GetType() != pCam_i->GetType())
+        if(pCam->type() != pCam_i->type())
             continue;
 
-        if(pCam->GetType() == GeometricCamera::CAM_PINHOLE)
+        if(pCam->type() == GeometricCamera::Type::Pinhole)
         {
-            if(((Pinhole*)pCam_i)->IsEqual(pCam))
+            if(((Pinhole*)pCam_i)->isEqual(*pCam))
             {
                 bAlreadyInMap = true;
                 index_cam = i;
             }
         }
-        else if(pCam->GetType() == GeometricCamera::CAM_FISHEYE)
+        else if(pCam->type() == GeometricCamera::Type::Fisheye)
         {
-            if(((KannalaBrandt8*)pCam_i)->IsEqual(pCam))
+            if(((KannalaBrandt8*)pCam_i)->isEqual(*pCam))
             {
                 bAlreadyInMap = true;
                 index_cam = i;
@@ -336,7 +336,7 @@ void Atlas::PostLoad()
     std::map<unsigned int,GeometricCamera*> mpCams;
     for(auto pCam : mvpCameras)
     {
-        mpCams[pCam->GetId()] = pCam;
+        mpCams[pCam->id()] = pCam;
     }
 
     mspMaps.clear();
