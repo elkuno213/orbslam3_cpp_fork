@@ -1,20 +1,23 @@
 /**
-* This file is part of ORB-SLAM3
-*
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-*
-* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM3
+ *
+ * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
+ * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
+ * University of Zaragoza.
+ *
+ * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef CONVERTER_H
 #define CONVERTER_H
@@ -27,53 +30,38 @@
 #include <orbslam3/external/Sophus/sophus/se3.hpp>
 #include <orbslam3/external/Sophus/sophus/sim3.hpp>
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3::Converter {
 
-class Converter
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    static std::vector<cv::Mat> toDescriptorVector(const cv::Mat &Descriptors);
+// ──────────────────────────── //
+// Conversion to OpenCV
 
-    static g2o::SE3Quat toSE3Quat(const cv::Mat &cvT);
-    static g2o::SE3Quat toSE3Quat(const Sophus::SE3f &T);
-    static g2o::SE3Quat toSE3Quat(const g2o::Sim3 &gSim3);
+// TODO templetize these functions
+cv::Point2f toCvPoint2f(const Eigen::Vector2f& vector);
+cv::Point3f toCvPoint3f(const Eigen::Vector3f& vector);
+cv::Mat toCvMat(const Eigen::Matrix3f& matrix);
+cv::Mat toCvMat(const Eigen::Matrix4f& matrix);
 
-    // TODO templetize these functions
-    static cv::Mat toCvMat(const g2o::SE3Quat &SE3);
-    static cv::Mat toCvMat(const g2o::Sim3 &Sim3);
-    static cv::Mat toCvMat(const Eigen::Matrix<double,4,4> &m);
-    static cv::Mat toCvMat(const Eigen::Matrix<float,4,4> &m);
-    static cv::Mat toCvMat(const Eigen::Matrix<float,3,4> &m);
-    static cv::Mat toCvMat(const Eigen::Matrix3d &m);
-    static cv::Mat toCvMat(const Eigen::Matrix<double,3,1> &m);
-    static cv::Mat toCvMat(const Eigen::Matrix<float,3,1> &m);
-    static cv::Mat toCvMat(const Eigen::Matrix<float,3,3> &m);
+// ──────────────────────────── //
+// Conversion to Eigen
 
-    static cv::Mat toCvMat(const Eigen::MatrixXf &m);
-    static cv::Mat toCvMat(const Eigen::MatrixXd &m);
+Eigen::Vector2f toEigenVector2f(const cv::Point2f& pt);
+Eigen::Vector3f toEigenVector3f(const cv::Point3f& pt);
+Eigen::Vector3f toEigenVector3f(const cv::Mat& mat);
+Eigen::Matrix3f toEigenMatrix3f(const cv::Mat& mat);
 
-    static cv::Mat toCvSE3(const Eigen::Matrix<double,3,3> &R, const Eigen::Matrix<double,3,1> &t);
-    static cv::Mat tocvSkewMatrix(const cv::Mat &v);
+// ──────────────────────────── //
+// Conversion to Sophus
 
-    static Eigen::Matrix<double,3,1> toVector3d(const cv::Mat &cvVector);
-    static Eigen::Matrix<float,3,1> toVector3f(const cv::Mat &cvVector);
-    static Eigen::Matrix<double,3,1> toVector3d(const cv::Point3f &cvPoint);
-    static Eigen::Matrix<double,3,3> toMatrix3d(const cv::Mat &cvMat3);
-    static Eigen::Matrix<double,4,4> toMatrix4d(const cv::Mat &cvMat4);
-    static Eigen::Matrix<float,3,3> toMatrix3f(const cv::Mat &cvMat3);
-    static Eigen::Matrix<float,4,4> toMatrix4f(const cv::Mat &cvMat4);
-    static std::vector<float> toQuaternion(const cv::Mat &M);
+// TODO: Sophus migration, to be deleted in the future
+Sophus::SE3f  toSophus(const cv::Mat&   mat );
+Sophus::Sim3f toSophus(const g2o::Sim3& sim3);
 
-    static bool isRotationMatrix(const cv::Mat &R);
-    static std::vector<float> toEuler(const cv::Mat &R);
+// ──────────────────────────── //
+// Conversion to std
 
-    //TODO: Sophus migration, to be deleted in the future
-    static Sophus::SE3<float> toSophus(const cv::Mat& T);
-    static Sophus::Sim3f toSophus(const g2o::Sim3& S);
-};
+std::vector<float> toQuaternion(const cv::Mat& mat);
+std::vector<cv::Mat> toDescriptorVector(const cv::Mat& mat);
 
-}// namespace ORB_SLAM
+} // namespace ORB_SLAM3::Converter
 
 #endif // CONVERTER_H

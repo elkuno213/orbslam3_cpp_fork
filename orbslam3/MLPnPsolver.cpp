@@ -182,8 +182,8 @@ namespace ORB_SLAM3 {
 	                Rcw.convertTo(Rcw,CV_32F);
 	                tcw.convertTo(tcw,CV_32F);
                     mBestTcw.setIdentity();
-                    mBestTcw.block<3,3>(0,0) = Converter::toMatrix3f(Rcw);
-                    mBestTcw.block<3,1>(0,3) = Converter::toVector3f(tcw);
+                    mBestTcw.block<3,3>(0,0) = Converter::toEigenMatrix3f(Rcw);
+                    mBestTcw.block<3,1>(0,3) = Converter::toEigenVector3f(tcw);
 
                     Eigen::Matrix<double, 3, 3, Eigen::RowMajor> eigRcw(mRi[0]);
                     Eigen::Vector3d eigtcw(mti);
@@ -344,8 +344,8 @@ namespace ORB_SLAM3 {
             tcw.convertTo(tcw,CV_32F);
             mRefinedTcw.setIdentity();
 
-            mRefinedTcw.block<3,3>(0,0) = Converter::toMatrix3f(Rcw);
-            mRefinedTcw.block<3,1>(0,3) = Converter::toVector3f(tcw);
+            mRefinedTcw.block<3,3>(0,0) = Converter::toEigenMatrix3f(Rcw);
+            mRefinedTcw.block<3,1>(0,3) = Converter::toEigenVector3f(tcw);
 
             Eigen::Matrix<double, 3, 3, Eigen::RowMajor> eigRcw(mRi[0]);
             Eigen::Vector3d eigtcw(mti);

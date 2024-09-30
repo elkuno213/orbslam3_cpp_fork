@@ -49,7 +49,10 @@ inline bool isEqual(const cv::Mat& one, const cv::Mat& other) {
   return true;
 }
 
-inline bool isEqual(const std::vector<float>& one, const std::vector<float>& other) {
+inline bool isEqual(
+  const std::vector<float>& one,
+  const std::vector<float>& other
+) {
   if (one.size() != other.size()) {
     return false;
   }
@@ -74,174 +77,121 @@ inline bool isEqual(const Eigen::VectorXd& one, const Eigen::VectorXd& other) {
 }
 
 TEST(Converter, toOpenCV) {
-  // g2o::SE3Quat to cv::Mat
+  // Eigen::Vector2f to cv::Point2f
   {
-    const g2o::SE3Quat se3(kQuaternionEigen.cast<double>(), kTranslationEigen.cast<double>());
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(se3);
-    EXPECT_TRUE(isEqual(mat, kTransformationCv));
+    const Eigen::Vector2f vector(1.f, 2.f);
+    const cv::Point2f point = ORB_SLAM3::Converter::toCvPoint2f(vector);
+    const cv::Point2f expected(1.f, 2.f);
+    EXPECT_EQ(point, expected);
   }
-  // g2o::Sim3 to cv::Mat
+  // Eigen::Vector3f to cv::Point3f
   {
-    const double scale = 2.0;
-    g2o::Sim3 sim3(kQuaternionEigen.cast<double>(), kTranslationEigen.cast<double>(), scale);
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(sim3);
-    cv::Mat expected = cv::Mat::zeros(4, 4, CV_32F);
-    for (int r = 0; r < 3; r++) {
-      for (int c = 0; c < 3; c++) {
-        expected.at<float>(r, c) = kRotationCv.at<float>(r, c) * scale;
-      }
-      expected.at<float>(r, 3) = kTranslationEigen(r);
-    }
-    expected.at<float>(3, 3) = 1.f;
-    EXPECT_TRUE(isEqual(mat, expected));
-  }
-  // Eigen::Matrix<float, 4, 4> to cv::Mat
-  {
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(kTransformationEigen);
-    EXPECT_TRUE(isEqual(mat, kTransformationCv));
-  }
-  // Eigen::Matrix<float, 3, 4> to cv::Mat
-  {
-    Eigen::Matrix<float, 3, 4> matrix = (
-      Eigen::Matrix<float, 3, 4>() << 1.f,  2.f,  3.f,  4.f,
-                                      5.f,  6.f,  7.f,  8.f,
-                                      9.f, 10.f, 11.f, 12.f
-    ).finished();
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(matrix);
-    const cv::Mat expected = (
-      cv::Mat_<float>(3, 4) << 1.f,  2.f,  3.f,  4.f,
-                               5.f,  6.f,  7.f,  8.f,
-                               9.f, 10.f, 11.f, 12.f
-    );
-    EXPECT_TRUE(isEqual(mat, expected));
+    const Eigen::Vector3f vector(1.f, 2.f, 3.f);
+    const cv::Point3f point = ORB_SLAM3::Converter::toCvPoint3f(vector);
+    const cv::Point3f expected(1.f, 2.f, 3.f);
+    EXPECT_EQ(point, expected);
   }
   // Eigen::Matrix3f to cv::Mat
   {
     const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(kRotationEigen);
     EXPECT_TRUE(isEqual(mat, kRotationCv));
   }
-  // Eigen::MatrixXf to cv::Mat
+  // Eigen::Matrix4f to cv::Mat
   {
-    const std::size_t rows = 2;
-    const std::size_t cols = 4;
-    const Eigen::MatrixXf matrix = (
-      Eigen::MatrixXf(rows, cols) << 1.f, 2.f, 3.f, 4.f,
-                                     5.f, 6.f, 7.f, 8.f
-    ).finished();
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(matrix);
-    const cv::Mat expected = (
-      cv::Mat_<float>(rows, cols) << 1.f, 2.f, 3.f, 4.f,
-                                     5.f, 6.f, 7.f, 8.f
-    );
-    EXPECT_TRUE(isEqual(mat, expected));
-  }
-  // Eigen::Matrix<float, 3, 1> to cv::Mat
-  {
-    const Eigen::Matrix<float, 3, 1> matrix = kTranslationEigen;
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(matrix);
-    EXPECT_TRUE(isEqual(mat, kTranslationCv));
-  }
-  // Eigen::Matrix<double, 3, 3> R and Eigen::Matrix<double, 3, 1> t to cv::Mat
-  {
-    const cv::Mat mat = ORB_SLAM3::Converter::toCvSE3(
-      kRotationEigen.cast<double>(),
-      kTranslationEigen.cast<double>()
-    );
+    const cv::Mat mat = ORB_SLAM3::Converter::toCvMat(kTransformationEigen);
     EXPECT_TRUE(isEqual(mat, kTransformationCv));
   }
 }
 
 TEST(Converter, toEigen) {
-  // cv::Mat to Eigen::Matrix<float, 3, 1>
+  // cv::Point2f to Eigen::Vector2f
   {
-    const Eigen::Matrix<float, 3, 1> matrix = ORB_SLAM3::Converter::toVector3f(kTranslationCv);
-    const Eigen::Matrix<float, 3, 1> expected = kTranslationEigen;
+    const cv::Point2f point(1.f, 2.f);
+    const Eigen::Vector2f vector = ORB_SLAM3::Converter::toEigenVector2f(point);
+    const Eigen::Vector2f expected(1.f, 2.f);
+    EXPECT_TRUE(vector.isApprox(expected));
+  }
+  // cv::Point3f to Eigen::Vector3f
+  {
+    const cv::Point3f point(1.f, 2.f, 3.f);
+    const Eigen::Vector3f vector = ORB_SLAM3::Converter::toEigenVector3f(point);
+    const Eigen::Vector3f expected(1.f, 2.f, 3.f);
+    EXPECT_TRUE(vector.isApprox(expected));
+  }
+  // cv::Mat to Eigen::Vector3f
+  {
+    const Eigen::Vector3f matrix = ORB_SLAM3::Converter::toEigenVector3f(kTranslationCv);
+    const Eigen::Vector3f expected = kTranslationEigen;
     EXPECT_TRUE(matrix.isApprox(expected));
   }
-  // cv::Point3f to Eigen::Matrix<double, 3, 1>
   {
-    const Eigen::Matrix<double, 3, 1> matrix = ORB_SLAM3::Converter::toVector3d(kTranslationCv);
-    const Eigen::Matrix<double, 3, 1> expected = kTranslationEigen.cast<double>();
-    EXPECT_TRUE(matrix.isApprox(expected));
+    const cv::Mat mat = cv::Mat::zeros(2, 2, CV_32F);
+    EXPECT_THROW(ORB_SLAM3::Converter::toEigenVector3f(mat), std::runtime_error);
   }
-  // cv::Mat to Eigen::Matrix<float, 3, 3>
+  // cv::Mat to Eigen::Matrix3f
   {
-    const Eigen::Matrix<float, 3, 3> matrix = ORB_SLAM3::Converter::toMatrix3f(kRotationCv);
+    const Eigen::Matrix3f matrix = ORB_SLAM3::Converter::toEigenMatrix3f(kRotationCv);
     EXPECT_TRUE(matrix.isApprox(kRotationEigen));
   }
-  // cv::Mat to Eigen::Matrix<float, 4, 4>
   {
-    const Eigen::Matrix<float, 4, 4> matrix = ORB_SLAM3::Converter::toMatrix4f(kTransformationCv);
-    EXPECT_TRUE(matrix.isApprox(kTransformationEigen));
+    const cv::Mat mat = cv::Mat::zeros(2, 2, CV_32F);
+    EXPECT_THROW(ORB_SLAM3::Converter::toEigenMatrix3f(mat), std::runtime_error);
   }
 }
 
 TEST(Converter, toStd) {
-  // quaternion from cv::Mat to std::vector
+  // quaternion from cv::Mat to std::vector<float>
   {
     const std::vector<float> vector = ORB_SLAM3::Converter::toQuaternion(kRotationCv);
     const std::vector<float> expected
       = {kQuaternionEigen.x(), kQuaternionEigen.y(), kQuaternionEigen.z(), kQuaternionEigen.w()};
     EXPECT_TRUE(isEqual(vector, expected));
   }
-  // euler angles from cv::Mat to std::vector
-  {
-    const std::vector<float> vector = ORB_SLAM3::Converter::toEuler(kRotationCv);
-    EXPECT_TRUE(isEqual(vector, kEulerStd));
-  }
 }
 
 TEST(Converter, toSophus) {
-  // cv::Mat to Sophus::SE3<float>
+  // cv::Mat to Sophus::SE3f
   {
-    const Sophus::SE3<float> se3 = ORB_SLAM3::Converter::toSophus(kTransformationCv);
-    const Sophus::SE3<float> expected(kQuaternionEigen, kTranslationEigen);
+    const Sophus::SE3f se3 = ORB_SLAM3::Converter::toSophus(kTransformationCv);
+    const Sophus::SE3f expected(kQuaternionEigen, kTranslationEigen);
     EXPECT_TRUE(se3.matrix().isApprox(expected.matrix()));
+  }
+  {
+    const cv::Mat mat = cv::Mat::zeros(2, 2, CV_32F);
+    EXPECT_THROW(ORB_SLAM3::Converter::toSophus(mat), std::runtime_error);
   }
   // g2o::Sim3 to Sophus::Sim3f
   {
     const double scale = 2.0;
-    g2o::Sim3 sim3(kQuaternionEigen.cast<double>(), kTranslationEigen.cast<double>(), scale);
-    const Sophus::Sim3f sim3f = ORB_SLAM3::Converter::toSophus(sim3);
+    const g2o::Sim3 sim3_g2o(
+      kQuaternionEigen.cast<double>(),
+      kTranslationEigen.cast<double>(),
+      scale
+    );
+    const Sophus::Sim3f sim3_sophus = ORB_SLAM3::Converter::toSophus(sim3_g2o);
     Eigen::Matrix4f expected = Eigen::Matrix4f::Zero();
     expected.block<3, 3>(0, 0) = kRotationEigen * scale;
     expected.block<3, 1>(0, 3) = kTranslationEigen;
     expected(3, 3) = 1.0f;
-    EXPECT_TRUE(sim3f.matrix().isApprox(expected));
-  }
-}
-
-TEST(Converter, toG2O) {
-  // cv::Mat to g2o::SE3Quat
-  {
-    const g2o::SE3Quat se3 = ORB_SLAM3::Converter::toSE3Quat(kTransformationCv);
-    const g2o::SE3Quat expected(kQuaternionEigen.cast<double>(), kTranslationEigen.cast<double>());
-    EXPECT_TRUE(isEqual(se3.toVector(), expected.toVector()));
-  }
-  // Sophus::SE3f to g2o::SE3Quat
-  {
-    const Sophus::SE3f se3(kQuaternionEigen, kTranslationEigen);
-    const g2o::SE3Quat g2o_se3 = ORB_SLAM3::Converter::toSE3Quat(se3);
-    const g2o::SE3Quat expected(kQuaternionEigen.cast<double>(), kTranslationEigen.cast<double>());
-    EXPECT_TRUE(isEqual(g2o_se3.toVector(), expected.toVector()));
+    EXPECT_TRUE(sim3_sophus.matrix().isApprox(expected));
   }
 }
 
 TEST(Converter, Other) {
-  // Check rotation matrix
+  // cv::Mat to std::vector<float> for quaternion
   {
-    EXPECT_TRUE(ORB_SLAM3::Converter::isRotationMatrix(kRotationCv));
+    const std::vector<float> vec = ORB_SLAM3::Converter::toQuaternion(kRotationCv);
+    const std::vector<float> expected = {
+      kQuaternionEigen.x(),
+      kQuaternionEigen.y(),
+      kQuaternionEigen.z(),
+      kQuaternionEigen.w()
+    };
+    EXPECT_TRUE(isEqual(vec, expected));
   }
-  // vector (cv::Mat) to skew matrix (cv::Mat)
   {
-    const cv::Mat vector = (cv::Mat_<float>(3, 1) << 1.f, 2.f, 3.f);
-    const cv::Mat mat = ORB_SLAM3::Converter::tocvSkewMatrix(vector);
-    const cv::Mat expected = (
-      cv::Mat_<float>(3, 3) << 0.f, -3.f, 2.f,
-                               3.f,  0.f, -1.f,
-                              -2.f,  1.f, 0.f
-    );
-    EXPECT_TRUE(isEqual(mat, expected));
+    const cv::Mat mat = cv::Mat::zeros(2, 2, CV_32F);
+    EXPECT_THROW(ORB_SLAM3::Converter::toQuaternion(mat), std::runtime_error);
   }
   // cv::Mat to std::vector<cv::Mat> for descriptors
   {
