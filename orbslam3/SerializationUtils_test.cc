@@ -115,7 +115,7 @@ TEST_F(SerializeMatrixTest, ArchiveConstReference) {
   EXPECT_EQ(original.at<float>(1, 2), loaded.at<float>(1, 2));
 }
 
-class SerializeVectorKeyPointsTest : public ::testing::Test {
+class SerializeKeyPointsTest : public ::testing::Test {
 protected:
   void SetUp() override {
     original = {
@@ -131,20 +131,24 @@ protected:
     std::stringstream ss;
     {
       boost::archive::text_oarchive oa(ss);
-      ORB_SLAM3::serializeVectorKeyPoints(oa, original, 0);
+      ORB_SLAM3::serializeKeyPoints(oa, original, 0);
     }
     {
       boost::archive::text_iarchive ia(ss);
-      ORB_SLAM3::serializeVectorKeyPoints(ia, loaded, 0);
+      ORB_SLAM3::serializeKeyPoints(ia, loaded, 0);
     }
   }
 
   std::vector<cv::KeyPoint> original;
 };
 
-TEST_F(SerializeVectorKeyPointsTest, Archive) {
-  // TODO: it's not correct if the vector is not empty.
-  std::vector<cv::KeyPoint> loaded;
+TEST_F(SerializeKeyPointsTest, Archive) {
+  std::vector<cv::KeyPoint> loaded = {
+    cv::KeyPoint{cv::Point2f(0.f, 0.f), 0.f, 0.f, 0.f, 0, 0},
+    cv::KeyPoint{cv::Point2f(0.f, 0.f), 0.f, 0.f, 0.f, 0, 0},
+    cv::KeyPoint{cv::Point2f(0.f, 0.f), 0.f, 0.f, 0.f, 0, 0},
+    cv::KeyPoint{cv::Point2f(0.f, 0.f), 0.f, 0.f, 0.f, 0, 0}
+  };
   Archive(loaded);
 
   EXPECT_EQ(original.size(), loaded.size());

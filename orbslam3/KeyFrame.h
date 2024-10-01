@@ -117,8 +117,8 @@ class KeyFrame
         // Number of Keypoints
         ar & const_cast<int&>(N);
         // KeyPoints
-        serializeVectorKeyPoints<Archive>(ar, mvKeys, version);
-        serializeVectorKeyPoints<Archive>(ar, mvKeysUn, version);
+        serializeKeyPoints<Archive>(ar, mvKeys, version);
+        serializeKeyPoints<Archive>(ar, mvKeysUn, version);
         ar & const_cast<std::vector<float>& >(mvuRight);
         ar & const_cast<std::vector<float>& >(mvDepth);
         serializeMatrix<Archive>(ar,mDescriptors,version);
@@ -173,7 +173,7 @@ class KeyFrame
         ar & const_cast<int&>(NLeft);
         ar & const_cast<int&>(NRight);
         serializeSophusSE3<Archive>(ar, mTlr, version);
-        serializeVectorKeyPoints<Archive>(ar, mvKeysRight, version);
+        serializeKeyPoints<Archive>(ar, mvKeysRight, version);
         ar & mGridRight;
 
         // Inertial variables
