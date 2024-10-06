@@ -8,50 +8,151 @@
 #include "orbslam3/ImuTypes.h"
 
 TEST(Point, Constructor) {
-  const float ax = 0.1;
-  const float ay = 0.2;
-  const float az = 0.3;
-  const float wx = 0.4;
-  const float wy = 0.5;
-  const float wz = 0.6;
-  const cv::Point3f acc(ax, ay, az);
-  const cv::Point3f gyro(wx, wy, wz);
-  const double timestamp = 1.0;
+  // Default constructor
+  {
+    ORB_SLAM3::IMU::Point point;
+    EXPECT_EQ(point.acc.x() , 0.f);
+    EXPECT_EQ(point.acc.y() , 0.f);
+    EXPECT_EQ(point.acc.z() , 0.f);
+    EXPECT_EQ(point.gyro.x(), 0.f);
+    EXPECT_EQ(point.gyro.y(), 0.f);
+    EXPECT_EQ(point.gyro.z(), 0.f);
+    EXPECT_EQ(point.t, 0.0);
+  }
+  // Constructor with float values
+  {
+    const float ax = 0.1;
+    const float ay = 0.2;
+    const float az = 0.3;
+    const float wx = 0.4;
+    const float wy = 0.5;
+    const float wz = 0.6;
+    const double t = 1.0;
+    const ORB_SLAM3::IMU::Point point(ax, ay, az, wx, wy, wz, t);
+    EXPECT_EQ(point.acc.x() , ax);
+    EXPECT_EQ(point.acc.y() , ay);
+    EXPECT_EQ(point.acc.z() , az);
+    EXPECT_EQ(point.gyro.x(), wx);
+    EXPECT_EQ(point.gyro.y(), wy);
+    EXPECT_EQ(point.gyro.z(), wz);
+    EXPECT_EQ(point.t, t);
+  }
+  // Constructor with Eigen::Vector3f
+  {
+    const float ax = 0.1;
+    const float ay = 0.2;
+    const float az = 0.3;
+    const float wx = 0.4;
+    const float wy = 0.5;
+    const float wz = 0.6;
+    const Eigen::Vector3f acc(ax, ay, az);
+    const Eigen::Vector3f gyro(wx, wy, wz);
+    const double t = 1.0;
+    const ORB_SLAM3::IMU::Point point(acc, gyro, t);
+    EXPECT_EQ(point.acc.x() , ax);
+    EXPECT_EQ(point.acc.y() , ay);
+    EXPECT_EQ(point.acc.z() , az);
+    EXPECT_EQ(point.gyro.x(), wx);
+    EXPECT_EQ(point.gyro.y(), wy);
+    EXPECT_EQ(point.gyro.z(), wz);
+    EXPECT_EQ(point.t, t);
+  }
+  // Constructor with cv::Point3f
+  {
+    const float ax = 0.1;
+    const float ay = 0.2;
+    const float az = 0.3;
+    const float wx = 0.4;
+    const float wy = 0.5;
+    const float wz = 0.6;
+    const cv::Point3f acc(ax, ay, az);
+    const cv::Point3f gyro(wx, wy, wz);
+    const double t = 1.0;
+    const ORB_SLAM3::IMU::Point point(acc, gyro, t);
+    EXPECT_EQ(point.acc.x() , ax);
+    EXPECT_EQ(point.acc.y() , ay);
+    EXPECT_EQ(point.acc.z() , az);
+    EXPECT_EQ(point.gyro.x(), wx);
+    EXPECT_EQ(point.gyro.y(), wy);
+    EXPECT_EQ(point.gyro.z(), wz);
+    EXPECT_EQ(point.t, t);
+  }
+}
 
-  const ORB_SLAM3::IMU::Point point_1(ax, ay, az, wx, wy, wz, timestamp);
-  EXPECT_EQ(point_1.a.x(), ax);
-  EXPECT_EQ(point_1.a.y(), ay);
-  EXPECT_EQ(point_1.a.z(), az);
-  EXPECT_EQ(point_1.w.x(), wx);
-  EXPECT_EQ(point_1.w.y(), wy);
-  EXPECT_EQ(point_1.w.z(), wz);
-  EXPECT_EQ(point_1.t, timestamp);
+TEST(Point, Serialization) {
+  const Eigen::Vector3f acc(0.1f, 0.2f, 0.3f);
+  const Eigen::Vector3f gyro(0.4f, 0.5f, 0.6f);
+  const double t = 1.0;
+  const ORB_SLAM3::IMU::Point point(acc, gyro, t);
 
-  const ORB_SLAM3::IMU::Point point_2(acc, gyro, timestamp);
-  EXPECT_EQ(point_2.a.x(), ax);
-  EXPECT_EQ(point_2.a.y(), ay);
-  EXPECT_EQ(point_2.a.z(), az);
-  EXPECT_EQ(point_2.w.x(), wx);
-  EXPECT_EQ(point_2.w.y(), wy);
-  EXPECT_EQ(point_2.w.z(), wz);
-  EXPECT_EQ(point_2.t, timestamp);
+  std::stringstream ss;
+  boost::archive::text_oarchive oa(ss);
+  oa << point;
+  ORB_SLAM3::IMU::Point loaded;
+  boost::archive::text_iarchive ia(ss);
+  ia >> loaded;
+
+  EXPECT_EQ(loaded.acc.x() , acc.x());
+  EXPECT_EQ(loaded.acc.y() , acc.y());
+  EXPECT_EQ(loaded.acc.z() , acc.z());
+  EXPECT_EQ(loaded.gyro.x(), gyro.x());
+  EXPECT_EQ(loaded.gyro.y(), gyro.y());
+  EXPECT_EQ(loaded.gyro.z(), gyro.z());
 }
 
 TEST(Bias, Constructor) {
-  const float bias_ax = 0.1;
-  const float bias_ay = 0.2;
-  const float bias_az = 0.3;
-  const float bias_wx = 0.4;
-  const float bias_wy = 0.5;
-  const float bias_wz = 0.6;
-  const ORB_SLAM3::IMU::Bias bias(bias_ax, bias_ay, bias_az, bias_wx, bias_wy, bias_wz);
+  // Default constructor
+  {
+    ORB_SLAM3::IMU::Bias bias;
+    EXPECT_EQ(bias.ax, 0.f);
+    EXPECT_EQ(bias.ay, 0.f);
+    EXPECT_EQ(bias.az, 0.f);
+    EXPECT_EQ(bias.wx, 0.f);
+    EXPECT_EQ(bias.wy, 0.f);
+    EXPECT_EQ(bias.wz, 0.f);
+  }
+  // Constructor with float values
+  {
+    const float bias_ax = 0.1;
+    const float bias_ay = 0.2;
+    const float bias_az = 0.3;
+    const float bias_wx = 0.4;
+    const float bias_wy = 0.5;
+    const float bias_wz = 0.6;
+    const ORB_SLAM3::IMU::Bias bias(bias_ax, bias_ay, bias_az, bias_wx, bias_wy, bias_wz);
+    EXPECT_EQ(bias.ax, bias_ax);
+    EXPECT_EQ(bias.ay, bias_ay);
+    EXPECT_EQ(bias.az, bias_az);
+    EXPECT_EQ(bias.wx, bias_wx);
+    EXPECT_EQ(bias.wy, bias_wy);
+    EXPECT_EQ(bias.wz, bias_wz);
+  }
+}
 
-  EXPECT_EQ(bias.bax, bias_ax);
-  EXPECT_EQ(bias.bay, bias_ay);
-  EXPECT_EQ(bias.baz, bias_az);
-  EXPECT_EQ(bias.bwx, bias_wx);
-  EXPECT_EQ(bias.bwy, bias_wy);
-  EXPECT_EQ(bias.bwz, bias_wz);
+TEST(Bias, Subtraction) {
+  const float bias_ax_1 = 0.1;
+  const float bias_ay_1 = 0.2;
+  const float bias_az_1 = 0.3;
+  const float bias_wx_1 = 0.4;
+  const float bias_wy_1 = 0.5;
+  const float bias_wz_1 = 0.6;
+  const ORB_SLAM3::IMU::Bias bias_1(bias_ax_1, bias_ay_1, bias_az_1, bias_wx_1, bias_wy_1, bias_wz_1);
+
+  const float bias_ax_2 = 0.01;
+  const float bias_ay_2 = 0.02;
+  const float bias_az_2 = 0.03;
+  const float bias_wx_2 = 0.04;
+  const float bias_wy_2 = 0.05;
+  const float bias_wz_2 = 0.06;
+  const ORB_SLAM3::IMU::Bias bias_2(bias_ax_2, bias_ay_2, bias_az_2, bias_wx_2, bias_wy_2, bias_wz_2);
+
+  const ORB_SLAM3::IMU::Bias bias_diff = bias_1 - bias_2;
+  EXPECT_EQ(bias_diff.ax, bias_ax_1 - bias_ax_2);
+  EXPECT_EQ(bias_diff.ay, bias_ay_1 - bias_ay_2);
+  EXPECT_EQ(bias_diff.az, bias_az_1 - bias_az_2);
+  EXPECT_EQ(bias_diff.wx, bias_wx_1 - bias_wx_2);
+  EXPECT_EQ(bias_diff.wy, bias_wy_1 - bias_wy_2);
+  EXPECT_EQ(bias_diff.wz, bias_wz_1 - bias_wz_2);
 }
 
 TEST(Bias, CopyFrom) {
@@ -62,15 +163,16 @@ TEST(Bias, CopyFrom) {
   const float bias_wy = 0.5;
   const float bias_wz = 0.6;
 
-  ORB_SLAM3::IMU::Bias bias_1(bias_ax, bias_ay, bias_az, bias_wx, bias_wy, bias_wz);
-  ORB_SLAM3::IMU::Bias bias_2;
-  bias_2.CopyFrom(bias_1);
-  EXPECT_EQ(bias_2.bax, bias_ax);
-  EXPECT_EQ(bias_2.bay, bias_ay);
-  EXPECT_EQ(bias_2.baz, bias_az);
-  EXPECT_EQ(bias_2.bwx, bias_wx);
-  EXPECT_EQ(bias_2.bwy, bias_wy);
-  EXPECT_EQ(bias_2.bwz, bias_wz);
+  ORB_SLAM3::IMU::Bias bias(bias_ax, bias_ay, bias_az, bias_wx, bias_wy, bias_wz);
+  ORB_SLAM3::IMU::Bias copied;
+  copied.copyFrom(bias);
+
+  EXPECT_EQ(copied.ax, bias_ax);
+  EXPECT_EQ(copied.ay, bias_ay);
+  EXPECT_EQ(copied.az, bias_az);
+  EXPECT_EQ(copied.wx, bias_wx);
+  EXPECT_EQ(copied.wy, bias_wy);
+  EXPECT_EQ(copied.wz, bias_wz);
 }
 
 TEST(Bias, Serialization) {
@@ -85,16 +187,16 @@ TEST(Bias, Serialization) {
   std::stringstream ss;
   boost::archive::text_oarchive oa(ss);
   oa << bias;
-  ORB_SLAM3::IMU::Bias loaded_bias;
+  ORB_SLAM3::IMU::Bias loaded;
   boost::archive::text_iarchive ia(ss);
-  ia >> loaded_bias;
+  ia >> loaded;
 
-  EXPECT_EQ(loaded_bias.bax, bias_ax);
-  EXPECT_EQ(loaded_bias.bay, bias_ay);
-  EXPECT_EQ(loaded_bias.baz, bias_az);
-  EXPECT_EQ(loaded_bias.bwx, bias_wx);
-  EXPECT_EQ(loaded_bias.bwy, bias_wy);
-  EXPECT_EQ(loaded_bias.bwz, bias_wz);
+  EXPECT_EQ(loaded.ax, bias_ax);
+  EXPECT_EQ(loaded.ay, bias_ay);
+  EXPECT_EQ(loaded.az, bias_az);
+  EXPECT_EQ(loaded.wx, bias_wx);
+  EXPECT_EQ(loaded.wy, bias_wy);
+  EXPECT_EQ(loaded.wz, bias_wz);
 }
 
 class CalibTest : public ::testing::Test {
@@ -102,14 +204,14 @@ protected:
   void SetUp() override {
     const Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     const Eigen::Vector3f t(1.0f, 2.0f, 3.0f);
-    Tbc = Sophus::SE3f(q, t);
+    T_bc = Sophus::SE3f(q, t);
 
-    noise_gyro      = 0.1;
-    noise_acc       = 0.2;
-    noise_gyro_walk = 0.3;
-    noise_acc_walk  = 0.4;
+    noise_gyro       = 0.1;
+    noise_acc        = 0.2;
+    random_walk_gyro = 0.3;
+    random_walk_acc  = 0.4;
 
-    calib = ORB_SLAM3::IMU::Calib(Tbc, noise_gyro, noise_acc, noise_gyro_walk, noise_acc_walk);
+    calib = ORB_SLAM3::IMU::Calib(T_bc, noise_gyro, noise_acc, random_walk_gyro, random_walk_acc);
   }
 
   void TearDown() override {}
@@ -123,56 +225,69 @@ protected:
   }
 
   ORB_SLAM3::IMU::Calib calib;
-  Sophus::SE3f Tbc;
+  Sophus::SE3f T_bc;
   float noise_gyro;
   float noise_acc;
-  float noise_gyro_walk;
-  float noise_acc_walk;
+  float random_walk_gyro;
+  float random_walk_acc;
 };
 
 TEST_F(CalibTest, Constructor) {
-  const float noise_gyro_squared      = noise_gyro      * noise_gyro     ;
-  const float noise_acc_squared       = noise_acc       * noise_acc      ;
-  const float noise_gyro_walk_squared = noise_gyro_walk * noise_gyro_walk;
-  const float noise_acc_walk_squared  = noise_acc_walk  * noise_acc_walk ;
+  // Default constructor
+  {
+    ORB_SLAM3::IMU::Calib calib;
+    EXPECT_FALSE(calib.is_set);
+    EXPECT_EQ(calib.T_bc.matrix(), Sophus::SE3f().matrix());
+    EXPECT_EQ(calib.T_cb.matrix(), Sophus::SE3f().matrix());
+    EXPECT_EQ(calib.noise_cov.diagonal().isZero(), true);
+    EXPECT_EQ(calib.walk_cov.diagonal().isZero() , true);
+  }
 
-  EXPECT_EQ(calib.mTbc.matrix(), Tbc.matrix());
-  EXPECT_EQ(calib.Cov.diagonal()(0), noise_gyro_squared);
-  EXPECT_EQ(calib.Cov.diagonal()(1), noise_gyro_squared);
-  EXPECT_EQ(calib.Cov.diagonal()(2), noise_gyro_squared);
-  EXPECT_EQ(calib.Cov.diagonal()(3), noise_acc_squared);
-  EXPECT_EQ(calib.Cov.diagonal()(4), noise_acc_squared);
-  EXPECT_EQ(calib.Cov.diagonal()(5), noise_acc_squared);
-  EXPECT_EQ(calib.CovWalk.diagonal()(0), noise_gyro_walk_squared);
-  EXPECT_EQ(calib.CovWalk.diagonal()(1), noise_gyro_walk_squared);
-  EXPECT_EQ(calib.CovWalk.diagonal()(2), noise_gyro_walk_squared);
-  EXPECT_EQ(calib.CovWalk.diagonal()(3), noise_acc_walk_squared);
-  EXPECT_EQ(calib.CovWalk.diagonal()(4), noise_acc_walk_squared);
-  EXPECT_EQ(calib.CovWalk.diagonal()(5), noise_acc_walk_squared);
+  // Constructor
+  {
+    const float noise_gyro_squared       = noise_gyro * noise_gyro;
+    const float noise_acc_squared        = noise_acc * noise_acc;
+    const float random_walk_gyro_squared = random_walk_gyro * random_walk_gyro;
+    const float random_walk_acc_squared  = random_walk_acc * random_walk_acc;
+
+    EXPECT_EQ(calib.T_bc.matrix(), T_bc.matrix());
+    EXPECT_EQ(calib.noise_cov.diagonal()(0), noise_gyro_squared      );
+    EXPECT_EQ(calib.noise_cov.diagonal()(1), noise_gyro_squared      );
+    EXPECT_EQ(calib.noise_cov.diagonal()(2), noise_gyro_squared      );
+    EXPECT_EQ(calib.noise_cov.diagonal()(3), noise_acc_squared       );
+    EXPECT_EQ(calib.noise_cov.diagonal()(4), noise_acc_squared       );
+    EXPECT_EQ(calib.noise_cov.diagonal()(5), noise_acc_squared       );
+    EXPECT_EQ(calib.walk_cov.diagonal()(0) , random_walk_gyro_squared);
+    EXPECT_EQ(calib.walk_cov.diagonal()(1) , random_walk_gyro_squared);
+    EXPECT_EQ(calib.walk_cov.diagonal()(2) , random_walk_gyro_squared);
+    EXPECT_EQ(calib.walk_cov.diagonal()(3) , random_walk_acc_squared );
+    EXPECT_EQ(calib.walk_cov.diagonal()(4) , random_walk_acc_squared );
+    EXPECT_EQ(calib.walk_cov.diagonal()(5) , random_walk_acc_squared );
+  }
 }
 
 TEST_F(CalibTest, Serialization) {
   ORB_SLAM3::IMU::Calib loaded;
   Archive(loaded);
 
-  const float noise_gyro_squared      = noise_gyro      * noise_gyro     ;
-  const float noise_acc_squared       = noise_acc       * noise_acc      ;
-  const float noise_gyro_walk_squared = noise_gyro_walk * noise_gyro_walk;
-  const float noise_acc_walk_squared  = noise_acc_walk  * noise_acc_walk ;
+  const float noise_gyro_squared       = noise_gyro * noise_gyro;
+  const float noise_acc_squared        = noise_acc * noise_acc;
+  const float random_walk_gyro_squared = random_walk_gyro * random_walk_gyro;
+  const float random_walk_acc_squared  = random_walk_acc * random_walk_acc;
 
-  EXPECT_EQ(loaded.mTbc.matrix(), Tbc.matrix());
-  EXPECT_EQ(loaded.Cov.diagonal()(0), noise_gyro_squared);
-  EXPECT_EQ(loaded.Cov.diagonal()(1), noise_gyro_squared);
-  EXPECT_EQ(loaded.Cov.diagonal()(2), noise_gyro_squared);
-  EXPECT_EQ(loaded.Cov.diagonal()(3), noise_acc_squared);
-  EXPECT_EQ(loaded.Cov.diagonal()(4), noise_acc_squared);
-  EXPECT_EQ(loaded.Cov.diagonal()(5), noise_acc_squared);
-  EXPECT_EQ(loaded.CovWalk.diagonal()(0), noise_gyro_walk_squared);
-  EXPECT_EQ(loaded.CovWalk.diagonal()(1), noise_gyro_walk_squared);
-  EXPECT_EQ(loaded.CovWalk.diagonal()(2), noise_gyro_walk_squared);
-  EXPECT_EQ(loaded.CovWalk.diagonal()(3), noise_acc_walk_squared);
-  EXPECT_EQ(loaded.CovWalk.diagonal()(4), noise_acc_walk_squared);
-  EXPECT_EQ(loaded.CovWalk.diagonal()(5), noise_acc_walk_squared);
+  EXPECT_EQ(loaded.T_bc.matrix(), T_bc.matrix());
+  EXPECT_EQ(loaded.noise_cov.diagonal()(0), noise_gyro_squared      );
+  EXPECT_EQ(loaded.noise_cov.diagonal()(1), noise_gyro_squared      );
+  EXPECT_EQ(loaded.noise_cov.diagonal()(2), noise_gyro_squared      );
+  EXPECT_EQ(loaded.noise_cov.diagonal()(3), noise_acc_squared       );
+  EXPECT_EQ(loaded.noise_cov.diagonal()(4), noise_acc_squared       );
+  EXPECT_EQ(loaded.noise_cov.diagonal()(5), noise_acc_squared       );
+  EXPECT_EQ(loaded.walk_cov.diagonal()(0) , random_walk_gyro_squared);
+  EXPECT_EQ(loaded.walk_cov.diagonal()(1) , random_walk_gyro_squared);
+  EXPECT_EQ(loaded.walk_cov.diagonal()(2) , random_walk_gyro_squared);
+  EXPECT_EQ(loaded.walk_cov.diagonal()(3) , random_walk_acc_squared );
+  EXPECT_EQ(loaded.walk_cov.diagonal()(4) , random_walk_acc_squared );
+  EXPECT_EQ(loaded.walk_cov.diagonal()(5) , random_walk_acc_squared );
 }
 
 class IntegratedRotationTest : public ::testing::Test {
@@ -227,8 +342,8 @@ TEST_F(IntegratedRotationTest, TooSmallEpsilon) {
   const Eigen::Matrix3f expected_deltaR = Eigen::Matrix3f::Identity() + W;
   const Eigen::Matrix3f expected_rightJ = Eigen::Matrix3f::Identity();
 
-  EXPECT_TRUE(integrated_rotation.deltaR.isApprox(expected_deltaR));
-  EXPECT_TRUE(integrated_rotation.rightJ.isApprox(expected_rightJ));
+  EXPECT_TRUE(integrated_rotation.dR.isApprox(expected_deltaR));
+  EXPECT_TRUE(integrated_rotation.rightJacobian.isApprox(expected_rightJ));
 }
 
 TEST_F(IntegratedRotationTest, NormalCase) {
@@ -243,11 +358,17 @@ TEST_F(IntegratedRotationTest, NormalCase) {
   const Eigen::Matrix3f W = Sophus::SO3f::hat(v);
   const Eigen::Matrix3f W_squared = W * W;
   const Eigen::Matrix3f I = Eigen::Matrix3f::Identity();
-  const Eigen::Matrix3f expected_deltaR = I + W * std::sin(d) / d + W_squared * (1.0f - std::cos(d)) / d_squared;
-  const Eigen::Matrix3f expected_rightJ = I - W * (1.0f - std::cos(d)) / d_squared + W_squared * (d - std::sin(d)) / (d_squared * d);
+  const Eigen::Matrix3f expected_deltaR
+    = I
+    + W * std::sin(d) / d
+    + W_squared * (1.0f - std::cos(d)) / d_squared;
+  const Eigen::Matrix3f expected_rightJ
+    = I
+    - W * (1.0f - std::cos(d)) / d_squared
+    + W_squared * (d - std::sin(d)) / (d_squared * d);
 
-  EXPECT_TRUE(integrated_rotation.deltaR.isApprox(expected_deltaR));
-  EXPECT_TRUE(integrated_rotation.rightJ.isApprox(expected_rightJ));
+  EXPECT_TRUE(integrated_rotation.dR.isApprox(expected_deltaR));
+  EXPECT_TRUE(integrated_rotation.rightJacobian.isApprox(expected_rightJ));
 }
 
 class PreintegratedTest : public ::testing::Test {
@@ -265,12 +386,12 @@ protected:
     // Calibration
     const Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     const Eigen::Vector3f t(0.01, 0.01, 0.01);
-    const Sophus::SE3f Tbc(q, t);
-    const float noise_gyro      = 0.1;
-    const float noise_acc       = 0.2;
-    const float noise_gyro_walk = 0.3;
-    const float noise_acc_walk  = 0.4;
-    calib = ORB_SLAM3::IMU::Calib(Tbc, noise_gyro, noise_acc, noise_gyro_walk, noise_acc_walk);
+    const Sophus::SE3f T_bc(q, t);
+    const float noise_gyro       = 0.1;
+    const float noise_acc        = 0.2;
+    const float random_walk_gyro = 0.3;
+    const float random_walk_acc  = 0.4;
+    calib = ORB_SLAM3::IMU::Calib(T_bc, noise_gyro, noise_acc, random_walk_gyro, random_walk_acc);
   }
 
   void TearDown() override {}
@@ -290,42 +411,40 @@ protected:
 };
 
 TEST_F(PreintegratedTest, Constructor) {
-  // TODO: add == operator to Bias.
-
   ORB_SLAM3::IMU::Preintegrated preintegrated(bias, calib);
 
-  EXPECT_EQ(preintegrated.b.bax, bias.bax);
-  EXPECT_EQ(preintegrated.b.bay, bias.bay);
-  EXPECT_EQ(preintegrated.b.baz, bias.baz);
-  EXPECT_EQ(preintegrated.b.bwx, bias.bwx);
-  EXPECT_EQ(preintegrated.b.bwy, bias.bwy);
-  EXPECT_EQ(preintegrated.b.bwz, bias.bwz);
-  EXPECT_EQ(preintegrated.Nga.diagonal(), calib.Cov.diagonal());
-  EXPECT_EQ(preintegrated.NgaWalk.diagonal(), calib.CovWalk.diagonal());
+  EXPECT_EQ(preintegrated.bias.ax, bias.ax);
+  EXPECT_EQ(preintegrated.bias.ay, bias.ay);
+  EXPECT_EQ(preintegrated.bias.az, bias.az);
+  EXPECT_EQ(preintegrated.bias.wx, bias.wx);
+  EXPECT_EQ(preintegrated.bias.wy, bias.wy);
+  EXPECT_EQ(preintegrated.bias.wz, bias.wz);
+  EXPECT_EQ(preintegrated.noise_cov.diagonal(), calib.noise_cov.diagonal());
+  EXPECT_EQ(preintegrated.walk_cov.diagonal() , calib.walk_cov.diagonal() );
 
   ORB_SLAM3::IMU::Preintegrated copied(&preintegrated);
-  EXPECT_EQ(copied.b.bax, bias.bax);
-  EXPECT_EQ(copied.b.bay, bias.bay);
-  EXPECT_EQ(copied.b.baz, bias.baz);
-  EXPECT_EQ(copied.b.bwx, bias.bwx);
-  EXPECT_EQ(copied.b.bwy, bias.bwy);
-  EXPECT_EQ(copied.b.bwz, bias.bwz);
-  EXPECT_EQ(copied.Nga.diagonal(), calib.Cov.diagonal());
-  EXPECT_EQ(copied.NgaWalk.diagonal(), calib.CovWalk.diagonal());
+  EXPECT_EQ(copied.bias.ax, bias.ax);
+  EXPECT_EQ(copied.bias.ay, bias.ay);
+  EXPECT_EQ(copied.bias.az, bias.az);
+  EXPECT_EQ(copied.bias.wx, bias.wx);
+  EXPECT_EQ(copied.bias.wy, bias.wy);
+  EXPECT_EQ(copied.bias.wz, bias.wz);
+  EXPECT_EQ(copied.noise_cov.diagonal(), calib.noise_cov.diagonal());
+  EXPECT_EQ(copied.walk_cov.diagonal() , calib.walk_cov.diagonal() );
 }
 
 TEST_F(PreintegratedTest, Serialization) {
   ORB_SLAM3::IMU::Preintegrated loaded;
   Archive(loaded);
 
-  EXPECT_EQ(loaded.b.bax, bias.bax);
-  EXPECT_EQ(loaded.b.bay, bias.bay);
-  EXPECT_EQ(loaded.b.baz, bias.baz);
-  EXPECT_EQ(loaded.b.bwx, bias.bwx);
-  EXPECT_EQ(loaded.b.bwy, bias.bwy);
-  EXPECT_EQ(loaded.b.bwz, bias.bwz);
-  EXPECT_EQ(loaded.Nga.diagonal(), calib.Cov.diagonal());
-  EXPECT_EQ(loaded.NgaWalk.diagonal(), calib.CovWalk.diagonal());
+  EXPECT_EQ(loaded.bias.ax, bias.ax);
+  EXPECT_EQ(loaded.bias.ay, bias.ay);
+  EXPECT_EQ(loaded.bias.az, bias.az);
+  EXPECT_EQ(loaded.bias.wx, bias.wx);
+  EXPECT_EQ(loaded.bias.wy, bias.wy);
+  EXPECT_EQ(loaded.bias.wz, bias.wz);
+  EXPECT_EQ(loaded.noise_cov.diagonal(), calib.noise_cov.diagonal());
+  EXPECT_EQ(loaded.walk_cov.diagonal() , calib.walk_cov.diagonal());
 }
 
 TEST_F(PreintegratedTest, Integration) {
@@ -337,7 +456,7 @@ TEST_F(PreintegratedTest, Integration) {
     const Eigen::Vector3f acc(0.1, 0.0, 0.1);
     const Eigen::Vector3f gyro(0.1, 0.0, 0.1);
     const float dt = 0.1f;
-    preintegrated.IntegrateNewMeasurement(acc, gyro, dt);
+    preintegrated.integrateNewMeasurement(acc, gyro, dt);
 
     // Expected values.
     Eigen::Matrix<float, 15, 15> expected_C = Eigen::Matrix<float, 15, 15>::Zero();
@@ -369,18 +488,18 @@ TEST_F(PreintegratedTest, Integration) {
     const Eigen::Vector3f expected_avgW(0.09f, -0.01f, 0.09f);
 
     // Check.
-    EXPECT_NEAR(preintegrated.dT, 0.1f, 1e-6f);
+    EXPECT_NEAR(preintegrated.t, 0.1f, 1e-6f);
     EXPECT_TRUE(preintegrated.C.isApprox(expected_C));
-    EXPECT_TRUE(preintegrated.Info.isApprox(expected_Info));
+    EXPECT_TRUE(preintegrated.info.isApprox(expected_Info));
     EXPECT_TRUE(preintegrated.dR.isApprox(expected_dR));
     EXPECT_TRUE(preintegrated.dV.isApprox(expected_dV));
     EXPECT_TRUE(preintegrated.dP.isApprox(expected_dP));
-    EXPECT_TRUE(preintegrated.JRg.isApprox(expected_JRg));
-    EXPECT_TRUE(preintegrated.JVg.isApprox(expected_JVg));
-    EXPECT_TRUE(preintegrated.JVa.isApprox(expected_JVa));
-    EXPECT_TRUE(preintegrated.JPg.isApprox(expected_JPg));
-    EXPECT_TRUE(preintegrated.JPa.isApprox(expected_JPa));
-    EXPECT_TRUE(preintegrated.avgA.isApprox(expected_avgA));
-    EXPECT_TRUE(preintegrated.avgW.isApprox(expected_avgW));
+    EXPECT_TRUE(preintegrated.JR_gyro.isApprox(expected_JRg));
+    EXPECT_TRUE(preintegrated.JV_gyro.isApprox(expected_JVg));
+    EXPECT_TRUE(preintegrated.JV_acc.isApprox(expected_JVa));
+    EXPECT_TRUE(preintegrated.JP_gyro.isApprox(expected_JPg));
+    EXPECT_TRUE(preintegrated.JP_acc.isApprox(expected_JPa));
+    EXPECT_TRUE(preintegrated.mean_acc.isApprox(expected_avgA));
+    EXPECT_TRUE(preintegrated.mean_gyro.isApprox(expected_avgW));
   }
 }

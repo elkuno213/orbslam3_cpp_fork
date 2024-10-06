@@ -120,9 +120,9 @@ void KeyFrame::SetPose(const Sophus::SE3f &Tcw)
     mTwc = mTcw.inverse();
     mRwc = mTwc.rotationMatrix();
 
-    if (mImuCalib.mbIsSet) // TODO Use a flag instead of the OpenCV matrix
+    if (mImuCalib.is_set) // TODO Use a flag instead of the OpenCV matrix
     {
-        mOwb = mRwc * mImuCalib.mTcb.translation() + mTwc.translation();
+        mOwb = mRwc * mImuCalib.T_cb.translation() + mTwc.translation();
     }
 }
 
@@ -159,13 +159,13 @@ Eigen::Vector3f KeyFrame::GetImuPosition()
 Eigen::Matrix3f KeyFrame::GetImuRotation()
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
-    return (mTwc * mImuCalib.mTcb).rotationMatrix();
+    return (mTwc * mImuCalib.T_cb).rotationMatrix();
 }
 
 Sophus::SE3f KeyFrame::GetImuPose()
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
-    return mTwc * mImuCalib.mTcb;
+    return mTwc * mImuCalib.T_cb;
 }
 
 Eigen::Matrix3f KeyFrame::GetRotation(){
@@ -816,19 +816,19 @@ void KeyFrame::SetNewBias(const IMU::Bias &b)
     std::unique_lock<std::mutex> lock(mMutexPose);
     mImuBias = b;
     if(mpImuPreintegrated)
-        mpImuPreintegrated->SetNewBias(b);
+        mpImuPreintegrated->setNewBias(b);
 }
 
 Eigen::Vector3f KeyFrame::GetGyroBias()
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
-    return Eigen::Vector3f(mImuBias.bwx, mImuBias.bwy, mImuBias.bwz);
+    return Eigen::Vector3f(mImuBias.wx, mImuBias.wy, mImuBias.wz);
 }
 
 Eigen::Vector3f KeyFrame::GetAccBias()
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
-    return Eigen::Vector3f(mImuBias.bax, mImuBias.bay, mImuBias.baz);
+    return Eigen::Vector3f(mImuBias.ax, mImuBias.ay, mImuBias.az);
 }
 
 IMU::Bias KeyFrame::GetImuBias()
@@ -921,7 +921,7 @@ void KeyFrame::PreSave(std::set<KeyFrame*>& spKF,std::set<MapPoint*>& spMP, std:
         mBackupNextKFId = mNextKF->mnId;
 
     if(mpImuPreintegrated)
-        mBackupImuPreintegrated.CopyFrom(mpImuPreintegrated);
+        mBackupImuPreintegrated.copyFrom(mpImuPreintegrated);
 }
 
 void KeyFrame::PostLoad(std::map<long unsigned int, KeyFrame*>& mpKFid, std::map<long unsigned int, MapPoint*>& mpMPid, std::map<unsigned int, GeometricCamera*>& mpCamId){

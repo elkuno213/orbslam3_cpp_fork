@@ -443,7 +443,7 @@ void Frame::SetNewBias(const IMU::Bias &b)
 {
     mImuBias = b;
     if(mpImuPreintegrated)
-        mpImuPreintegrated->SetNewBias(b);
+        mpImuPreintegrated->setNewBias(b);
 }
 
 void Frame::SetVelocity(Eigen::Vector3f Vwb)
@@ -465,7 +465,7 @@ void Frame::SetImuPoseVelocity(const Eigen::Matrix3f &Rwb, const Eigen::Vector3f
     Sophus::SE3f Twb(Rwb, twb);
     Sophus::SE3f Tbw = Twb.inverse();
 
-    mTcw = mImuCalib.mTcb * Tbw;
+    mTcw = mImuCalib.T_cb * Tbw;
 
     UpdatePoseMatrices();
     mbIsSet = true;
@@ -482,15 +482,15 @@ void Frame::UpdatePoseMatrices()
 }
 
 Eigen::Matrix<float,3,1> Frame::GetImuPosition() const {
-    return mRwc * mImuCalib.mTcb.translation() + mOw;
+    return mRwc * mImuCalib.T_cb.translation() + mOw;
 }
 
 Eigen::Matrix<float,3,3> Frame::GetImuRotation() {
-    return mRwc * mImuCalib.mTcb.rotationMatrix();
+    return mRwc * mImuCalib.T_cb.rotationMatrix();
 }
 
 Sophus::SE3<float> Frame::GetImuPose() {
-    return mTcw.inverse() * mImuCalib.mTcb;
+    return mTcw.inverse() * mImuCalib.T_cb;
 }
 
 Sophus::SE3f Frame::GetRelativePoseTrl()

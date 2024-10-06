@@ -1030,7 +1030,7 @@ void LocalMapping::KeyFrameCulling()
 
                     if((bInitImu && (pKF->mnId<last_ID) && t<3.) || (t<0.5))
                     {
-                        pKF->mNextKF->mpImuPreintegrated->MergePrevious(pKF->mpImuPreintegrated);
+                        pKF->mNextKF->mpImuPreintegrated->mergePrevious(pKF->mpImuPreintegrated);
                         pKF->mNextKF->mPrevKF = pKF->mPrevKF;
                         pKF->mPrevKF->mNextKF = pKF->mNextKF;
                         pKF->mNextKF = NULL;
@@ -1039,7 +1039,7 @@ void LocalMapping::KeyFrameCulling()
                     }
                     else if(!mpCurrentKeyFrame->GetMap()->GetIniertialBA2() && ((pKF->GetImuPosition()-pKF->mPrevKF->GetImuPosition()).norm()<0.02) && (t<3))
                     {
-                        pKF->mNextKF->mpImuPreintegrated->MergePrevious(pKF->mpImuPreintegrated);
+                        pKF->mNextKF->mpImuPreintegrated->mergePrevious(pKF->mpImuPreintegrated);
                         pKF->mNextKF->mPrevKF = pKF->mPrevKF;
                         pKF->mPrevKF->mNextKF = pKF->mNextKF;
                         pKF->mNextKF = NULL;
@@ -1242,8 +1242,8 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
             if (!(*itKF)->mPrevKF)
                 continue;
 
-            dirG -= (*itKF)->mPrevKF->GetImuRotation() * (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity();
-            Eigen::Vector3f _vel = ((*itKF)->GetImuPosition() - (*itKF)->mPrevKF->GetImuPosition())/(*itKF)->mpImuPreintegrated->dT;
+            dirG -= (*itKF)->mPrevKF->GetImuRotation() * (*itKF)->mpImuPreintegrated->getUpdatedDeltaVelocity();
+            Eigen::Vector3f _vel = ((*itKF)->GetImuPosition() - (*itKF)->mPrevKF->GetImuPosition())/(*itKF)->mpImuPreintegrated->t;
             (*itKF)->SetVelocity(_vel);
             (*itKF)->mPrevKF->SetVelocity(_vel);
         }

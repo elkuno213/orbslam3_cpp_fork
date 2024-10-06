@@ -1,20 +1,23 @@
 /**
-* This file is part of ORB-SLAM3
-*
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-*
-* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM3
+ *
+ * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
+ * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
+ * University of Zaragoza.
+ *
+ * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef IMUTYPES_H
 #define IMUTYPES_H
@@ -23,7 +26,6 @@
 #include <mutex>
 #include <vector>
 // 3rdparty
-#include <glog/logging.h>
 #include <Eigen/Core>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
@@ -32,233 +34,249 @@
 // Local
 #include "orbslam3/SerializationUtils.h"
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3::IMU {
 
-namespace IMU
-{
+// Constants.
+constexpr float kGravity = 9.81f;
 
-const float GRAVITY_VALUE=9.81;
+// IMU measurement point.
+struct Point {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-//IMU measurement (gyro, accelerometer and timestamp)
-class Point
-{
-public:
-    Point(const float &acc_x, const float &acc_y, const float &acc_z,
-             const float &ang_vel_x, const float &ang_vel_y, const float &ang_vel_z,
-             const double &timestamp): a(acc_x,acc_y,acc_z), w(ang_vel_x,ang_vel_y,ang_vel_z), t(timestamp){}
-    Point(const cv::Point3f Acc, const cv::Point3f Gyro, const double &timestamp):
-        a(Acc.x,Acc.y,Acc.z), w(Gyro.x,Gyro.y,Gyro.z), t(timestamp){}
-public:
-    Eigen::Vector3f a;
-    Eigen::Vector3f w;
-    double t;
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-};
+  Eigen::Vector3f acc  = Eigen::Vector3f::Zero(); // acceleration     [m/s^2]
+  Eigen::Vector3f gyro = Eigen::Vector3f::Zero(); // angular velocity [rad/s]
+  double t = 0.0;                                 // timestamp        [s]
 
-//IMU biases (gyro and accelerometer)
-class Bias
-{
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version)
-    {
-        ar & bax;
-        ar & bay;
-        ar & baz;
-
-        ar & bwx;
-        ar & bwy;
-        ar & bwz;
-    }
-
-public:
-    Bias():bax(0),bay(0),baz(0),bwx(0),bwy(0),bwz(0){}
-    Bias(const float &b_acc_x, const float &b_acc_y, const float &b_acc_z,
-            const float &b_ang_vel_x, const float &b_ang_vel_y, const float &b_ang_vel_z):
-            bax(b_acc_x), bay(b_acc_y), baz(b_acc_z), bwx(b_ang_vel_x), bwy(b_ang_vel_y), bwz(b_ang_vel_z){}
-    void CopyFrom(Bias &b);
-    friend std::ostream& operator<< (std::ostream &out, const Bias &b);
-
-public:
-    float bax, bay, baz;
-    float bwx, bwy, bwz;
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-};
-
-//IMU calibration (Tbc, Tcb, noise)
-class Calib
-{
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version)
-    {
-        serializeSophusSE3(ar,mTcb,version);
-        serializeSophusSE3(ar,mTbc,version);
-
-        ar & boost::serialization::make_array(Cov.diagonal().data(), Cov.diagonal().size());
-        ar & boost::serialization::make_array(CovWalk.diagonal().data(), CovWalk.diagonal().size());
-
-        ar & mbIsSet;
-    }
-
-public:
-
-    Calib(const Sophus::SE3<float> &Tbc, const float &ng, const float &na, const float &ngw, const float &naw)
-    {
-        Set(Tbc,ng,na,ngw,naw);
-    }
-
-    Calib(const Calib &calib);
-    Calib(){mbIsSet = false;}
-
-    //void Set(const cv::Mat &cvTbc, const float &ng, const float &na, const float &ngw, const float &naw);
-    void Set(const Sophus::SE3<float> &sophTbc, const float &ng, const float &na, const float &ngw, const float &naw);
-
-public:
-    // Sophus/Eigen implementation
-    Sophus::SE3<float> mTcb;
-    Sophus::SE3<float> mTbc;
-    Eigen::DiagonalMatrix<float,6> Cov, CovWalk;
-    bool mbIsSet;
-};
-
-//Integration of 1 gyro measurement
-class IntegratedRotation
-{
-public:
-    IntegratedRotation(){}
-    IntegratedRotation(const Eigen::Vector3f &angVel, const Bias &imuBias, const float &time);
-
-public:
-    float deltaT; //integration time
-    Eigen::Matrix3f deltaR;
-    Eigen::Matrix3f rightJ; // right jacobian
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-};
-
-//Preintegration of Imu Measurements
-class Preintegrated
-{
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version)
-    {
-        ar & dT;
-        ar & boost::serialization::make_array(C.data(), C.size());
-        ar & boost::serialization::make_array(Info.data(), Info.size());
-        ar & boost::serialization::make_array(Nga.diagonal().data(), Nga.diagonal().size());
-        ar & boost::serialization::make_array(NgaWalk.diagonal().data(), NgaWalk.diagonal().size());
-        ar & b;
-        ar & boost::serialization::make_array(dR.data(), dR.size());
-        ar & boost::serialization::make_array(dV.data(), dV.size());
-        ar & boost::serialization::make_array(dP.data(), dP.size());
-        ar & boost::serialization::make_array(JRg.data(), JRg.size());
-        ar & boost::serialization::make_array(JVg.data(), JVg.size());
-        ar & boost::serialization::make_array(JVa.data(), JVa.size());
-        ar & boost::serialization::make_array(JPg.data(), JPg.size());
-        ar & boost::serialization::make_array(JPa.data(), JPa.size());
-        ar & boost::serialization::make_array(avgA.data(), avgA.size());
-        ar & boost::serialization::make_array(avgW.data(), avgW.size());
-
-        ar & bu;
-        ar & boost::serialization::make_array(db.data(), db.size());
-        ar & mvMeasurements;
-    }
-
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    Preintegrated(const Bias &b_, const Calib &calib);
-    Preintegrated(Preintegrated* pImuPre);
-    Preintegrated() {}
-    ~Preintegrated() {}
-    void CopyFrom(Preintegrated* pImuPre);
-    void Initialize(const Bias &b_);
-    void IntegrateNewMeasurement(const Eigen::Vector3f &acceleration, const Eigen::Vector3f &angVel, const float &dt);
-    void Reintegrate();
-    void MergePrevious(Preintegrated* pPrev);
-    void SetNewBias(const Bias &bu_);
-    IMU::Bias GetDeltaBias(const Bias &b_);
-
-    Eigen::Matrix3f GetDeltaRotation(const Bias &b_);
-    Eigen::Vector3f GetDeltaVelocity(const Bias &b_);
-    Eigen::Vector3f GetDeltaPosition(const Bias &b_);
-
-    Eigen::Matrix3f GetUpdatedDeltaRotation();
-    Eigen::Vector3f GetUpdatedDeltaVelocity();
-    Eigen::Vector3f GetUpdatedDeltaPosition();
-
-    Eigen::Matrix3f GetOriginalDeltaRotation();
-    Eigen::Vector3f GetOriginalDeltaVelocity();
-    Eigen::Vector3f GetOriginalDeltaPosition();
-
-    Eigen::Matrix<float,6,1> GetDeltaBias();
-
-    Bias GetOriginalBias();
-    Bias GetUpdatedBias();
-
-    void printMeasurements() const {
-        LOG(INFO) << "pint meas";
-        for(int i=0; i<mvMeasurements.size(); i++){
-            LOG(INFO) << "meas " << mvMeasurements[i].t;
-        }
-        LOG(INFO) << "end pint meas";
-    }
-
-public:
-    float dT;
-    Eigen::Matrix<float,15,15> C;
-    Eigen::Matrix<float,15,15> Info;
-    Eigen::DiagonalMatrix<float,6> Nga, NgaWalk;
-
-    // Values for the original bias (when integration was computed)
-    Bias b;
-    Eigen::Matrix3f dR;
-    Eigen::Vector3f dV, dP;
-    Eigen::Matrix3f JRg, JVg, JVa, JPg, JPa;
-    Eigen::Vector3f avgA, avgW;
-
+  Point() = default;
+  Point(
+    const float ax,
+    const float ay,
+    const float az,
+    const float wx,
+    const float wy,
+    const float wz,
+    const double t
+  );
+  Point(const Eigen::Vector3f& acc, const Eigen::Vector3f& gyro, const double t);
+  Point(const cv::Point3f& acc, const cv::Point3f& gyro, const double t);
 
 private:
-    // Updated bias
-    Bias bu;
-    // Dif between original and updated bias
-    // This is used to compute the updated values of the preintegration
-    Eigen::Matrix<float,6,1> db;
+  // ──────────────────────────── //
+  // Serialization
 
-    struct integrable
-    {
-        template<class Archive>
-        void serialize(Archive & ar, const unsigned int version)
-        {
-            ar & boost::serialization::make_array(a.data(), a.size());
-            ar & boost::serialization::make_array(w.data(), w.size());
-            ar & t;
-        }
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int) {
+    ar& boost::serialization::make_array(acc.data() , acc.size());
+    ar& boost::serialization::make_array(gyro.data(), gyro.size());
+    ar& t;
+  }
+};
 
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        integrable(){}
-        integrable(const Eigen::Vector3f &a_, const Eigen::Vector3f &w_ , const float &t_):a(a_),w(w_),t(t_){}
-        Eigen::Vector3f a, w;
-        float t;
-    };
+// IMU bias (accelerometer and gyroscope)
+struct Bias {
+  float ax = 0.f, ay = 0.f, az = 0.f; // accelerometer bias [m/s^2]
+  float wx = 0.f, wy = 0.f, wz = 0.f; // gyroscope bias     [rad/s]
 
-    std::vector<integrable> mvMeasurements;
+  Bias() = default;
+  Bias(
+    const float bias_ax,
+    const float bias_ay,
+    const float bias_az,
+    const float bias_wx,
+    const float bias_wy,
+    const float bias_wz
+  );
 
-    std::mutex mMutex;
+  Bias operator-(const Bias& other) const;
+
+  void copyFrom(const Bias& other);
+
+  Eigen::Vector3f acc()  const { return Eigen::Vector3f(ax, ay, az); }
+  Eigen::Vector3f gyro() const { return Eigen::Vector3f(wx, wy, wz); }
+
+  friend std::ostream& operator<<(std::ostream& out, const Bias& bias);
+
+private:
+  // ──────────────────────────── //
+  // Serialization
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int) {
+    ar& ax;
+    ar& ay;
+    ar& az;
+
+    ar& wx;
+    ar& wy;
+    ar& wz;
+  }
+};
+
+// IMU calibration
+struct Calib {
+  Sophus::SE3f T_bc; // Transformation from camera to body-frame (IMU)
+  Sophus::SE3f T_cb; // Transformation from body-frame (IMU) to camera
+  Eigen::DiagonalMatrix<float, 6> noise_cov; // Noise covariance
+  Eigen::DiagonalMatrix<float, 6> walk_cov;  // Random walk covariance
+  bool is_set;
+
+  Calib();
+  Calib(
+    const Sophus::SE3f& camera_to_body,
+    const float noise_gyro,
+    const float noise_acc,
+    const float walk_gyro,
+    const float walk_acc
+  );
+
+private:
+  // ──────────────────────────── //
+  // Serialization
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int version) {
+    serializeSophusSE3(ar, T_cb, version);
+    serializeSophusSE3(ar, T_bc, version);
+
+    ar& boost::serialization::make_array(
+      noise_cov.diagonal().data(),
+      noise_cov.diagonal().size()
+    );
+    ar& boost::serialization::make_array(
+      walk_cov.diagonal().data(),
+      walk_cov.diagonal().size()
+    );
+
+    ar& is_set;
+  }
+};
+
+// Integrated rotation from gyroscope measurements.
+struct IntegratedRotation {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  Eigen::Matrix3f dR;
+  Eigen::Matrix3f rightJacobian;
+
+  IntegratedRotation() = default;
+  IntegratedRotation(const Eigen::Vector3f& gyro, const Bias& bias, const double dt);
+};
+
+// Preintegration of IMU measurements
+struct Preintegrated {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  // Total integrated time [s]
+  double t;
+  // Covariance matrix
+  Eigen::Matrix<float, 15, 15> C;
+  // Information matrix
+  Eigen::Matrix<float, 15, 15> info;
+  // Noise and random walk covariance
+  Eigen::DiagonalMatrix<float, 6> noise_cov, walk_cov;
+  // Original bias
+  Bias bias;
+  Eigen::Matrix3f dR; // Delta rotation matrix
+  Eigen::Vector3f dV, dP; // Delta velocity and position
+  // Jacobian matrices for rotation, velocity and position wrt gyro and acc
+  Eigen::Matrix3f JR_gyro, JV_gyro, JV_acc, JP_gyro, JP_acc;
+  // Mean acceleration and gyroscope
+  Eigen::Vector3f mean_acc, mean_gyro;
+
+  // ──────────────────────────── //
+  // Constructors
+
+  Preintegrated();
+  Preintegrated(const Bias& bias, const Calib& calib);
+  Preintegrated(Preintegrated* other);
+
+  // ──────────────────────────── //
+  // Public methods
+
+  void copyFrom(Preintegrated* other);
+  void initialize(const Bias& init_bias);
+  void integrateNewMeasurement(
+    const Eigen::Vector3f& acc,
+    const Eigen::Vector3f& gyro,
+    const double dt
+  );
+  void reintegrate();
+  void mergePrevious(Preintegrated* previous);
+  void setNewBias(const Bias& new_bias);
+
+  IMU::Bias getDeltaBias(const Bias& other);
+
+  Eigen::Matrix3f getDeltaRotation(const Bias& other);
+  Eigen::Vector3f getDeltaVelocity(const Bias& other);
+  Eigen::Vector3f getDeltaPosition(const Bias& other);
+
+  Eigen::Matrix3f getUpdatedDeltaRotation();
+  Eigen::Vector3f getUpdatedDeltaVelocity();
+  Eigen::Vector3f getUpdatedDeltaPosition();
+
+  Eigen::Matrix3f getOriginalDeltaRotation();
+  Eigen::Vector3f getOriginalDeltaVelocity();
+  Eigen::Vector3f getOriginalDeltaPosition();
+
+  Bias getOriginalBias();
+  Bias getUpdatedBias();
+  Bias getBiasDifference();
+
+private:
+  // ──────────────────────────── //
+  // Serialization
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int) {
+    ar& t;
+
+    ar& boost::serialization::make_array(C.data()   , C.size()   );
+    ar& boost::serialization::make_array(info.data(), info.size());
+    ar& boost::serialization::make_array(
+      noise_cov.diagonal().data(),
+      noise_cov.diagonal().size()
+    );
+    ar& boost::serialization::make_array(
+      walk_cov.diagonal().data(),
+      walk_cov.diagonal().size()
+    );
+
+    ar& bias;
+
+    ar& boost::serialization::make_array(dR.data()       , dR.size()       );
+    ar& boost::serialization::make_array(dV.data()       , dV.size()       );
+    ar& boost::serialization::make_array(dP.data()       , dP.size()       );
+    ar& boost::serialization::make_array(JR_gyro.data()  , JR_gyro.size()  );
+    ar& boost::serialization::make_array(JV_gyro.data()  , JV_gyro.size()  );
+    ar& boost::serialization::make_array(JV_acc.data()   , JV_acc.size()   );
+    ar& boost::serialization::make_array(JP_gyro.data()  , JP_gyro.size()  );
+    ar& boost::serialization::make_array(JP_acc.data()   , JP_acc.size()   );
+    ar& boost::serialization::make_array(mean_acc.data() , mean_acc.size() );
+    ar& boost::serialization::make_array(mean_gyro.data(), mean_gyro.size());
+
+    ar& updated_bias_;
+    ar& bias_diff_;
+    ar& measurements_;
+  }
+
+private:
+  // Updated bias.
+  Bias updated_bias_;
+  // Difference between the original and updated bias, which is used to compute
+  // the updated values of the preintegration.
+  Bias bias_diff_;
+  // Measurements stored.
+  std::vector<Point> measurements_;
+  std::mutex mutex_;
 };
 
 // Lie Algebra Functions
-Eigen::Matrix3f RightJacobianSO3(const float &x, const float &y, const float &z);
-Eigen::Matrix3f RightJacobianSO3(const Eigen::Vector3f &v);
+Eigen::Matrix3f normalizeRotation(const Eigen::Matrix3f& R);
 
-Eigen::Matrix3f InverseRightJacobianSO3(const float &x, const float &y, const float &z);
-Eigen::Matrix3f InverseRightJacobianSO3(const Eigen::Vector3f &v);
-
-Eigen::Matrix3f NormalizeRotation(const Eigen::Matrix3f &R);
-
-}
-
-} //namespace ORB_SLAM2
+} // namespace ORB_SLAM3::IMU
 
 #endif // IMUTYPES_H

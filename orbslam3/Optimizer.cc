@@ -486,7 +486,7 @@ void Optimizer::FullInertialBA(Map *pMap, int its, const bool bFixLocal, const l
                 continue;
             if(pKFi->bImu && pKFi->mPrevKF->bImu)
             {
-                pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
+                pKFi->mpImuPreintegrated->setNewBias(pKFi->mPrevKF->GetImuBias());
                 g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
                 g2o::HyperGraph::Vertex* VV1 = optimizer.vertex(maxKFid+3*(pKFi->mPrevKF->mnId)+1);
 
@@ -2607,7 +2607,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
         }
         if(pKFi->bImu && pKFi->mPrevKF->bImu && pKFi->mpImuPreintegrated)
         {
-            pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
+            pKFi->mpImuPreintegrated->setNewBias(pKFi->mPrevKF->GetImuBias());
             g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
             g2o::HyperGraph::Vertex* VV1 = optimizer.vertex(maxKFid+3*(pKFi->mPrevKF->mnId)+1);
             g2o::HyperGraph::Vertex* VG1 = optimizer.vertex(maxKFid+3*(pKFi->mPrevKF->mnId)+2);
@@ -3145,7 +3145,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
             if(!pKFi->mpImuPreintegrated)
                 LOG(ERROR) << "Not preintegrated measurement";
 
-            pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
+            pKFi->mpImuPreintegrated->setNewBias(pKFi->mPrevKF->GetImuBias());
             g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
             g2o::HyperGraph::Vertex* VV1 = optimizer.vertex(maxKFid+(pKFi->mPrevKF->mnId)+1);
             g2o::HyperGraph::Vertex* VP2 =  optimizer.vertex(pKFi->mnId);
@@ -3217,7 +3217,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
         {
             pKFi->SetNewBias(b);
             if (pKFi->mpImuPreintegrated)
-                pKFi->mpImuPreintegrated->Reintegrate();
+                pKFi->mpImuPreintegrated->reintegrate();
         }
         else
             pKFi->SetNewBias(b);
@@ -3316,7 +3316,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Vector3d &bg, Eigen::Vect
             if(pKFi->isBad() || pKFi->mPrevKF->mnId>maxKFid)
                 continue;
 
-            pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
+            pKFi->mpImuPreintegrated->setNewBias(pKFi->mPrevKF->GetImuBias());
             g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
             g2o::HyperGraph::Vertex* VV1 = optimizer.vertex(maxKFid+(pKFi->mPrevKF->mnId)+1);
             g2o::HyperGraph::Vertex* VP2 =  optimizer.vertex(pKFi->mnId);
@@ -3382,7 +3382,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Vector3d &bg, Eigen::Vect
         {
             pKFi->SetNewBias(b);
             if (pKFi->mpImuPreintegrated)
-                pKFi->mpImuPreintegrated->Reintegrate();
+                pKFi->mpImuPreintegrated->reintegrate();
         }
         else
             pKFi->SetNewBias(b);
@@ -4201,7 +4201,7 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool *pbS
         }
         if(pKFi->bImu && pKFi->mPrevKF->bImu && pKFi->mpImuPreintegrated)
         {
-            pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
+            pKFi->mpImuPreintegrated->setNewBias(pKFi->mPrevKF->GetImuBias());
             g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
             g2o::HyperGraph::Vertex* VV1 = optimizer.vertex(maxKFid+3*(pKFi->mPrevKF->mnId)+1);
             g2o::HyperGraph::Vertex* VG1 = optimizer.vertex(maxKFid+3*(pKFi->mPrevKF->mnId)+2);
