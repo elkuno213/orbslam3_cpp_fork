@@ -1,81 +1,45 @@
 /**
-* This file is part of ORB-SLAM3
-*
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-*
-* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM3
+ *
+ * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
+ * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
+ * University of Zaragoza.
+ *
+ * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef GEOMETRIC_TOOLS_H
 #define GEOMETRIC_TOOLS_H
 
-// Standard
-#include <iostream>
 // 3rdparty
-#include <glog/logging.h>
 #include <Eigen/Core>
-#include <opencv2/core.hpp>
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
-class KeyFrame;
-
-class GeometricTools
-{
+class GeometricTools {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    // Compute the Fundamental matrix between KF1 and KF2
-    static Eigen::Matrix3f ComputeF12(KeyFrame* &pKF1, KeyFrame* &pKF2);
-
-    //Triangulate point with KF1 and KF2
-    static bool Triangulate(Eigen::Vector3f &x_c1, Eigen::Vector3f &x_c2,Eigen::Matrix<float,3,4> &Tc1w ,Eigen::Matrix<float,3,4> &Tc2w , Eigen::Vector3f &x3D);
-
-    template<int rows, int cols>
-    static bool CheckMatrices(const cv::Mat &cvMat, const Eigen::Matrix<float,rows,cols> &eigMat) {
-        const float epsilon = 1e-3;
-        // LOG(INFO) << cvMat.cols - cols << cvMat.rows - rows;
-        if(rows != cvMat.rows || cols != cvMat.cols) {
-            LOG(INFO) << "wrong cvmat size";
-            return false;
-        }
-        for(int i = 0; i < rows; i++)
-            for(int j = 0; j < cols; j++)
-                if ((cvMat.at<float>(i,j) > (eigMat(i,j) + epsilon)) ||
-                    (cvMat.at<float>(i,j) < (eigMat(i,j) - epsilon))){
-                    LOG(INFO) << "cv mat:\n" << cvMat;
-                    LOG(INFO) << "eig mat:\n" << eigMat;
-                    return false;
-                }
-        return true;
-    }
-
-    template<typename T, int rows, int cols>
-    static bool CheckMatrices( const Eigen::Matrix<T,rows,cols> &eigMat1, const Eigen::Matrix<T,rows,cols> &eigMat2) {
-        const float epsilon = 1e-3;
-        for(int i = 0; i < rows; i++)
-            for(int j = 0; j < cols; j++)
-                if ((eigMat1(i,j) > (eigMat2(i,j) + epsilon)) ||
-                    (eigMat1(i,j) < (eigMat2(i,j) - epsilon))){
-                    LOG(INFO) << "eig mat 1:\n" << eigMat1;
-                    LOG(INFO) << "eig mat 2:\n" << eigMat2;
-                    return false;
-                }
-        return true;
-    }
-
+  // Triangulate point from two camera poses. Returns false if invalid scale,
+  // true otherwise.
+  static bool triangulate(
+    const Eigen::Vector3f& point_c1, // Homogeneous coordinates of the point in camera 1
+    const Eigen::Vector3f& point_c2, // Homogeneous coordinates of the point in camera 2
+    const Eigen::Matrix<float, 3, 4>& T_c1w, // Transformation from world to camera 1
+    const Eigen::Matrix<float, 3, 4>& T_c2w, // Transformation from world to camera 2
+    Eigen::Vector3f& triangulated // Triangulated point
+  );
 };
 
-}// namespace ORB_SLAM
+} // namespace ORB_SLAM3
 
 #endif // GEOMETRIC_TOOLS_H

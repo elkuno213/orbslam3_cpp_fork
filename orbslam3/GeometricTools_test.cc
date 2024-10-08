@@ -38,7 +38,7 @@ TEST(GeometricTools, Triangulation) {
   // ──────────────────────────── //
   // Test triangulation.
   Eigen::Vector3f triangulated;
-  const bool success = GeometricTools::Triangulate(point_c1, point_c2, T_c1w, T_c2w, triangulated);
+  const bool success = GeometricTools::triangulate(point_c1, point_c2, T_c1w, T_c2w, triangulated);
 
   // Expect the triangulation to be successful.
   EXPECT_TRUE(success);

@@ -827,7 +827,7 @@ namespace ORB_SLAM3
             Eigen::Vector3f x_p1(kp1.pt.x, kp1.pt.y, 1);
             Eigen::Vector3f x_p2(kp2.pt.x, kp2.pt.y, 1);
 
-            GeometricTools::Triangulate(x_p1, x_p2, P1, P2, p3dC1);
+            GeometricTools::triangulate(x_p1, x_p2, P1, P2, p3dC1);
 
 
             if(!std::isfinite(p3dC1(0)) || !std::isfinite(p3dC1(1)) || !std::isfinite(p3dC1(2)))

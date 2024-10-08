@@ -24,6 +24,7 @@
 #include <set>
 #include <vector>
 // 3rdparty
+#include <glog/logging.h>
 #include <orbslam3/external/DBoW2/DBoW2/BowVector.h>
 #include <orbslam3/external/DBoW2/DBoW2/FeatureVector.h>
 #include <boost/serialization/base_object.hpp>
