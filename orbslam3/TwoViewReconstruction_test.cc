@@ -99,7 +99,7 @@ protected:
   std::unique_ptr<ORB_SLAM3::TwoViewReconstruction> reconstructor_;
 };
 
-TEST_F(TwoViewReconstructionTest, Success) {
+TEST_F(TwoViewReconstructionTest, SuccessfulReconstructionWithFundamentalMatrix) {
   constexpr std::size_t num_sides = 100;
 
   // Construct a 3D polygon in the world frame.
@@ -145,7 +145,7 @@ TEST_F(TwoViewReconstructionTest, Success) {
   Sophus::SE3f T_21;
   std::vector<cv::Point3f> points_3D;
   std::vector<bool> triangulated_flags;
-  const bool success = reconstructor_->Reconstruct(
+  const bool success = reconstructor_->reconstruct(
     keypoints_1,
     keypoints_2,
     matches_12,
@@ -157,14 +157,14 @@ TEST_F(TwoViewReconstructionTest, Success) {
   // Check.
   EXPECT_TRUE(success);
 
-  EXPECT_TRUE(T_21.matrix().isApprox(simulation::T_21.matrix(), 1e-6));
+  EXPECT_TRUE(T_21.matrix().isApprox(simulation::T_21.matrix(), 1e-6f));
   EXPECT_EQ(points_3D.size(), num_sides);
   for (std::size_t i = 0; i < num_sides; ++i) {
     const auto& point  = points_3D[i];
     const auto& vertex = vertices[i];
-    EXPECT_NEAR(point.x, vertex.x(), 1e-5);
-    EXPECT_NEAR(point.y, vertex.y(), 1e-5);
-    EXPECT_NEAR(point.z, vertex.z(), 1e-5);
+    EXPECT_NEAR(point.x, vertex.x(), 1e-5f);
+    EXPECT_NEAR(point.y, vertex.y(), 1e-5f);
+    EXPECT_NEAR(point.z, vertex.z(), 1e-5f);
   }
 
   EXPECT_EQ(triangulated_flags.size(), num_sides);
@@ -173,18 +173,129 @@ TEST_F(TwoViewReconstructionTest, Success) {
   }
 }
 
-TEST_F(TwoViewReconstructionTest, FailureEmptyKeypoints) {
-  // TODO: handle edge case and implement the test.
+TEST_F(TwoViewReconstructionTest, SuccessfulReconstructionWithHomographyMatrix) {
+  // TODO: implement the test.
 }
 
-TEST_F(TwoViewReconstructionTest, FailureEmptyMatches) {
-  // TODO: handle edge case and implement the test.
+TEST_F(TwoViewReconstructionTest, FailedEmptyKeypoints) {
+  {
+    // Initialize keypoints and matches.
+    const std::vector<cv::KeyPoint> keypoints_1; // Empty keypoints
+    const std::vector<cv::KeyPoint> keypoints_2 = {
+      cv::KeyPoint(0.f, 0.f, 1.f),
+      cv::KeyPoint(1.f, 0.f, 1.f),
+    };
+    const std::vector<int> matches_12 = {0, 1};
+
+    // Reconstruct.
+    Sophus::SE3f T_21;
+    std::vector<cv::Point3f> points_3D;
+    std::vector<bool> triangulated_flags;
+    const bool success = reconstructor_->reconstruct(
+      keypoints_1,
+      keypoints_2,
+      matches_12,
+      T_21,
+      points_3D,
+      triangulated_flags
+    );
+
+    // Check.
+    EXPECT_FALSE(success);
+    EXPECT_TRUE(T_21.matrix().isApprox(Eigen::Matrix4f::Identity(), 1e-6f));
+    EXPECT_TRUE(points_3D.empty());
+    EXPECT_TRUE(triangulated_flags.empty());
+  }
+  {
+    // Initialize keypoints and matches.
+    const std::vector<cv::KeyPoint> keypoints_1 = {
+      cv::KeyPoint(0.f, 0.f, 1.f),
+      cv::KeyPoint(1.f, 0.f, 1.f),
+    };
+    const std::vector<cv::KeyPoint> keypoints_2; // Empty keypoints
+    const std::vector<int> matches_12 = {0, 1};
+
+    // Reconstruct.
+    Sophus::SE3f T_21;
+    std::vector<cv::Point3f> points_3D;
+    std::vector<bool> triangulated_flags;
+    const bool success = reconstructor_->reconstruct(
+      keypoints_1,
+      keypoints_2,
+      matches_12,
+      T_21,
+      points_3D,
+      triangulated_flags
+    );
+
+    // Check.
+    EXPECT_FALSE(success);
+    EXPECT_TRUE(T_21.matrix().isApprox(Eigen::Matrix4f::Identity(), 1e-6f));
+    EXPECT_TRUE(points_3D.empty());
+    EXPECT_TRUE(triangulated_flags.empty());
+  }
 }
 
-TEST_F(TwoViewReconstructionTest, FailureInsufficientKeypoints) {
-  // TODO: handle edge case and implement the test.
+TEST_F(TwoViewReconstructionTest, FailedEmptyMatches) {
+  // Initialize keypoints and matches.
+  const std::vector<cv::KeyPoint> keypoints_1 = {
+    cv::KeyPoint(0.f, 0.f, 1.f),
+    cv::KeyPoint(1.f, 0.f, 1.f),
+  };
+  const std::vector<cv::KeyPoint> keypoints_2 = {
+    cv::KeyPoint(0.f, 0.f, 1.f),
+    cv::KeyPoint(1.f, 0.f, 1.f),
+  };
+  const std::vector<int> matches_12; // Empty matches
+
+  // Reconstruct.
+  Sophus::SE3f T_21;
+  std::vector<cv::Point3f> points_3D;
+  std::vector<bool> triangulated_flags;
+  const bool success = reconstructor_->reconstruct(
+    keypoints_1,
+    keypoints_2,
+    matches_12,
+    T_21,
+    points_3D,
+    triangulated_flags
+  );
+
+  // Check.
+  EXPECT_FALSE(success);
+  EXPECT_TRUE(T_21.matrix().isApprox(Eigen::Matrix4f::Identity(), 1e-6f));
+  EXPECT_TRUE(points_3D.empty());
+  EXPECT_TRUE(triangulated_flags.empty());
 }
 
-TEST_F(TwoViewReconstructionTest, FailureInsufficientMatches) {
-  // TODO: handle edge case and implement the test.
+TEST_F(TwoViewReconstructionTest, FailedInsufficientValidMatches) {
+  // Initialize keypoints and matches.
+  const std::vector<cv::KeyPoint> keypoints_1 = {
+    cv::KeyPoint(0.f, 0.f, 1.f),
+    cv::KeyPoint(1.f, 0.f, 1.f),
+  };
+  const std::vector<cv::KeyPoint> keypoints_2 = {
+    cv::KeyPoint(0.f, 0.f, 1.f),
+    cv::KeyPoint(1.f, 0.f, 1.f),
+  };
+  const std::vector<int> matches_12 = {-1, -2, -3, -4}; // Invalid matches
+
+  // Reconstruct.
+  Sophus::SE3f T_21;
+  std::vector<cv::Point3f> points_3D;
+  std::vector<bool> triangulated_flags;
+  const bool success = reconstructor_->reconstruct(
+    keypoints_1,
+    keypoints_2,
+    matches_12,
+    T_21,
+    points_3D,
+    triangulated_flags
+  );
+
+  // Check.
+  EXPECT_FALSE(success);
+  EXPECT_TRUE(T_21.matrix().isApprox(Eigen::Matrix4f::Identity(), 1e-6f));
+  EXPECT_TRUE(points_3D.empty());
+  EXPECT_TRUE(triangulated_flags.empty());
 }

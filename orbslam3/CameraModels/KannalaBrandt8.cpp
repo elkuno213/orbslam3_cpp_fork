@@ -201,7 +201,7 @@ namespace ORB_SLAM3 {
         for(std::size_t i = 0; i < vKeys1.size(); i++) vKeysUn1[i].pt = vPts1[i];
         for(std::size_t i = 0; i < vKeys2.size(); i++) vKeysUn2[i].pt = vPts2[i];
 
-        return tvr->Reconstruct(vKeysUn1,vKeysUn2,vMatches12,T21,vP3D,vbTriangulated);
+        return tvr->reconstruct(vKeysUn1,vKeysUn2,vMatches12,T21,vP3D,vbTriangulated);
     }
 
 
