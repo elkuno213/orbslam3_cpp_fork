@@ -1,20 +1,23 @@
 /**
-* This file is part of ORB-SLAM3
-*
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-*
-* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM3
+ *
+ * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
+ * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
+ * University of Zaragoza.
+ *
+ * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef G2OTYPES_H
 #define G2OTYPES_H
@@ -33,39 +36,43 @@
 // Local
 #include "orbslam3/ImuTypes.h"
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
 class KeyFrame;
 class Frame;
 class GeometricCamera;
 
+// ────────────────────────────────────────────────────────────────────────── //
+// Aliases
+
 using Vector6d  = Eigen::Matrix<double,  6,  1>;
 using Vector9d  = Eigen::Matrix<double,  9,  1>;
 using Vector12d = Eigen::Matrix<double, 12,  1>;
 using Vector15d = Eigen::Matrix<double, 15,  1>;
+using Matrix9d  = Eigen::Matrix<double,  9,  9>;
 using Matrix12d = Eigen::Matrix<double, 12, 12>;
 using Matrix15d = Eigen::Matrix<double, 15, 15>;
-using Matrix9d  = Eigen::Matrix<double,  9,  9>;
 
-Eigen::Matrix3d ExpSO3(const double x, const double y, const double z);
-Eigen::Matrix3d ExpSO3(const Eigen::Vector3d &w);
+// ────────────────────────────────────────────────────────────────────────── //
+// Functions
 
-Eigen::Vector3d LogSO3(const Eigen::Matrix3d &R);
+// Skew symmetric matrix.
+Eigen::Matrix3d skew(const Eigen::Vector3d& w);
+// Normalize rotation matrix.
+Eigen::Matrix3d normalizeRotation(const Eigen::Matrix3d& R);
+// Exponential map for SO3 group that converts an angle-axis vector to a
+// rotation matrix.
+Eigen::Matrix3d expSO3(const Eigen::Vector3d& w);
+// Logarithm map for SO3 group that converts a rotation matrix to an angle-axis
+// vector.
+Eigen::Vector3d logSO3(const Eigen::Matrix3d& R);
+// Right Jacobian of SO3 group of an angle-axis vector.
+Eigen::Matrix3d rightJacobianSO3(const Eigen::Vector3d& w);
+// Inverse right Jacobian of SO3 group of an angle-axis vector.
+Eigen::Matrix3d inverseRightJacobianSO3(const Eigen::Vector3d& w);
 
-Eigen::Matrix3d InverseRightJacobianSO3(const Eigen::Vector3d &v);
-Eigen::Matrix3d RightJacobianSO3(const Eigen::Vector3d &v);
-Eigen::Matrix3d RightJacobianSO3(const double x, const double y, const double z);
-
-Eigen::Matrix3d Skew(const Eigen::Vector3d &w);
-Eigen::Matrix3d InverseRightJacobianSO3(const double x, const double y, const double z);
-
-template<typename T = double>
-Eigen::Matrix<T,3,3> NormalizeRotation(const Eigen::Matrix<T,3,3> &R) {
-    Eigen::JacobiSVD<Eigen::Matrix<T,3,3>> svd(R,Eigen::ComputeFullU | Eigen::ComputeFullV);
-    return svd.matrixU() * svd.matrixV().transpose();
-}
-
+// ────────────────────────────────────────────────────────────────────────── //
+// Classes
 
 class ImuCamPose
 {
@@ -259,7 +266,7 @@ public:
 
     void Update(const double *pu)
     {
-        Rwg=Rwg*ExpSO3(pu[0],pu[1],0.0);
+        Rwg=Rwg*expSO3(Eigen::Vector3d(pu[0], pu[1], 0.0));
     }
 
     Eigen::Matrix3d Rwg, Rgw;
@@ -827,7 +834,7 @@ public:
     void computeError(){
         const VertexPose4DoF* VPi = static_cast<const VertexPose4DoF*>(_vertices[0]);
         const VertexPose4DoF* VPj = static_cast<const VertexPose4DoF*>(_vertices[1]);
-        _error << LogSO3(VPi->estimate().Rcw[0]*VPj->estimate().Rcw[0].transpose()*dRij.transpose()),
+        _error << logSO3(VPi->estimate().Rcw[0]*VPj->estimate().Rcw[0].transpose()*dRij.transpose()),
                  VPi->estimate().Rcw[0]*(-VPj->estimate().Rcw[0].transpose()*VPj->estimate().tcw[0])+VPi->estimate().tcw[0] - dtij;
     }
 
@@ -838,6 +845,6 @@ public:
     Eigen::Vector3d dtij;
 };
 
-} //namespace ORB_SLAM2
+} // namespace ORB_SLAM3
 
 #endif // G2OTYPES_H

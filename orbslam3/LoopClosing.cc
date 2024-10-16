@@ -160,10 +160,10 @@ void LoopClosing::Run()
                             if ((mpTracker->mSensor==System::IMU_MONOCULAR || mpTracker->mSensor==System::IMU_STEREO || mpTracker->mSensor==System::IMU_RGBD) &&
                                    mpCurrentKF->GetMap()->GetIniertialBA1())
                             {
-                                Eigen::Vector3d phi = LogSO3(mSold_new.rotation().toRotationMatrix());
+                                Eigen::Vector3d phi = logSO3(mSold_new.rotation().toRotationMatrix());
                                 phi(0)=0;
                                 phi(1)=0;
-                                mSold_new = g2o::Sim3(ExpSO3(phi),mSold_new.translation(),1.0);
+                                mSold_new = g2o::Sim3(expSO3(phi),mSold_new.translation(),1.0);
                             }
                         }
 
@@ -239,7 +239,7 @@ void LoopClosing::Run()
                         g2o::Sim3 g2oTwc(Twc.unit_quaternion(),Twc.translation(),1.0);
                         g2o::Sim3 g2oSww_new = g2oTwc*mg2oLoopScw;
 
-                        Eigen::Vector3d phi = LogSO3(g2oSww_new.rotation().toRotationMatrix());
+                        Eigen::Vector3d phi = logSO3(g2oSww_new.rotation().toRotationMatrix());
                         LOG(INFO) << "phi = " << phi.transpose();
                         if (fabs(phi(0))<0.008f && fabs(phi(1))<0.008f && fabs(phi(2))<0.349f)
                         {
@@ -251,7 +251,7 @@ void LoopClosing::Run()
                                 {
                                     phi(0)=0;
                                     phi(1)=0;
-                                    g2oSww_new = g2o::Sim3(ExpSO3(phi),g2oSww_new.translation(),1.0);
+                                    g2oSww_new = g2o::Sim3(expSO3(phi),g2oSww_new.translation(),1.0);
                                     mg2oLoopScw = g2oTwc.inverse()*g2oSww_new;
                                 }
                             }

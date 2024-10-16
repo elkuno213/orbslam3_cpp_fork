@@ -1,20 +1,23 @@
 /**
-* This file is part of ORB-SLAM3
-*
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
-*
-* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM3
+ *
+ * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
+ * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
+ * University of Zaragoza.
+ *
+ * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 // Local
 #include "orbslam3/CameraModels/GeometricCamera.h"
@@ -22,8 +25,100 @@
 #include "orbslam3/G2oTypes.h"
 #include "orbslam3/KeyFrame.h"
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
+
+// ────────────────────────────────────────────────────────────────────────── //
+// Functions
+
+Eigen::Matrix3d skew(const Eigen::Vector3d& w) {
+  Eigen::Matrix3d W;
+  W <<    0.0,    -w.z(),    w.y(),
+        w.z(),       0.0,   -w.x(),
+       -w.y(),     w.x(),      0.0;
+  return W;
+}
+
+Eigen::Matrix3d normalizeRotation(const Eigen::Matrix3d& R) {
+  const Eigen::JacobiSVD<Eigen::Matrix3d> svd(
+    R,
+    Eigen::ComputeFullU | Eigen::ComputeFullV
+  );
+  return svd.matrixU() * svd.matrixV().transpose();
+}
+
+Eigen::Matrix3d expSO3(const Eigen::Vector3d& w) {
+  const double theta_squared = w.squaredNorm();
+  const double theta         = std::sqrt(theta_squared);
+  const Eigen::Matrix3d W    = skew(w);
+
+  if (theta < 1e-5) {
+    // Approximation for small angles.
+    const Eigen::Matrix3d R = Eigen::Matrix3d::Identity() + W + 0.5 * W * W;
+    return normalizeRotation(R);
+  } else {
+    // Rodrigues' formula.
+    const Eigen::Matrix3d R = Eigen::Matrix3d::Identity()
+                            + W * std::sin(theta) / theta
+                            + W * W * (1.0 - std::cos(theta)) / theta_squared;
+    return normalizeRotation(R);
+  }
+}
+
+Eigen::Vector3d logSO3(const Eigen::Matrix3d& R) {
+  const Eigen::Vector3d w(
+    (R(2, 1) - R(1, 2)) / 2.0,
+    (R(0, 2) - R(2, 0)) / 2.0,
+    (R(1, 0) - R(0, 1)) / 2.0
+  );
+
+  const double cos_theta = (R.trace() - 1.0) * 0.5;
+  if (std::abs(cos_theta) > 1.0) {
+    // No rotation.
+    return w;
+  }
+
+  const double theta     = std::acos(cos_theta);
+  const double sin_theta = std::sin(theta);
+  if (std::abs(sin_theta) < 1e-5) {
+    // Small angle approximation.
+    return w;
+  } else {
+    return theta * w / sin_theta;
+  }
+}
+
+Eigen::Matrix3d rightJacobianSO3(const Eigen::Vector3d& w) {
+  const double theta_squared = w.squaredNorm();
+  const double theta         = std::sqrt(theta_squared);
+  const Eigen::Matrix3d W    = skew(w);
+
+  if (theta < 1e-5) {
+    // No rotation.
+    return Eigen::Matrix3d::Identity();
+  } else {
+    return Eigen::Matrix3d::Identity()
+         - W * (1.0 - std::cos(theta)) / theta_squared
+         + W * W * (theta - std::sin(theta)) / (theta_squared * theta);
+  }
+}
+
+Eigen::Matrix3d inverseRightJacobianSO3(const Eigen::Vector3d& w) {
+  const double theta_squared = w.squaredNorm();
+  const double theta         = std::sqrt(theta_squared);
+  const Eigen::Matrix3d W    = skew(w);
+
+  if (theta < 1e-5) {
+    // No rotation.
+    return Eigen::Matrix3d::Identity();
+  } else {
+    return Eigen::Matrix3d::Identity()
+         + W / 2.0
+         + W * W * (1.0 / theta_squared - (1.0 + std::cos(theta)) / (2.0 * theta * std::sin(theta)));
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────── //
+// Classes
 
 ImuCamPose::ImuCamPose(KeyFrame *pKF):its(0)
 {
@@ -200,13 +295,13 @@ void ImuCamPose::Update(const double *pu)
 
     // Update body pose
     twb += Rwb * ut;
-    Rwb = Rwb * ExpSO3(ur);
+    Rwb = Rwb * expSO3(ur);
 
     // Normalize rotation after 5 updates
     its++;
     if(its>=3)
     {
-        NormalizeRotation(Rwb);
+        normalizeRotation(Rwb);
         its=0;
     }
 
@@ -229,7 +324,7 @@ void ImuCamPose::UpdateW(const double *pu)
     ut << pu[3], pu[4], pu[5];
 
 
-    const Eigen::Matrix3d dR = ExpSO3(ur);
+    const Eigen::Matrix3d dR = expSO3(ur);
     DR = dR * DR;
     Rwb = DR * Rwb0;
     // Update body pose
@@ -243,7 +338,7 @@ void ImuCamPose::UpdateW(const double *pu)
         DR(1,2) = 0.0;
         DR(2,0) = 0.0;
         DR(2,1) = 0.0;
-        NormalizeRotation(DR);
+        normalizeRotation(DR);
         its = 0;
     }
 
@@ -528,7 +623,7 @@ void EdgeInertial::computeError()
     const Eigen::Vector3d dV = mpInt->getDeltaVelocity(b1).cast<double>();
     const Eigen::Vector3d dP = mpInt->getDeltaPosition(b1).cast<double>();
 
-    const Eigen::Vector3d er = LogSO3(dR.transpose()*VP1->estimate().Rwb.transpose()*VP2->estimate().Rwb);
+    const Eigen::Vector3d er = logSO3(dR.transpose()*VP1->estimate().Rwb.transpose()*VP2->estimate().Rwb);
     const Eigen::Vector3d ev = VP1->estimate().Rwb.transpose()*(VV2->estimate() - VV1->estimate() - g*dt) - dV;
     const Eigen::Vector3d ep = VP1->estimate().Rwb.transpose()*(VP2->estimate().twb - VP1->estimate().twb
                                                                - VV1->estimate()*dt - g*dt*dt/2) - dP;
@@ -555,8 +650,8 @@ void EdgeInertial::linearizeOplus()
 
     const Eigen::Matrix3d dR = mpInt->getDeltaRotation(b1).cast<double>();
     const Eigen::Matrix3d eR = dR.transpose()*Rbw1*Rwb2;
-    const Eigen::Vector3d er = LogSO3(eR);
-    const Eigen::Matrix3d invJr = InverseRightJacobianSO3(er);
+    const Eigen::Vector3d er = logSO3(eR);
+    const Eigen::Matrix3d invJr = inverseRightJacobianSO3(er);
 
     // Jacobians wrt Pose 1
     _jacobianOplus[0].setZero();
@@ -575,7 +670,7 @@ void EdgeInertial::linearizeOplus()
 
     // Jacobians wrt Gyro 1
     _jacobianOplus[2].setZero();
-    _jacobianOplus[2].block<3,3>(0,0) = -invJr*eR.transpose()*RightJacobianSO3(JRg*dbg)*JRg; // OK
+    _jacobianOplus[2].block<3,3>(0,0) = -invJr*eR.transpose()*rightJacobianSO3(JRg*dbg)*JRg; // OK
     _jacobianOplus[2].block<3,3>(3,0) = -JVg; // OK
     _jacobianOplus[2].block<3,3>(6,0) = -JPg; // OK
 
@@ -635,7 +730,7 @@ void EdgeInertialGS::computeError()
     const Eigen::Vector3d dV = mpInt->getDeltaVelocity(b).cast<double>();
     const Eigen::Vector3d dP = mpInt->getDeltaPosition(b).cast<double>();
 
-    const Eigen::Vector3d er = LogSO3(dR.transpose()*VP1->estimate().Rwb.transpose()*VP2->estimate().Rwb);
+    const Eigen::Vector3d er = logSO3(dR.transpose()*VP1->estimate().Rwb.transpose()*VP2->estimate().Rwb);
     const Eigen::Vector3d ev = VP1->estimate().Rwb.transpose()*(s*(VV2->estimate() - VV1->estimate()) - g*dt) - dV;
     const Eigen::Vector3d ep = VP1->estimate().Rwb.transpose()*(s*(VP2->estimate().twb - VP1->estimate().twb - VV1->estimate()*dt) - g*dt*dt/2) - dP;
 
@@ -669,8 +764,8 @@ void EdgeInertialGS::linearizeOplus()
     const Eigen::MatrixXd dGdTheta = Rwg*Gm;
     const Eigen::Matrix3d dR = mpInt->getDeltaRotation(b).cast<double>();
     const Eigen::Matrix3d eR = dR.transpose()*Rbw1*Rwb2;
-    const Eigen::Vector3d er = LogSO3(eR);
-    const Eigen::Matrix3d invJr = InverseRightJacobianSO3(er);
+    const Eigen::Vector3d er = logSO3(eR);
+    const Eigen::Matrix3d invJr = inverseRightJacobianSO3(er);
 
     // Jacobians wrt Pose 1
     _jacobianOplus[0].setZero();
@@ -689,7 +784,7 @@ void EdgeInertialGS::linearizeOplus()
 
     // Jacobians wrt Gyro bias
     _jacobianOplus[2].setZero();
-    _jacobianOplus[2].block<3,3>(0,0) = -invJr*eR.transpose()*RightJacobianSO3(JRg*dbg)*JRg;
+    _jacobianOplus[2].block<3,3>(0,0) = -invJr*eR.transpose()*rightJacobianSO3(JRg*dbg)*JRg;
     _jacobianOplus[2].block<3,3>(3,0) = -JVg;
     _jacobianOplus[2].block<3,3>(6,0) = -JPg;
 
@@ -738,7 +833,7 @@ void EdgePriorPoseImu::computeError()
     const VertexGyroBias* VG = static_cast<const VertexGyroBias*>(_vertices[2]);
     const VertexAccBias* VA = static_cast<const VertexAccBias*>(_vertices[3]);
 
-    const Eigen::Vector3d er = LogSO3(Rwb.transpose()*VP->estimate().Rwb);
+    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().Rwb);
     const Eigen::Vector3d et = Rwb.transpose()*(VP->estimate().twb-twb);
     const Eigen::Vector3d ev = VV->estimate() - vwb;
     const Eigen::Vector3d ebg = VG->estimate() - bg;
@@ -750,9 +845,9 @@ void EdgePriorPoseImu::computeError()
 void EdgePriorPoseImu::linearizeOplus()
 {
     const VertexPose* VP = static_cast<const VertexPose*>(_vertices[0]);
-    const Eigen::Vector3d er = LogSO3(Rwb.transpose()*VP->estimate().Rwb);
+    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().Rwb);
     _jacobianOplus[0].setZero();
-    _jacobianOplus[0].block<3,3>(0,0) = InverseRightJacobianSO3(er);
+    _jacobianOplus[0].block<3,3>(0,0) = inverseRightJacobianSO3(er);
     _jacobianOplus[0].block<3,3>(3,3) = Rwb.transpose()*VP->estimate().Rwb;
     _jacobianOplus[1].setZero();
     _jacobianOplus[1].block<3,3>(6,0) = Eigen::Matrix3d::Identity();
@@ -776,91 +871,4 @@ void EdgePriorGyro::linearizeOplus()
 
 }
 
-// SO3 FUNCTIONS
-Eigen::Matrix3d ExpSO3(const Eigen::Vector3d &w)
-{
-    return ExpSO3(w[0],w[1],w[2]);
-}
-
-Eigen::Matrix3d ExpSO3(const double x, const double y, const double z)
-{
-    const double d2 = x*x+y*y+z*z;
-    const double d = std::sqrt(d2);
-    Eigen::Matrix3d W;
-    W << 0.0, -z, y,z, 0.0, -x,-y,  x, 0.0;
-    if(d<1e-5)
-    {
-        Eigen::Matrix3d res = Eigen::Matrix3d::Identity() + W +0.5*W*W;
-        return NormalizeRotation(res);
-    }
-    else
-    {
-        Eigen::Matrix3d res =Eigen::Matrix3d::Identity() + W*std::sin(d)/d + W*W*(1.0-std::cos(d))/d2;
-        return NormalizeRotation(res);
-    }
-}
-
-Eigen::Vector3d LogSO3(const Eigen::Matrix3d &R)
-{
-    const double tr = R(0,0)+R(1,1)+R(2,2);
-    Eigen::Vector3d w;
-    w << (R(2,1)-R(1,2))/2, (R(0,2)-R(2,0))/2, (R(1,0)-R(0,1))/2;
-    const double costheta = (tr-1.0)*0.5f;
-    if(costheta>1 || costheta<-1)
-        return w;
-    const double theta = std::acos(costheta);
-    const double s = std::sin(theta);
-    if(fabs(s)<1e-5)
-        return w;
-    else
-        return theta*w/s;
-}
-
-Eigen::Matrix3d InverseRightJacobianSO3(const Eigen::Vector3d &v)
-{
-    return InverseRightJacobianSO3(v[0],v[1],v[2]);
-}
-
-Eigen::Matrix3d InverseRightJacobianSO3(const double x, const double y, const double z)
-{
-    const double d2 = x*x+y*y+z*z;
-    const double d = std::sqrt(d2);
-
-    Eigen::Matrix3d W;
-    W << 0.0, -z, y,z, 0.0, -x,-y,  x, 0.0;
-    if(d<1e-5)
-        return Eigen::Matrix3d::Identity();
-    else
-        return Eigen::Matrix3d::Identity() + W/2 + W*W*(1.0/d2 - (1.0+std::cos(d))/(2.0*d*std::sin(d)));
-}
-
-Eigen::Matrix3d RightJacobianSO3(const Eigen::Vector3d &v)
-{
-    return RightJacobianSO3(v[0],v[1],v[2]);
-}
-
-Eigen::Matrix3d RightJacobianSO3(const double x, const double y, const double z)
-{
-    const double d2 = x*x+y*y+z*z;
-    const double d = std::sqrt(d2);
-
-    Eigen::Matrix3d W;
-    W << 0.0, -z, y,z, 0.0, -x,-y,  x, 0.0;
-    if(d<1e-5)
-    {
-        return Eigen::Matrix3d::Identity();
-    }
-    else
-    {
-        return Eigen::Matrix3d::Identity() - W*(1.0-std::cos(d))/d2 + W*W*(d-std::sin(d))/(d2*d);
-    }
-}
-
-Eigen::Matrix3d Skew(const Eigen::Vector3d &w)
-{
-    Eigen::Matrix3d W;
-    W << 0.0, -w[2], w[1],w[2], 0.0, -w[0],-w[1],  w[0], 0.0;
-    return W;
-}
-
-}
+} // namespace ORB_SLAM3
