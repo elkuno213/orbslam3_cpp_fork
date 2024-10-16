@@ -74,42 +74,83 @@ Eigen::Matrix3d inverseRightJacobianSO3(const Eigen::Vector3d& w);
 // ────────────────────────────────────────────────────────────────────────── //
 // Classes
 
-class ImuCamPose
-{
+// Class handling the IMU and camera poses, where there are 3 principal frames:
+// - World frame (w)
+// - Body frame (b) for IMU
+// - Camera frame (c)
+class ImuCamPose {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    ImuCamPose(){}
-    ImuCamPose(KeyFrame* pKF);
-    ImuCamPose(Frame* pF);
-    ImuCamPose(Eigen::Matrix3d &_Rwc, Eigen::Vector3d &_twc, KeyFrame* pKF);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    void SetParam(const std::vector<Eigen::Matrix3d> &_Rcw, const std::vector<Eigen::Vector3d> &_tcw, const std::vector<Eigen::Matrix3d> &_Rbc,
-                  const std::vector<Eigen::Vector3d> &_tbc, const double &_bf);
+  // Rotation/Translation from body frame to world frame.
+  Eigen::Matrix3d Rwb;
+  Eigen::Vector3d twb;
+  // Sets of rotation/translation from world frame to camera frame.
+  std::vector<Eigen::Matrix3d> Rcw;
+  std::vector<Eigen::Vector3d> tcw;
+  // Sets of rotation/translation from body frame to camera frame.
+  std::vector<Eigen::Matrix3d> Rcb;
+  std::vector<Eigen::Vector3d> tcb;
+  // Sets of rotation/translation from camera frame to body frame.
+  std::vector<Eigen::Matrix3d> Rbc;
+  std::vector<Eigen::Vector3d> tbc;
+  // Set of camera models.
+  std::vector<GeometricCamera*> pCamera;
+  // Multiplicative factor of baseline and focal length.
+  double bf;
 
-    void Update(const double *pu); // update in the imu reference
-    void UpdateW(const double *pu); // update in the world reference
-    Eigen::Vector2d Project(const Eigen::Vector3d &Xw, int cam_idx=0) const; // Mono
-    Eigen::Vector3d ProjectStereo(const Eigen::Vector3d &Xw, int cam_idx=0) const; // Stereo
-    bool isDepthPositive(const Eigen::Vector3d &Xw, int cam_idx=0) const;
+  // ──────────────────────────────────── //
+  // Constructors
 
-public:
-    // For IMU
-    Eigen::Matrix3d Rwb;
-    Eigen::Vector3d twb;
+  ImuCamPose() {}
+  ImuCamPose(KeyFrame* keyframe);
+  ImuCamPose(Frame* frame);
+  ImuCamPose(
+    const Eigen::Matrix3d& Rwc,
+    const Eigen::Vector3d& twc,
+    KeyFrame* keyframe
+  );
 
-    // For set of cameras
-    std::vector<Eigen::Matrix3d> Rcw;
-    std::vector<Eigen::Vector3d> tcw;
-    std::vector<Eigen::Matrix3d> Rcb, Rbc;
-    std::vector<Eigen::Vector3d> tcb, tbc;
-    double bf;
-    std::vector<GeometricCamera*> pCamera;
+  // ──────────────────────────────────── //
+  // Public methods
 
-    // For posegraph 4DoF
-    Eigen::Matrix3d Rwb0;
-    Eigen::Matrix3d DR;
+  void SetParam(
+    const std::vector<Eigen::Matrix3d>& _Rcw,
+    const std::vector<Eigen::Vector3d>& _tcw,
+    const std::vector<Eigen::Matrix3d>& _Rbc,
+    const std::vector<Eigen::Vector3d>& _tbc,
+    const double _bf
+  );
 
-    int its;
+  // Project a 3D point in the camera frame to the image plane for Monocular camera.
+  Eigen::Vector2d Project(
+    const Eigen::Vector3d& pt,
+    const std::size_t cam_idx = 0
+  ) const;
+  // Project a 3D point in the camera frame to the image plane for Stereo camera.
+  Eigen::Vector3d ProjectStereo(
+    const Eigen::Vector3d& pt,
+    const std::size_t cam_idx = 0
+  ) const;
+
+  // Check if the depth of a 3D point in the camera frame is positive.
+  bool isDepthPositive(
+    const Eigen::Vector3d& pt,
+    const std::size_t cam_idx = 0
+  ) const;
+
+  // Update poses in the body frame and world frame from incremental update.
+  // Please make sure the update has 6 elements: 3 for rotation and 3 for translation.
+  void Update (const double* update);
+  void UpdateW(const double* update);
+
+private:
+  // Initial rotation matrix from body to world frame.
+  Eigen::Matrix3d Rwb0;
+  // Incremental rotation matrix difference from body to world frame.
+  Eigen::Matrix3d DR;
+  // Number of iterations for normalization.
+  std::size_t its;
 };
 
 class InvDepthPoint
