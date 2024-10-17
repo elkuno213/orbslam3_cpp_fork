@@ -411,85 +411,102 @@ void InvDepthPoint::update(const double* update) {
   rho += *update;
 }
 
-bool VertexPose::read(std::istream& is)
-{
-    std::vector<Eigen::Matrix<double,3,3> > Rcw;
-    std::vector<Eigen::Matrix<double,3,1> > tcw;
-    std::vector<Eigen::Matrix<double,3,3> > Rbc;
-    std::vector<Eigen::Matrix<double,3,1> > tbc;
-
-    const int num_cams = _estimate.R_bc.size();
-    for(int idx = 0; idx<num_cams; idx++)
-    {
-        for (int i=0; i<3; i++){
-            for (int j=0; j<3; j++)
-                is >> Rcw[idx](i,j);
-        }
-        for (int i=0; i<3; i++){
-            is >> tcw[idx](i);
-        }
-
-        for (int i=0; i<3; i++){
-            for (int j=0; j<3; j++)
-                is >> Rbc[idx](i,j);
-        }
-        for (int i=0; i<3; i++){
-            is >> tbc[idx](i);
-        }
-
-        float nextParam;
-        for(std::size_t i = 0; i < _estimate.cameras[idx]->getNumParams(); i++){
-            is >> nextParam;
-            _estimate.cameras[idx]->setParameter(nextParam,i);
-        }
-    }
-
-    double bf;
-    is >> bf;
-    _estimate.setParameters(Rcw,tcw,Rbc,tbc,bf);
-    updateCache();
-
-    return true;
+VertexPose::VertexPose(const KeyFrame* keyframe) {
+  setEstimate(ImuCamPose(keyframe));
 }
 
-bool VertexPose::write(std::ostream& os) const
-{
-    std::vector<Eigen::Matrix<double,3,3> > Rcw = _estimate.R_cw;
-    std::vector<Eigen::Matrix<double,3,1> > tcw = _estimate.t_cw;
-
-    std::vector<Eigen::Matrix<double,3,3> > Rbc = _estimate.R_bc;
-    std::vector<Eigen::Matrix<double,3,1> > tbc = _estimate.t_bc;
-
-    const int num_cams = tcw.size();
-
-    for(int idx = 0; idx<num_cams; idx++)
-    {
-        for (int i=0; i<3; i++){
-            for (int j=0; j<3; j++)
-                os << Rcw[idx](i,j) << " ";
-        }
-        for (int i=0; i<3; i++){
-            os << tcw[idx](i) << " ";
-        }
-
-        for (int i=0; i<3; i++){
-            for (int j=0; j<3; j++)
-                os << Rbc[idx](i,j) << " ";
-        }
-        for (int i=0; i<3; i++){
-            os << tbc[idx](i) << " ";
-        }
-
-        for(std::size_t i = 0; i < _estimate.cameras[idx]->getNumParams(); i++){
-            os << _estimate.cameras[idx]->getParameter(i) << " ";
-        }
-    }
-
-    os << _estimate.bf << " ";
-
-    return os.good();
+VertexPose::VertexPose(const Frame* frame) {
+  setEstimate(ImuCamPose(frame));
 }
 
+bool VertexPose::read(std::istream& is) {
+  const std::size_t num_cams = _estimate.cameras.size();
+
+  std::vector<Eigen::Matrix3d> R_cw;
+  std::vector<Eigen::Vector3d> t_cw;
+  std::vector<Eigen::Matrix3d> R_bc;
+  std::vector<Eigen::Vector3d> t_bc;
+
+  // Loop over the number of cameras.
+  for (std::size_t idx = 0; idx < num_cams; idx++) {
+    // Deserialize rotation and translation from world to camera.
+    for (std::size_t i = 0; i < 3; i++) {
+      for (std::size_t j = 0; j < 3; j++) {
+        is >> R_cw[idx](i, j);
+      }
+    }
+    for (std::size_t i = 0; i < 3; i++) {
+      is >> t_cw[idx](i);
+    }
+    // Deserialize rotation and translation from camera to body.
+    for (std::size_t i = 0; i < 3; i++) {
+      for (std::size_t j = 0; j < 3; j++) {
+        is >> R_bc[idx](i, j);
+      }
+    }
+    for (std::size_t i = 0; i < 3; i++) {
+      is >> t_bc[idx](i);
+    }
+
+    // Deserialize camera parameters.
+    float next_param;
+    for (std::size_t i = 0; i < _estimate.cameras[idx]->getNumParams(); i++) {
+      is >> next_param;
+      _estimate.cameras[idx]->setParameter(next_param, i);
+    }
+  }
+
+  // Deserialize bf.
+  double bf;
+  is >> bf;
+
+  // Set parameters for the estimate.
+  _estimate.setParameters(R_cw, t_cw, R_bc, t_bc, bf);
+  updateCache();
+
+  return true;
+}
+
+bool VertexPose::write(std::ostream& os) const {
+  const std::size_t num_cams = _estimate.cameras.size();
+
+  const std::vector<Eigen::Matrix3d>& R_cw = _estimate.R_cw;
+  const std::vector<Eigen::Vector3d>& t_cw = _estimate.t_cw;
+  const std::vector<Eigen::Matrix3d>& R_bc = _estimate.R_bc;
+  const std::vector<Eigen::Vector3d>& t_bc = _estimate.t_bc;
+
+  // Loop over the number of cameras.
+  for (std::size_t idx = 0; idx < num_cams; idx++) {
+    // Serialize rotation and translation from world to camera.
+    for (std::size_t i = 0; i < 3; i++) {
+      for (std::size_t j = 0; j < 3; j++) {
+        os << R_cw[idx](i, j) << " ";
+      }
+    }
+    for (std::size_t i = 0; i < 3; i++) {
+      os << t_cw[idx](i) << " ";
+    }
+    // Serialize rotation and translation from camera to body.
+    for (std::size_t i = 0; i < 3; i++) {
+      for (std::size_t j = 0; j < 3; j++) {
+        os << R_bc[idx](i, j) << " ";
+      }
+    }
+    for (std::size_t i = 0; i < 3; i++) {
+      os << t_bc[idx](i) << " ";
+    }
+
+    // Serialize camera parameters.
+    for (std::size_t i = 0; i < _estimate.cameras[idx]->getNumParams(); i++) {
+      os << _estimate.cameras[idx]->getParameter(i) << " ";
+    }
+  }
+
+  // Serialize bf.
+  os << _estimate.bf << " ";
+
+  return os.good();
+}
 
 void EdgeMono::linearizeOplus()
 {

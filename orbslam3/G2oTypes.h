@@ -173,30 +173,28 @@ struct InvDepthPoint {
   void update(const double* update);
 };
 
-// Optimizable parameters are IMU pose
-class VertexPose : public g2o::BaseVertex<6,ImuCamPose>
-{
+// Optimization vertex for the IMU and camera poses.
+class VertexPose : public g2o::BaseVertex<6, ImuCamPose> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexPose(){}
-    VertexPose(KeyFrame* pKF){
-        setEstimate(ImuCamPose(pKF));
-    }
-    VertexPose(Frame* pF){
-        setEstimate(ImuCamPose(pF));
-    }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  VertexPose() = default;
 
-    virtual bool read(std::istream& is);
-    virtual bool write(std::ostream& os) const;
+  VertexPose(const KeyFrame* keyframe);
 
-    virtual void setToOriginImpl() {
-        }
+  VertexPose(const Frame* frame);
 
-    virtual void oplusImpl(const double* update_){
-        _estimate.updateInBodyFrame(update_);
-        updateCache();
-    }
+  virtual bool read(std::istream& is);
+
+  virtual bool write(std::ostream& os) const;
+
+  virtual void setToOriginImpl() {
+  }
+
+  virtual void oplusImpl(const double* update) {
+    _estimate.updateInBodyFrame(update);
+    updateCache();
+  }
 };
 
 class VertexPose4DoF : public g2o::BaseVertex<4,ImuCamPose>
