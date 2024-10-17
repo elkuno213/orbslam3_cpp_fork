@@ -39,6 +39,7 @@ endif()
 
 # Add options.
 option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_TESTS    "Build tests"    OFF)
 
 # ──────────────────────────────────────────────────────────────────────────── #
 # Dependencies                                                                 #
@@ -53,6 +54,12 @@ find_package(Pangolin REQUIRED)
 find_package(Boost REQUIRED COMPONENTS serialization)
 find_package(OpenSSL REQUIRED)
 find_package(glog REQUIRED)
+
+if(BUILD_TESTS)
+  find_package(GTest CONFIG REQUIRED COMPONENTS GTest GMock)
+  include(GoogleTest)
+  enable_testing()
+endif()
 
 add_subdirectory(orbslam3/external/DBoW2)
 add_subdirectory(orbslam3/external/g2o)

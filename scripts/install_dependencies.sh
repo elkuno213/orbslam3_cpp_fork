@@ -8,7 +8,9 @@ sudo apt-get install -y \
   libpython3-dev \
   libunwind-dev \
   libgoogle-glog-dev \
-  libboost-serialization-dev
+  libboost-serialization-dev \
+  libgtest-dev \
+  libgmock-dev
 
 
 # Optional: install librealsense2
