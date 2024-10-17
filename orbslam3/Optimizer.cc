@@ -735,12 +735,12 @@ void Optimizer::FullInertialBA(Map *pMap, int its, const bool bFixLocal, const l
         VertexPose* VP = static_cast<VertexPose*>(optimizer.vertex(pKFi->mnId));
         if(nLoopId==0)
         {
-            Sophus::SE3f Tcw(VP->estimate().Rcw[0].cast<float>(), VP->estimate().tcw[0].cast<float>());
+            Sophus::SE3f Tcw(VP->estimate().R_cw[0].cast<float>(), VP->estimate().t_cw[0].cast<float>());
             pKFi->SetPose(Tcw);
         }
         else
         {
-            pKFi->mTcwGBA = Sophus::SE3f(VP->estimate().Rcw[0].cast<float>(),VP->estimate().tcw[0].cast<float>());
+            pKFi->mTcwGBA = Sophus::SE3f(VP->estimate().R_cw[0].cast<float>(),VP->estimate().t_cw[0].cast<float>());
             pKFi->mnBAGlobalForKF = nLoopId;
 
         }
@@ -2921,7 +2921,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
         KeyFrame* pKFi = vpOptimizableKFs[i];
 
         VertexPose* VP = static_cast<VertexPose*>(optimizer.vertex(pKFi->mnId));
-        Sophus::SE3f Tcw(VP->estimate().Rcw[0].cast<float>(), VP->estimate().tcw[0].cast<float>());
+        Sophus::SE3f Tcw(VP->estimate().R_cw[0].cast<float>(), VP->estimate().t_cw[0].cast<float>());
         pKFi->SetPose(Tcw);
         pKFi->mnBALocalForKF=0;
 
@@ -2943,7 +2943,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
     {
         KeyFrame* pKFi = *it;
         VertexPose* VP = static_cast<VertexPose*>(optimizer.vertex(pKFi->mnId));
-        Sophus::SE3f Tcw(VP->estimate().Rcw[0].cast<float>(), VP->estimate().tcw[0].cast<float>());
+        Sophus::SE3f Tcw(VP->estimate().R_cw[0].cast<float>(), VP->estimate().t_cw[0].cast<float>());
         pKFi->SetPose(Tcw);
         pKFi->mnBALocalForKF=0;
     }
@@ -4436,7 +4436,7 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool *pbS
         KeyFrame* pKFi = vpOptimizableKFs[i];
 
         VertexPose* VP = static_cast<VertexPose*>(optimizer.vertex(pKFi->mnId));
-        Sophus::SE3f Tcw(VP->estimate().Rcw[0].cast<float>(), VP->estimate().tcw[0].cast<float>());
+        Sophus::SE3f Tcw(VP->estimate().R_cw[0].cast<float>(), VP->estimate().t_cw[0].cast<float>());
         pKFi->SetPose(Tcw);
 
         Sophus::SE3d Tiw = pKFi->GetPose().cast<double>();
@@ -4460,7 +4460,7 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool *pbS
         KeyFrame* pKFi = vpOptimizableCovKFs[i];
 
         VertexPose* VP = static_cast<VertexPose*>(optimizer.vertex(pKFi->mnId));
-        Sophus::SE3f Tcw(VP->estimate().Rcw[0].cast<float>(), VP->estimate().tcw[0].cast<float>());
+        Sophus::SE3f Tcw(VP->estimate().R_cw[0].cast<float>(), VP->estimate().t_cw[0].cast<float>());
         pKFi->SetPose(Tcw);
 
         Sophus::SE3d Tiw = pKFi->GetPose().cast<double>();
@@ -4826,7 +4826,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
     }
 
     // Recover optimized pose, velocity and biases
-    pFrame->SetImuPoseVelocity(VP->estimate().Rwb.cast<float>(), VP->estimate().twb.cast<float>(), VV->estimate().cast<float>());
+    pFrame->SetImuPoseVelocity(VP->estimate().R_wb.cast<float>(), VP->estimate().t_wb.cast<float>(), VV->estimate().cast<float>());
     Vector6d b;
     b << VG->estimate(), VA->estimate();
     pFrame->mImuBias = IMU::Bias(b[3],b[4],b[5],b[0],b[1],b[2]);
@@ -4870,7 +4870,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
             tot_out++;
     }
 
-    pFrame->mpcpi = new ConstraintPoseImu(VP->estimate().Rwb,VP->estimate().twb,VV->estimate(),VG->estimate(),VA->estimate(),H);
+    pFrame->mpcpi = new ConstraintPoseImu(VP->estimate().R_wb,VP->estimate().t_wb,VV->estimate(),VG->estimate(),VA->estimate(),H);
 
     return nInitialCorrespondences-nBad;
 }
@@ -5227,7 +5227,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
 
 
     // Recover optimized pose, velocity and biases
-    pFrame->SetImuPoseVelocity(VP->estimate().Rwb.cast<float>(), VP->estimate().twb.cast<float>(), VV->estimate().cast<float>());
+    pFrame->SetImuPoseVelocity(VP->estimate().R_wb.cast<float>(), VP->estimate().t_wb.cast<float>(), VV->estimate().cast<float>());
     Vector6d b;
     b << VG->estimate(), VA->estimate();
     pFrame->mImuBias = IMU::Bias(b[3],b[4],b[5],b[0],b[1],b[2]);
@@ -5285,7 +5285,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
 
     H = Marginalize(H,0,14);
 
-    pFrame->mpcpi = new ConstraintPoseImu(VP->estimate().Rwb,VP->estimate().twb,VV->estimate(),VG->estimate(),VA->estimate(),H.block<15,15>(15,15));
+    pFrame->mpcpi = new ConstraintPoseImu(VP->estimate().R_wb,VP->estimate().t_wb,VV->estimate(),VG->estimate(),VA->estimate(),H.block<15,15>(15,15));
     delete pFp->mpcpi;
     pFp->mpcpi = NULL;
 
@@ -5555,8 +5555,8 @@ void Optimizer::OptimizeEssentialGraph4DoF(Map* pMap, KeyFrame* pLoopKF, KeyFram
         const int nIDi = pKFi->mnId;
 
         VertexPose4DoF* Vi = static_cast<VertexPose4DoF*>(optimizer.vertex(nIDi));
-        Eigen::Matrix3d Ri = Vi->estimate().Rcw[0];
-        Eigen::Vector3d ti = Vi->estimate().tcw[0];
+        Eigen::Matrix3d Ri = Vi->estimate().R_cw[0];
+        Eigen::Vector3d ti = Vi->estimate().t_cw[0];
 
         g2o::Sim3 CorrectedSiw = g2o::Sim3(Ri,ti,1.);
         vCorrectedSwc[nIDi]=CorrectedSiw.inverse();

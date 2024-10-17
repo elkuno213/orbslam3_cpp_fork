@@ -83,19 +83,19 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   // Rotation/Translation from body frame to world frame.
-  Eigen::Matrix3d Rwb;
-  Eigen::Vector3d twb;
+  Eigen::Matrix3d R_wb;
+  Eigen::Vector3d t_wb;
   // Sets of rotation/translation from world frame to camera frame.
-  std::vector<Eigen::Matrix3d> Rcw;
-  std::vector<Eigen::Vector3d> tcw;
+  std::vector<Eigen::Matrix3d> R_cw;
+  std::vector<Eigen::Vector3d> t_cw;
   // Sets of rotation/translation from body frame to camera frame.
-  std::vector<Eigen::Matrix3d> Rcb;
-  std::vector<Eigen::Vector3d> tcb;
+  std::vector<Eigen::Matrix3d> R_cb;
+  std::vector<Eigen::Vector3d> t_cb;
   // Sets of rotation/translation from camera frame to body frame.
-  std::vector<Eigen::Matrix3d> Rbc;
-  std::vector<Eigen::Vector3d> tbc;
+  std::vector<Eigen::Matrix3d> R_bc;
+  std::vector<Eigen::Vector3d> t_bc;
   // Set of camera models.
-  std::vector<GeometricCamera*> pCamera;
+  std::vector<GeometricCamera*> cameras;
   // Multiplicative factor of baseline and focal length.
   double bf;
 
@@ -106,29 +106,29 @@ public:
   ImuCamPose(const KeyFrame* keyframe);
   ImuCamPose(const Frame* frame);
   ImuCamPose(
-    const Eigen::Matrix3d& Rwc,
-    const Eigen::Vector3d& twc,
+    const Eigen::Matrix3d& R_wc,
+    const Eigen::Vector3d& t_wc,
     const KeyFrame* keyframe
   );
 
   // ──────────────────────────────────── //
   // Public methods
 
-  void SetParam(
-    const std::vector<Eigen::Matrix3d>& _Rcw,
-    const std::vector<Eigen::Vector3d>& _tcw,
-    const std::vector<Eigen::Matrix3d>& _Rbc,
-    const std::vector<Eigen::Vector3d>& _tbc,
+  void setParameters(
+    const std::vector<Eigen::Matrix3d>& _R_cw,
+    const std::vector<Eigen::Vector3d>& _t_cw,
+    const std::vector<Eigen::Matrix3d>& _R_bc,
+    const std::vector<Eigen::Vector3d>& _t_bc,
     const double _bf
   );
 
   // Project a 3D point in the camera frame to the image plane for Monocular camera.
-  Eigen::Vector2d Project(
+  Eigen::Vector2d projectMonocular(
     const Eigen::Vector3d& pt,
     const std::size_t cam_idx = 0
   ) const;
   // Project a 3D point in the camera frame to the image plane for Stereo camera.
-  Eigen::Vector3d ProjectStereo(
+  Eigen::Vector3d projectStereo(
     const Eigen::Vector3d& pt,
     const std::size_t cam_idx = 0
   ) const;
@@ -141,16 +141,16 @@ public:
 
   // Update poses in the body frame and world frame from incremental update.
   // Please make sure the update has 6 elements: 3 for rotation and 3 for translation.
-  void Update (const double* update);
-  void UpdateW(const double* update);
+  void updateInBodyFrame (const double* update);
+  void UpdateInWorldFrame(const double* update);
 
 private:
   // Initial rotation matrix from body to world frame.
-  Eigen::Matrix3d Rwb0;
+  Eigen::Matrix3d R0_wb_;
   // Incremental rotation matrix difference from body to world frame.
-  Eigen::Matrix3d DR;
+  Eigen::Matrix3d dR_;
   // Number of iterations for normalization.
-  std::size_t its;
+  std::size_t iterations_;
 };
 
 class InvDepthPoint
@@ -191,7 +191,7 @@ public:
         }
 
     virtual void oplusImpl(const double* update_){
-        _estimate.Update(update_);
+        _estimate.updateInBodyFrame(update_);
         updateCache();
     }
 };
@@ -227,7 +227,7 @@ public:
         update6DoF[3] = update_[1];
         update6DoF[4] = update_[2];
         update6DoF[5] = update_[3];
-        _estimate.UpdateW(update6DoF);
+        _estimate.UpdateInWorldFrame(update6DoF);
         updateCache();
     }
 };
@@ -398,7 +398,7 @@ public:
         const g2o::VertexSBAPointXYZ* VPoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
         const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
         const Eigen::Vector2d obs(_measurement);
-        _error = obs - VPose->estimate().Project(VPoint->estimate(),cam_idx);
+        _error = obs - VPose->estimate().projectMonocular(VPoint->estimate(),cam_idx);
     }
 
 
@@ -445,7 +445,7 @@ public:
     void computeError(){
         const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
         const Eigen::Vector2d obs(_measurement);
-        _error = obs - VPose->estimate().Project(Xw,cam_idx);
+        _error = obs - VPose->estimate().projectMonocular(Xw,cam_idx);
     }
 
     virtual void linearizeOplus();
@@ -480,7 +480,7 @@ public:
         const g2o::VertexSBAPointXYZ* VPoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
         const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
         const Eigen::Vector3d obs(_measurement);
-        _error = obs - VPose->estimate().ProjectStereo(VPoint->estimate(),cam_idx);
+        _error = obs - VPose->estimate().projectStereo(VPoint->estimate(),cam_idx);
     }
 
 
@@ -521,7 +521,7 @@ public:
     void computeError(){
         const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
         const Eigen::Vector3d obs(_measurement);
-        _error = obs - VPose->estimate().ProjectStereo(Xw, cam_idx);
+        _error = obs - VPose->estimate().projectStereo(Xw, cam_idx);
     }
 
     virtual void linearizeOplus();
@@ -875,8 +875,8 @@ public:
     void computeError(){
         const VertexPose4DoF* VPi = static_cast<const VertexPose4DoF*>(_vertices[0]);
         const VertexPose4DoF* VPj = static_cast<const VertexPose4DoF*>(_vertices[1]);
-        _error << logSO3(VPi->estimate().Rcw[0]*VPj->estimate().Rcw[0].transpose()*dRij.transpose()),
-                 VPi->estimate().Rcw[0]*(-VPj->estimate().Rcw[0].transpose()*VPj->estimate().tcw[0])+VPi->estimate().tcw[0] - dtij;
+        _error << logSO3(VPi->estimate().R_cw[0]*VPj->estimate().R_cw[0].transpose()*dRij.transpose()),
+                 VPi->estimate().R_cw[0]*(-VPj->estimate().R_cw[0].transpose()*VPj->estimate().t_cw[0])+VPi->estimate().t_cw[0] - dtij;
     }
 
     // virtual void linearizeOplus(); // numerical implementation

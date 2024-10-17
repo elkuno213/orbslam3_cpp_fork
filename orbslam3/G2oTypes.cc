@@ -122,10 +122,10 @@ Eigen::Matrix3d inverseRightJacobianSO3(const Eigen::Vector3d& w) {
 // ────────────────────────────────────────────────────────────────────────── //
 // Classes
 
-ImuCamPose::ImuCamPose(const KeyFrame* keyframe) : its(0) {
+ImuCamPose::ImuCamPose(const KeyFrame* keyframe) : iterations_(0) {
   // Load IMU pose.
-  twb = keyframe->GetImuPosition().cast<double>();
-  Rwb = keyframe->GetImuRotation().cast<double>();
+  t_wb = keyframe->GetImuPosition().cast<double>();
+  R_wb = keyframe->GetImuRotation().cast<double>();
 
   // Determine number of cameras.
   std::size_t num_cams = 1;
@@ -134,49 +134,49 @@ ImuCamPose::ImuCamPose(const KeyFrame* keyframe) : its(0) {
   }
 
   // Initialize.
-  Rcw.resize(num_cams);
-  tcw.resize(num_cams);
-  Rcb.resize(num_cams);
-  tcb.resize(num_cams);
-  Rbc.resize(num_cams);
-  tbc.resize(num_cams);
-  pCamera.resize(num_cams);
+  R_cw.resize(num_cams);
+  t_cw.resize(num_cams);
+  R_cb.resize(num_cams);
+  t_cb.resize(num_cams);
+  R_bc.resize(num_cams);
+  t_bc.resize(num_cams);
+  cameras.resize(num_cams);
 
   // Initialize left camera.
-  Rcw[0]     = keyframe->GetRotation().cast<double>();
-  tcw[0]     = keyframe->GetTranslation().cast<double>();
-  Rcb[0]     = keyframe->mImuCalib.T_cb.rotationMatrix().cast<double>();
-  tcb[0]     = keyframe->mImuCalib.T_cb.translation().cast<double>();
-  Rbc[0]     = Rcb[0].transpose();
-  tbc[0]     = keyframe->mImuCalib.T_bc.translation().cast<double>();
-  pCamera[0] = keyframe->mpCamera;
+  R_cw[0]    = keyframe->GetRotation().cast<double>();
+  t_cw[0]    = keyframe->GetTranslation().cast<double>();
+  R_cb[0]    = keyframe->mImuCalib.T_cb.rotationMatrix().cast<double>();
+  t_cb[0]    = keyframe->mImuCalib.T_cb.translation().cast<double>();
+  R_bc[0]    = R_cb[0].transpose();
+  t_bc[0]    = keyframe->mImuCalib.T_bc.translation().cast<double>();
+  cameras[0] = keyframe->mpCamera;
   bf         = keyframe->mbf;
 
   // Initialize right camera.
   if (num_cams > 1) {
     // Retrieve relative pose between left and right cameras.
-    const Eigen::Matrix4d Trl = keyframe->GetRelativePoseTrl().matrix().cast<double>();
-    const Eigen::Matrix3d Rrl = Trl.block<3, 3>(0, 0);
-    const Eigen::Vector3d trl = Trl.block<3, 1>(0, 3);
+    const Eigen::Matrix4d T_rl = keyframe->GetRelativePoseTrl().matrix().cast<double>();
+    const Eigen::Matrix3d R_rl = T_rl.block<3, 3>(0, 0);
+    const Eigen::Vector3d t_rl = T_rl.block<3, 1>(0, 3);
 
-    Rcw[1]     = Rrl * Rcw[0];
-    tcw[1]     = Rrl * tcw[0] + trl;
-    Rcb[1]     = Rrl * Rcb[0];
-    tcb[1]     = Rrl * tcb[0] + trl;
-    Rbc[1]     = Rcb[1].transpose();
-    tbc[1]     = -Rbc[1] * tcb[1];
-    pCamera[1] = keyframe->mpCamera2;
+    R_cw[1]    = R_rl * R_cw[0];
+    t_cw[1]    = R_rl * t_cw[0] + t_rl;
+    R_cb[1]    = R_rl * R_cb[0];
+    t_cb[1]    = R_rl * t_cb[0] + t_rl;
+    R_bc[1]    = R_cb[1].transpose();
+    t_bc[1]    = -R_bc[1] * t_cb[1];
+    cameras[1] = keyframe->mpCamera2;
   }
 
-  // Initialize internal variables for posegraph 4DoF.
-  Rwb0 = Rwb;
-  DR.setIdentity();
+  // Initialize internal variables.
+  R0_wb_ = R_wb;
+  dR_.setIdentity();
 }
 
-ImuCamPose::ImuCamPose(const Frame* frame) : its(0) {
+ImuCamPose::ImuCamPose(const Frame* frame) : iterations_(0) {
   // Load IMU pose.
-  twb = frame->GetImuPosition().cast<double>();
-  Rwb = frame->GetImuRotation().cast<double>();
+  t_wb = frame->GetImuPosition().cast<double>();
+  R_wb = frame->GetImuRotation().cast<double>();
 
   // Determine number of cameras.
   std::size_t num_cams = 1;
@@ -185,129 +185,129 @@ ImuCamPose::ImuCamPose(const Frame* frame) : its(0) {
   }
 
   // Initialize.
-  tcw.resize(num_cams);
-  Rcw.resize(num_cams);
-  tcb.resize(num_cams);
-  Rcb.resize(num_cams);
-  Rbc.resize(num_cams);
-  tbc.resize(num_cams);
-  pCamera.resize(num_cams);
+  t_cw.resize(num_cams);
+  R_cw.resize(num_cams);
+  t_cb.resize(num_cams);
+  R_cb.resize(num_cams);
+  R_bc.resize(num_cams);
+  t_bc.resize(num_cams);
+  cameras.resize(num_cams);
 
   // Initialize left camera.
-  Rcw[0]     = frame->GetPose().rotationMatrix().cast<double>();
-  tcw[0]     = frame->GetPose().translation().cast<double>();
-  Rcb[0]     = frame->mImuCalib.T_cb.rotationMatrix().cast<double>();
-  tcb[0]     = frame->mImuCalib.T_cb.translation().cast<double>();
-  Rbc[0]     = Rcb[0].transpose();
-  tbc[0]     = frame->mImuCalib.T_bc.translation().cast<double>();
-  pCamera[0] = frame->mpCamera;
+  R_cw[0]    = frame->GetPose().rotationMatrix().cast<double>();
+  t_cw[0]    = frame->GetPose().translation().cast<double>();
+  R_cb[0]    = frame->mImuCalib.T_cb.rotationMatrix().cast<double>();
+  t_cb[0]    = frame->mImuCalib.T_cb.translation().cast<double>();
+  R_bc[0]    = R_cb[0].transpose();
+  t_bc[0]    = frame->mImuCalib.T_bc.translation().cast<double>();
+  cameras[0] = frame->mpCamera;
   bf         = frame->mbf;
 
   // Initialize right camera.
   if (num_cams > 1) {
-    const Eigen::Matrix4d Trl = frame->GetRelativePoseTrl().matrix().cast<double>();
-    const Eigen::Matrix3d Rrl = Trl.block<3, 3>(0, 0);
-    const Eigen::Vector3d trl = Trl.block<3, 1>(0, 3);
+    const Eigen::Matrix4d T_rl = frame->GetRelativePoseTrl().matrix().cast<double>();
+    const Eigen::Matrix3d R_rl = T_rl.block<3, 3>(0, 0);
+    const Eigen::Vector3d t_rl = T_rl.block<3, 1>(0, 3);
 
-    Rcw[1]     = Rrl * Rcw[0];
-    tcw[1]     = Rrl * tcw[0] + trl;
-    Rcb[1]     = Rrl * Rcb[0];
-    tcb[1]     = Rrl * tcb[0] + trl;
-    Rbc[1]     = Rcb[1].transpose();
-    tbc[1]     = -Rbc[1] * tcb[1];
-    pCamera[1] = frame->mpCamera2;
+    R_cw[1]    = R_rl * R_cw[0];
+    t_cw[1]    = R_rl * t_cw[0] + t_rl;
+    R_cb[1]    = R_rl * R_cb[0];
+    t_cb[1]    = R_rl * t_cb[0] + t_rl;
+    R_bc[1]    = R_cb[1].transpose();
+    t_bc[1]    = -R_bc[1] * t_cb[1];
+    cameras[1] = frame->mpCamera2;
   }
 
-  // Initialize internal variables for posegraph 4DoF.
-  Rwb0 = Rwb;
-  DR.setIdentity();
+  // Initialize internal variables.
+  R0_wb_ = R_wb;
+  dR_.setIdentity();
 }
 
 ImuCamPose::ImuCamPose(
-  const Eigen::Matrix3d& Rwc,
-  const Eigen::Vector3d& twc,
+  const Eigen::Matrix3d& R_wc,
+  const Eigen::Vector3d& t_wc,
   const KeyFrame* keyframe
 )
-  : its(0) {
+  : iterations_(0) {
   // This is only for posegrpah, we do not care about multicamera.
-  tcw.resize(1);
-  Rcw.resize(1);
-  tcb.resize(1);
-  Rcb.resize(1);
-  Rbc.resize(1);
-  tbc.resize(1);
-  pCamera.resize(1);
+  t_cw.resize(1);
+  R_cw.resize(1);
+  t_cb.resize(1);
+  R_cb.resize(1);
+  R_bc.resize(1);
+  t_bc.resize(1);
+  cameras.resize(1);
 
   // Initialize left camera.
-  Rcb[0]     = keyframe->mImuCalib.T_cb.rotationMatrix().cast<double>();
-  tcb[0]     = keyframe->mImuCalib.T_cb.translation().cast<double>();
-  Rbc[0]     = Rcb[0].transpose();
-  tbc[0]     = keyframe->mImuCalib.T_bc.translation().cast<double>();
-  Rwb        = Rwc * Rcb[0];
-  twb        = Rwc * tcb[0] + twc;
-  Rcw[0]     = Rwc.transpose();
-  tcw[0]     = -Rcw[0] * twc;
-  pCamera[0] = keyframe->mpCamera;
+  R_cb[0]    = keyframe->mImuCalib.T_cb.rotationMatrix().cast<double>();
+  t_cb[0]    = keyframe->mImuCalib.T_cb.translation().cast<double>();
+  R_bc[0]    = R_cb[0].transpose();
+  t_bc[0]    = keyframe->mImuCalib.T_bc.translation().cast<double>();
+  R_wb       = R_wc * R_cb[0];
+  t_wb       = R_wc * t_cb[0] + t_wc;
+  R_cw[0]    = R_wc.transpose();
+  t_cw[0]    = -R_cw[0] * t_wc;
+  cameras[0] = keyframe->mpCamera;
   bf         = keyframe->mbf;
 
   // Initialize internal variables for posegraph 4DoF.
-  Rwb0 = Rwb;
-  DR.setIdentity();
+  R0_wb_ = R_wb;
+  dR_.setIdentity();
 }
 
-void ImuCamPose::SetParam(
-  const std::vector<Eigen::Matrix3d>& _Rcw,
-  const std::vector<Eigen::Vector3d>& _tcw,
-  const std::vector<Eigen::Matrix3d>& _Rbc,
-  const std::vector<Eigen::Vector3d>& _tbc,
+void ImuCamPose::setParameters(
+  const std::vector<Eigen::Matrix3d>& _R_cw,
+  const std::vector<Eigen::Vector3d>& _t_cw,
+  const std::vector<Eigen::Matrix3d>& _R_bc,
+  const std::vector<Eigen::Vector3d>& _t_bc,
   const double _bf
 ) {
-  const std::size_t num_cams = Rbc.size();
+  const std::size_t num_cams = R_bc.size();
 
   // Get rotations/translations for:
   // - camera to body
   // - world to camera
-  Rbc = _Rbc;
-  tbc = _tbc;
-  Rcw = _Rcw;
-  tcw = _tcw;
+  R_bc = _R_bc;
+  t_bc = _t_bc;
+  R_cw = _R_cw;
+  t_cw = _t_cw;
 
   // Calculate rotations/translations from body to camera.
-  Rcb.resize(num_cams);
-  tcb.resize(num_cams);
-  for (std::size_t i = 0; i < tcb.size(); i++) {
-    Rcb[i] = Rbc[i].transpose();
-    tcb[i] = -Rcb[i] * tbc[i];
+  R_cb.resize(num_cams);
+  t_cb.resize(num_cams);
+  for (std::size_t i = 0; i < t_cb.size(); i++) {
+    R_cb[i] = R_bc[i].transpose();
+    t_cb[i] = -R_cb[i] * t_bc[i];
   }
 
   // Calculate rotations/translations from body to world.
-  Rwb = Rcw[0].transpose() * Rcb[0];
-  twb = Rcw[0].transpose() * (tcb[0] - tcw[0]);
+  R_wb = R_cw[0].transpose() * R_cb[0];
+  t_wb = R_cw[0].transpose() * (t_cb[0] - t_cw[0]);
 
   bf = _bf;
 }
 
-Eigen::Vector2d ImuCamPose::Project(
+Eigen::Vector2d ImuCamPose::projectMonocular(
   const Eigen::Vector3d& pt,
   const std::size_t cam_idx
 ) const {
   // Project 3D point from world to camera frame.
-  const Eigen::Vector3d projected = Rcw[cam_idx] * pt + tcw[cam_idx];
+  const Eigen::Vector3d projected = R_cw[cam_idx] * pt + t_cw[cam_idx];
 
-  return pCamera[cam_idx]->project(projected.cast<float>()).cast<double>();
+  return cameras[cam_idx]->project(projected.cast<float>()).cast<double>();
 }
 
-Eigen::Vector3d ImuCamPose::ProjectStereo(
+Eigen::Vector3d ImuCamPose::projectStereo(
   const Eigen::Vector3d& pt,
   const std::size_t cam_idx
 ) const {
   // Project 3D point from world to camera frame.
-  const Eigen::Vector3d projected = Rcw[cam_idx] * pt + tcw[cam_idx];
+  const Eigen::Vector3d projected = R_cw[cam_idx] * pt + t_cw[cam_idx];
 
   // Continue to project to the image plane and output the 3rd element as
   // x-coordinate in other camera
   const Eigen::Vector2d uv
-    = pCamera[cam_idx]->project(projected.cast<float>()).cast<double>();
+    = cameras[cam_idx]->project(projected.cast<float>()).cast<double>();
 
   return Eigen::Vector3d(uv.x(), uv.y(), uv.x() - bf / projected.z());
 }
@@ -316,11 +316,11 @@ bool ImuCamPose::isDepthPositive(
   const Eigen::Vector3d& pt,
   const std::size_t cam_idx
 ) const {
-  const double depth = Rcw[cam_idx].row(2) * pt + tcw[cam_idx](2);
+  const double depth = R_cw[cam_idx].row(2) * pt + t_cw[cam_idx](2);
   return depth > 0.0;
 }
 
-void ImuCamPose::Update(const double* update) {
+void ImuCamPose::updateInBodyFrame(const double* update) {
   // No update if the pointer is null.
   if (update == nullptr) {
     LOG(WARNING) << "No update for IMU pose.";
@@ -333,27 +333,27 @@ void ImuCamPose::Update(const double* update) {
   const Eigen::Vector3d ut(update[3], update[4], update[5]);
 
   // Update body pose.
-  twb += Rwb * ut;
-  Rwb = Rwb * expSO3(ur);
+  t_wb += R_wb * ut;
+  R_wb = R_wb * expSO3(ur);
 
   // TODO: maybe parameterize the frequency of normalization.
   // Normalize rotation after 3 updates.
-  its++;
-  if (its >= 3) {
-    normalizeRotation(Rwb);
-    its = 0;
+  iterations_++;
+  if (iterations_ >= 3) {
+    normalizeRotation(R_wb);
+    iterations_ = 0;
   }
 
   // Update camera poses.
-  const Eigen::Matrix3d Rbw = Rwb.transpose();
-  const Eigen::Vector3d tbw = -Rbw * twb;
-  for (std::size_t i = 0; i < pCamera.size(); i++) {
-    Rcw[i] = Rcb[i] * Rbw;
-    tcw[i] = Rcb[i] * tbw + tcb[i];
+  const Eigen::Matrix3d R_bw = R_wb.transpose();
+  const Eigen::Vector3d t_bw = -R_bw * t_wb;
+  for (std::size_t i = 0; i < cameras.size(); i++) {
+    R_cw[i] = R_cb[i] * R_bw;
+    t_cw[i] = R_cb[i] * t_bw + t_cb[i];
   }
 }
 
-void ImuCamPose::UpdateW(const double* update) {
+void ImuCamPose::UpdateInWorldFrame(const double* update) {
   // No update if the pointer is null.
   if (update == nullptr) {
     LOG(WARNING) << "No update for IMU pose.";
@@ -366,28 +366,28 @@ void ImuCamPose::UpdateW(const double* update) {
   const Eigen::Vector3d ut(update[3], update[4], update[5]);
 
   // Update body pose.
-  DR  = expSO3(ur) * DR;
-  Rwb = DR * Rwb0;
-  twb += ut;
+  dR_  = expSO3(ur) * dR_;
+  R_wb = dR_ * R0_wb_;
+  t_wb += ut;
 
   // TODO: maybe parameterize the frequency of normalization.
   // Normalize rotation after 5 updates.
-  its++;
-  if (its >= 5) {
-    DR(0, 2) = 0.0;
-    DR(1, 2) = 0.0;
-    DR(2, 0) = 0.0;
-    DR(2, 1) = 0.0;
-    normalizeRotation(DR);
-    its = 0;
+  iterations_++;
+  if (iterations_ >= 5) {
+    dR_(0, 2) = 0.0;
+    dR_(1, 2) = 0.0;
+    dR_(2, 0) = 0.0;
+    dR_(2, 1) = 0.0;
+    normalizeRotation(dR_);
+    iterations_ = 0;
   }
 
   // Update camera poses.
-  const Eigen::Matrix3d Rbw = Rwb.transpose();
-  const Eigen::Vector3d tbw = -Rbw * twb;
-  for (std::size_t i = 0; i < pCamera.size(); i++) {
-    Rcw[i] = Rcb[i] * Rbw;
-    tcw[i] = Rcb[i] * tbw + tcb[i];
+  const Eigen::Matrix3d R_bw = R_wb.transpose();
+  const Eigen::Vector3d t_bw = -R_bw * t_wb;
+  for (std::size_t i = 0; i < cameras.size(); i++) {
+    R_cw[i] = R_cb[i] * R_bw;
+    t_cw[i] = R_cb[i] * t_bw + t_cb[i];
   }
 }
 
@@ -409,7 +409,7 @@ bool VertexPose::read(std::istream& is)
     std::vector<Eigen::Matrix<double,3,3> > Rbc;
     std::vector<Eigen::Matrix<double,3,1> > tbc;
 
-    const int num_cams = _estimate.Rbc.size();
+    const int num_cams = _estimate.R_bc.size();
     for(int idx = 0; idx<num_cams; idx++)
     {
         for (int i=0; i<3; i++){
@@ -429,15 +429,15 @@ bool VertexPose::read(std::istream& is)
         }
 
         float nextParam;
-        for(std::size_t i = 0; i < _estimate.pCamera[idx]->getNumParams(); i++){
+        for(std::size_t i = 0; i < _estimate.cameras[idx]->getNumParams(); i++){
             is >> nextParam;
-            _estimate.pCamera[idx]->setParameter(nextParam,i);
+            _estimate.cameras[idx]->setParameter(nextParam,i);
         }
     }
 
     double bf;
     is >> bf;
-    _estimate.SetParam(Rcw,tcw,Rbc,tbc,bf);
+    _estimate.setParameters(Rcw,tcw,Rbc,tbc,bf);
     updateCache();
 
     return true;
@@ -445,11 +445,11 @@ bool VertexPose::read(std::istream& is)
 
 bool VertexPose::write(std::ostream& os) const
 {
-    std::vector<Eigen::Matrix<double,3,3> > Rcw = _estimate.Rcw;
-    std::vector<Eigen::Matrix<double,3,1> > tcw = _estimate.tcw;
+    std::vector<Eigen::Matrix<double,3,3> > Rcw = _estimate.R_cw;
+    std::vector<Eigen::Matrix<double,3,1> > tcw = _estimate.t_cw;
 
-    std::vector<Eigen::Matrix<double,3,3> > Rbc = _estimate.Rbc;
-    std::vector<Eigen::Matrix<double,3,1> > tbc = _estimate.tbc;
+    std::vector<Eigen::Matrix<double,3,3> > Rbc = _estimate.R_bc;
+    std::vector<Eigen::Matrix<double,3,1> > tbc = _estimate.t_bc;
 
     const int num_cams = tcw.size();
 
@@ -471,8 +471,8 @@ bool VertexPose::write(std::ostream& os) const
             os << tbc[idx](i) << " ";
         }
 
-        for(std::size_t i = 0; i < _estimate.pCamera[idx]->getNumParams(); i++){
-            os << _estimate.pCamera[idx]->getParameter(i) << " ";
+        for(std::size_t i = 0; i < _estimate.cameras[idx]->getNumParams(); i++){
+            os << _estimate.cameras[idx]->getParameter(i) << " ";
         }
     }
 
@@ -487,13 +487,13 @@ void EdgeMono::linearizeOplus()
     const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
     const g2o::VertexSBAPointXYZ* VPoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
 
-    const Eigen::Matrix3d &Rcw = VPose->estimate().Rcw[cam_idx];
-    const Eigen::Vector3d &tcw = VPose->estimate().tcw[cam_idx];
+    const Eigen::Matrix3d &Rcw = VPose->estimate().R_cw[cam_idx];
+    const Eigen::Vector3d &tcw = VPose->estimate().t_cw[cam_idx];
     const Eigen::Vector3d Xc = Rcw*VPoint->estimate() + tcw;
-    const Eigen::Vector3d Xb = VPose->estimate().Rbc[cam_idx]*Xc+VPose->estimate().tbc[cam_idx];
-    const Eigen::Matrix3d &Rcb = VPose->estimate().Rcb[cam_idx];
+    const Eigen::Vector3d Xb = VPose->estimate().R_bc[cam_idx]*Xc+VPose->estimate().t_bc[cam_idx];
+    const Eigen::Matrix3d &Rcb = VPose->estimate().R_cb[cam_idx];
 
-    const Eigen::Matrix<double,2,3> proj_jac = VPose->estimate().pCamera[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
+    const Eigen::Matrix<double,2,3> proj_jac = VPose->estimate().cameras[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
     _jacobianOplusXi = -proj_jac * Rcw;
 
     Eigen::Matrix<double,3,6> SE3deriv;
@@ -512,13 +512,13 @@ void EdgeMonoOnlyPose::linearizeOplus()
 {
     const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
 
-    const Eigen::Matrix3d &Rcw = VPose->estimate().Rcw[cam_idx];
-    const Eigen::Vector3d &tcw = VPose->estimate().tcw[cam_idx];
+    const Eigen::Matrix3d &Rcw = VPose->estimate().R_cw[cam_idx];
+    const Eigen::Vector3d &tcw = VPose->estimate().t_cw[cam_idx];
     const Eigen::Vector3d Xc = Rcw*Xw + tcw;
-    const Eigen::Vector3d Xb = VPose->estimate().Rbc[cam_idx]*Xc+VPose->estimate().tbc[cam_idx];
-    const Eigen::Matrix3d &Rcb = VPose->estimate().Rcb[cam_idx];
+    const Eigen::Vector3d Xb = VPose->estimate().R_bc[cam_idx]*Xc+VPose->estimate().t_bc[cam_idx];
+    const Eigen::Matrix3d &Rcb = VPose->estimate().R_cb[cam_idx];
 
-    Eigen::Matrix<double,2,3> proj_jac = VPose->estimate().pCamera[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
+    Eigen::Matrix<double,2,3> proj_jac = VPose->estimate().cameras[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
 
     Eigen::Matrix<double,3,6> SE3deriv;
     double x = Xb(0);
@@ -535,16 +535,16 @@ void EdgeStereo::linearizeOplus()
     const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
     const g2o::VertexSBAPointXYZ* VPoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
 
-    const Eigen::Matrix3d &Rcw = VPose->estimate().Rcw[cam_idx];
-    const Eigen::Vector3d &tcw = VPose->estimate().tcw[cam_idx];
+    const Eigen::Matrix3d &Rcw = VPose->estimate().R_cw[cam_idx];
+    const Eigen::Vector3d &tcw = VPose->estimate().t_cw[cam_idx];
     const Eigen::Vector3d Xc = Rcw*VPoint->estimate() + tcw;
-    const Eigen::Vector3d Xb = VPose->estimate().Rbc[cam_idx]*Xc+VPose->estimate().tbc[cam_idx];
-    const Eigen::Matrix3d &Rcb = VPose->estimate().Rcb[cam_idx];
+    const Eigen::Vector3d Xb = VPose->estimate().R_bc[cam_idx]*Xc+VPose->estimate().t_bc[cam_idx];
+    const Eigen::Matrix3d &Rcb = VPose->estimate().R_cb[cam_idx];
     const double bf = VPose->estimate().bf;
     const double inv_z2 = 1.0/(Xc(2)*Xc(2));
 
     Eigen::Matrix<double,3,3> proj_jac;
-    proj_jac.block<2,3>(0,0) = VPose->estimate().pCamera[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
+    proj_jac.block<2,3>(0,0) = VPose->estimate().cameras[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
     proj_jac.block<1,3>(2,0) = proj_jac.block<1,3>(0,0);
     proj_jac(2,2) += bf*inv_z2;
 
@@ -566,16 +566,16 @@ void EdgeStereoOnlyPose::linearizeOplus()
 {
     const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
 
-    const Eigen::Matrix3d &Rcw = VPose->estimate().Rcw[cam_idx];
-    const Eigen::Vector3d &tcw = VPose->estimate().tcw[cam_idx];
+    const Eigen::Matrix3d &Rcw = VPose->estimate().R_cw[cam_idx];
+    const Eigen::Vector3d &tcw = VPose->estimate().t_cw[cam_idx];
     const Eigen::Vector3d Xc = Rcw*Xw + tcw;
-    const Eigen::Vector3d Xb = VPose->estimate().Rbc[cam_idx]*Xc+VPose->estimate().tbc[cam_idx];
-    const Eigen::Matrix3d &Rcb = VPose->estimate().Rcb[cam_idx];
+    const Eigen::Vector3d Xb = VPose->estimate().R_bc[cam_idx]*Xc+VPose->estimate().t_bc[cam_idx];
+    const Eigen::Matrix3d &Rcb = VPose->estimate().R_cb[cam_idx];
     const double bf = VPose->estimate().bf;
     const double inv_z2 = 1.0/(Xc(2)*Xc(2));
 
     Eigen::Matrix<double,3,3> proj_jac;
-    proj_jac.block<2,3>(0,0) = VPose->estimate().pCamera[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
+    proj_jac.block<2,3>(0,0) = VPose->estimate().cameras[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
     proj_jac.block<1,3>(2,0) = proj_jac.block<1,3>(0,0);
     proj_jac(2,2) += bf*inv_z2;
 
@@ -661,9 +661,9 @@ void EdgeInertial::computeError()
     const Eigen::Vector3d dV = mpInt->getDeltaVelocity(b1).cast<double>();
     const Eigen::Vector3d dP = mpInt->getDeltaPosition(b1).cast<double>();
 
-    const Eigen::Vector3d er = logSO3(dR.transpose()*VP1->estimate().Rwb.transpose()*VP2->estimate().Rwb);
-    const Eigen::Vector3d ev = VP1->estimate().Rwb.transpose()*(VV2->estimate() - VV1->estimate() - g*dt) - dV;
-    const Eigen::Vector3d ep = VP1->estimate().Rwb.transpose()*(VP2->estimate().twb - VP1->estimate().twb
+    const Eigen::Vector3d er = logSO3(dR.transpose()*VP1->estimate().R_wb.transpose()*VP2->estimate().R_wb);
+    const Eigen::Vector3d ev = VP1->estimate().R_wb.transpose()*(VV2->estimate() - VV1->estimate() - g*dt) - dV;
+    const Eigen::Vector3d ep = VP1->estimate().R_wb.transpose()*(VP2->estimate().t_wb - VP1->estimate().t_wb
                                                                - VV1->estimate()*dt - g*dt*dt/2) - dP;
 
     _error << er, ev, ep;
@@ -682,9 +682,9 @@ void EdgeInertial::linearizeOplus()
     Eigen::Vector3d dbg;
     dbg << db.wx, db.wy, db.wz;
 
-    const Eigen::Matrix3d Rwb1 = VP1->estimate().Rwb;
+    const Eigen::Matrix3d Rwb1 = VP1->estimate().R_wb;
     const Eigen::Matrix3d Rbw1 = Rwb1.transpose();
-    const Eigen::Matrix3d Rwb2 = VP2->estimate().Rwb;
+    const Eigen::Matrix3d Rwb2 = VP2->estimate().R_wb;
 
     const Eigen::Matrix3d dR = mpInt->getDeltaRotation(b1).cast<double>();
     const Eigen::Matrix3d eR = dR.transpose()*Rbw1*Rwb2;
@@ -696,7 +696,7 @@ void EdgeInertial::linearizeOplus()
      // rotation
     _jacobianOplus[0].block<3,3>(0,0) = -invJr*Rwb2.transpose()*Rwb1; // OK
     _jacobianOplus[0].block<3,3>(3,0) = Sophus::SO3d::hat(Rbw1*(VV2->estimate() - VV1->estimate() - g*dt)); // OK
-    _jacobianOplus[0].block<3,3>(6,0) = Sophus::SO3d::hat(Rbw1*(VP2->estimate().twb - VP1->estimate().twb
+    _jacobianOplus[0].block<3,3>(6,0) = Sophus::SO3d::hat(Rbw1*(VP2->estimate().t_wb - VP1->estimate().t_wb
                                                    - VV1->estimate()*dt - 0.5*g*dt*dt)); // OK
     // translation
     _jacobianOplus[0].block<3,3>(6,3) = -Eigen::Matrix3d::Identity(); // OK
@@ -768,9 +768,9 @@ void EdgeInertialGS::computeError()
     const Eigen::Vector3d dV = mpInt->getDeltaVelocity(b).cast<double>();
     const Eigen::Vector3d dP = mpInt->getDeltaPosition(b).cast<double>();
 
-    const Eigen::Vector3d er = logSO3(dR.transpose()*VP1->estimate().Rwb.transpose()*VP2->estimate().Rwb);
-    const Eigen::Vector3d ev = VP1->estimate().Rwb.transpose()*(s*(VV2->estimate() - VV1->estimate()) - g*dt) - dV;
-    const Eigen::Vector3d ep = VP1->estimate().Rwb.transpose()*(s*(VP2->estimate().twb - VP1->estimate().twb - VV1->estimate()*dt) - g*dt*dt/2) - dP;
+    const Eigen::Vector3d er = logSO3(dR.transpose()*VP1->estimate().R_wb.transpose()*VP2->estimate().R_wb);
+    const Eigen::Vector3d ev = VP1->estimate().R_wb.transpose()*(s*(VV2->estimate() - VV1->estimate()) - g*dt) - dV;
+    const Eigen::Vector3d ep = VP1->estimate().R_wb.transpose()*(s*(VP2->estimate().t_wb - VP1->estimate().t_wb - VV1->estimate()*dt) - g*dt*dt/2) - dP;
 
     _error << er, ev, ep;
 }
@@ -791,9 +791,9 @@ void EdgeInertialGS::linearizeOplus()
     Eigen::Vector3d dbg;
     dbg << db.wx, db.wy, db.wz;
 
-    const Eigen::Matrix3d Rwb1 = VP1->estimate().Rwb;
+    const Eigen::Matrix3d Rwb1 = VP1->estimate().R_wb;
     const Eigen::Matrix3d Rbw1 = Rwb1.transpose();
-    const Eigen::Matrix3d Rwb2 = VP2->estimate().Rwb;
+    const Eigen::Matrix3d Rwb2 = VP2->estimate().R_wb;
     const Eigen::Matrix3d Rwg = VGDir->estimate().Rwg;
     Eigen::MatrixXd Gm = Eigen::MatrixXd::Zero(3,2);
     Gm(0,1) = -IMU::kGravity;
@@ -810,7 +810,7 @@ void EdgeInertialGS::linearizeOplus()
      // rotation
     _jacobianOplus[0].block<3,3>(0,0) = -invJr*Rwb2.transpose()*Rwb1;
     _jacobianOplus[0].block<3,3>(3,0) = Sophus::SO3d::hat(Rbw1*(s*(VV2->estimate() - VV1->estimate()) - g*dt));
-    _jacobianOplus[0].block<3,3>(6,0) = Sophus::SO3d::hat(Rbw1*(s*(VP2->estimate().twb - VP1->estimate().twb
+    _jacobianOplus[0].block<3,3>(6,0) = Sophus::SO3d::hat(Rbw1*(s*(VP2->estimate().t_wb - VP1->estimate().t_wb
                                                    - VV1->estimate()*dt) - 0.5*g*dt*dt));
     // translation
     _jacobianOplus[0].block<3,3>(6,3) = Eigen::DiagonalMatrix<double,3>(-s,-s,-s);
@@ -850,7 +850,7 @@ void EdgeInertialGS::linearizeOplus()
     // Jacobians wrt scale factor
     _jacobianOplus[7].setZero();
     _jacobianOplus[7].block<3,1>(3,0) = Rbw1*(VV2->estimate()-VV1->estimate());
-    _jacobianOplus[7].block<3,1>(6,0) = Rbw1*(VP2->estimate().twb-VP1->estimate().twb-VV1->estimate()*dt);
+    _jacobianOplus[7].block<3,1>(6,0) = Rbw1*(VP2->estimate().t_wb-VP1->estimate().t_wb-VV1->estimate()*dt);
 }
 
 EdgePriorPoseImu::EdgePriorPoseImu(ConstraintPoseImu *c)
@@ -871,8 +871,8 @@ void EdgePriorPoseImu::computeError()
     const VertexGyroBias* VG = static_cast<const VertexGyroBias*>(_vertices[2]);
     const VertexAccBias* VA = static_cast<const VertexAccBias*>(_vertices[3]);
 
-    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().Rwb);
-    const Eigen::Vector3d et = Rwb.transpose()*(VP->estimate().twb-twb);
+    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().R_wb);
+    const Eigen::Vector3d et = Rwb.transpose()*(VP->estimate().t_wb-twb);
     const Eigen::Vector3d ev = VV->estimate() - vwb;
     const Eigen::Vector3d ebg = VG->estimate() - bg;
     const Eigen::Vector3d eba = VA->estimate() - ba;
@@ -883,10 +883,10 @@ void EdgePriorPoseImu::computeError()
 void EdgePriorPoseImu::linearizeOplus()
 {
     const VertexPose* VP = static_cast<const VertexPose*>(_vertices[0]);
-    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().Rwb);
+    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().R_wb);
     _jacobianOplus[0].setZero();
     _jacobianOplus[0].block<3,3>(0,0) = inverseRightJacobianSO3(er);
-    _jacobianOplus[0].block<3,3>(3,3) = Rwb.transpose()*VP->estimate().Rwb;
+    _jacobianOplus[0].block<3,3>(3,3) = Rwb.transpose()*VP->estimate().R_wb;
     _jacobianOplus[1].setZero();
     _jacobianOplus[1].block<3,3>(6,0) = Eigen::Matrix3d::Identity();
     _jacobianOplus[2].setZero();
