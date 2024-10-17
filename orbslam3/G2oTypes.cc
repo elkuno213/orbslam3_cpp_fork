@@ -391,16 +391,25 @@ void ImuCamPose::UpdateInWorldFrame(const double* update) {
   }
 }
 
-InvDepthPoint::InvDepthPoint(double _rho, double _u, double _v, KeyFrame* pHostKF): u(_u), v(_v), rho(_rho),
-    fx(pHostKF->fx), fy(pHostKF->fy), cx(pHostKF->cx), cy(pHostKF->cy), bf(pHostKF->mbf)
-{
-}
+InvDepthPoint::InvDepthPoint(
+  const double _rho,
+  const double _u,
+  const double _v,
+  const KeyFrame* host_keyframe
+)
+  : rho(_rho)
+  , u(_u)
+  , v(_v)
+  , fx(host_keyframe->fx)
+  , fy(host_keyframe->fy)
+  , cx(host_keyframe->cx)
+  , cy(host_keyframe->cy)
+  , bf(host_keyframe->mbf)
+{}
 
-void InvDepthPoint::Update(const double *pu)
-{
-    rho += *pu;
+void InvDepthPoint::update(const double* update) {
+  rho += *update;
 }
-
 
 bool VertexPose::read(std::istream& is)
 {

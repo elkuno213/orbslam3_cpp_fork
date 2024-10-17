@@ -153,21 +153,24 @@ private:
   std::size_t iterations_;
 };
 
-class InvDepthPoint
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    InvDepthPoint(){}
-    InvDepthPoint(double _rho, double _u, double _v, KeyFrame* pHostKF);
+// Class representing an inverse depth point in the host frame of a camera.
+struct InvDepthPoint {
+  // Inverse depth value.
+  double rho;
+  // Observation in the host frame.
+  double u, v;
+  // Camera intrinsic parameters from the host frame.
+  double fx, fy, cx, cy, bf;
 
-    void Update(const double *pu);
+  InvDepthPoint() {}
+  InvDepthPoint(
+    const double _rho,
+    const double _u,
+    const double _v,
+    const KeyFrame* host_keyframe
+  );
 
-    double rho;
-    double u, v; // they are not variables, observation in the host frame
-
-    double fx, fy, cx, cy, bf; // from host frame
-
-    int its;
+  void update(const double* update);
 };
 
 // Optimizable parameters are IMU pose
@@ -378,7 +381,7 @@ public:
         }
 
     virtual void oplusImpl(const double* update_){
-        _estimate.Update(update_);
+        _estimate.update(update_);
         updateCache();
     }
 };
