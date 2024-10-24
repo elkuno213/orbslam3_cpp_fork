@@ -3117,7 +3117,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
     optimizer.addEdge(epg);
 
     // Gravity and scale
-    VertexGDir* VGDir = new VertexGDir(Rwg);
+    VertexGravityDirection* VGDir = new VertexGravityDirection(Rwg);
     VGDir->setId(maxKFid*2+4);
     VGDir->setFixed(false);
     optimizer.addVertex(VGDir);
@@ -3199,7 +3199,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
 
 
     IMU::Bias b (vb[3],vb[4],vb[5],vb[0],vb[1],vb[2]);
-    Rwg = VGDir->estimate().Rwg;
+    Rwg = VGDir->estimate().R_wg;
 
     //Keyframes velocities and biases
     const int N = vpKFs.size();
@@ -3291,7 +3291,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Vector3d &bg, Eigen::Vect
     optimizer.addEdge(epg);
 
     // Gravity and scale
-    VertexGDir* VGDir = new VertexGDir(Eigen::Matrix3d::Identity());
+    VertexGravityDirection* VGDir = new VertexGravityDirection(Eigen::Matrix3d::Identity());
     VGDir->setId(maxKFid*2+4);
     VGDir->setFixed(true);
     optimizer.addVertex(VGDir);
@@ -3434,7 +3434,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
     }
 
     // Gravity and scale
-    VertexGDir* VGDir = new VertexGDir(Rwg);
+    VertexGravityDirection* VGDir = new VertexGravityDirection(Rwg);
     VGDir->setId(4*(maxKFid+1));
     VGDir->setFixed(false);
     optimizer.addVertex(VGDir);
@@ -3495,7 +3495,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
     float err_end = optimizer.activeRobustChi2();
     // Recover optimized data
     scale = VS->estimate();
-    Rwg = VGDir->estimate().Rwg;
+    Rwg = VGDir->estimate().R_wg;
 }
 
 void Optimizer::LocalBundleAdjustment(KeyFrame* pMainKF,std::vector<KeyFrame*> vpAdjustKF, std::vector<KeyFrame*> vpFixedKF, bool *pbStopFlag)

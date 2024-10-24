@@ -318,43 +318,43 @@ public:
   }
 };
 
-// Gravity direction vertex
-class GDirection
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    GDirection(){}
-    GDirection(Eigen::Matrix3d pRwg): Rwg(pRwg){}
+struct GravityDirection {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    void Update(const double *pu)
-    {
-        Rwg=Rwg*expSO3(Eigen::Vector3d(pu[0], pu[1], 0.0));
-    }
+  Eigen::Matrix3d R_wg;
 
-    Eigen::Matrix3d Rwg, Rgw;
+  GravityDirection() = default;
 
-    int its;
+  GravityDirection(Eigen::Matrix3d R_wg) : R_wg(R_wg) {}
+
+  void update(const double* update) {
+    R_wg = R_wg * expSO3(Eigen::Vector3d(update[0], update[1], 0.0));
+  }
 };
 
-class VertexGDir : public g2o::BaseVertex<2,GDirection>
-{
+// Optimization vertex for the gravity direction.
+class VertexGravityDirection : public g2o::BaseVertex<2, GravityDirection> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexGDir(){}
-    VertexGDir(Eigen::Matrix3d pRwg){
-        setEstimate(GDirection(pRwg));
-    }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  VertexGravityDirection() = default;
 
-    virtual void setToOriginImpl() {
-        }
+  VertexGravityDirection(const Eigen::Matrix3d& R_wg);
 
-    virtual void oplusImpl(const double* update_){
-        _estimate.Update(update_);
-        updateCache();
-    }
+  virtual bool read(std::istream& is) {
+    return false;
+  }
+
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
+
+  virtual void setToOriginImpl() {}
+
+  virtual void oplusImpl(const double* update) {
+    _estimate.update(update);
+    updateCache();
+  }
 };
 
 // scale vertex
