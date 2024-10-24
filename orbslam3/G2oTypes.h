@@ -357,30 +357,31 @@ public:
   }
 };
 
-// scale vertex
-class VertexScale : public g2o::BaseVertex<1,double>
-{
+// Optimization vertex for the scale factor.
+class VertexScale : public g2o::BaseVertex<1, double> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexScale(){
-        setEstimate(1.0);
-    }
-    VertexScale(double ps){
-        setEstimate(ps);
-    }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  VertexScale();
 
-    virtual void setToOriginImpl(){
-        setEstimate(1.0);
-    }
+  VertexScale(const double scale);
 
-    virtual void oplusImpl(const double *update_){
-        setEstimate(estimate()*exp(*update_));
-    }
+  virtual bool read(std::istream& is) {
+    return false;
+  }
+
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
+
+  virtual void setToOriginImpl() {
+    setEstimate(1.0);
+  }
+
+  virtual void oplusImpl(const double* update) {
+    setEstimate(estimate() * std::exp(*update));
+  }
 };
-
 
 // Inverse depth point (just one parameter, inverse depth at the host frame)
 class VertexInvDepth : public g2o::BaseVertex<1,InvDepthPoint>

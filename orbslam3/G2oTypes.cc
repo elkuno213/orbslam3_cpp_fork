@@ -660,6 +660,14 @@ VertexGravityDirection::VertexGravityDirection(const Eigen::Matrix3d& R_wg) {
   setEstimate(GravityDirection(R_wg));
 }
 
+VertexScale::VertexScale() {
+  setEstimate(1.0);
+}
+
+VertexScale::VertexScale(const double scale) {
+  setEstimate(scale);
+}
+
 EdgeInertial::EdgeInertial(IMU::Preintegrated *pInt):JRg(pInt->JR_gyro.cast<double>()),
     JVg(pInt->JV_gyro.cast<double>()), JPg(pInt->JP_gyro.cast<double>()), JVa(pInt->JV_acc.cast<double>()),
     JPa(pInt->JP_acc.cast<double>()), mpInt(pInt), dt(pInt->t)
