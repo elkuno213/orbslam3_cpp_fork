@@ -197,40 +197,44 @@ public:
   }
 };
 
-class VertexPose4DoF : public g2o::BaseVertex<4,ImuCamPose>
-{
-    // Translation and yaw are the only optimizable variables
+// Optimization vertex for the IMU and camera poses with 4 degrees of freedom:
+// translation and yaw.
+class VertexPose4DoF : public g2o::BaseVertex<4, ImuCamPose> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexPose4DoF(){}
-    VertexPose4DoF(KeyFrame* pKF){
-        setEstimate(ImuCamPose(pKF));
-    }
-    VertexPose4DoF(Frame* pF){
-        setEstimate(ImuCamPose(pF));
-    }
-    VertexPose4DoF(Eigen::Matrix3d &_Rwc, Eigen::Vector3d &_twc, KeyFrame* pKF){
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        setEstimate(ImuCamPose(_Rwc, _twc, pKF));
-    }
+  VertexPose4DoF() = default;
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  VertexPose4DoF(const KeyFrame* keyframe);
 
-    virtual void setToOriginImpl() {
-        }
+  VertexPose4DoF(const Frame* frame);
 
-    virtual void oplusImpl(const double* update_){
-        double update6DoF[6];
-        update6DoF[0] = 0;
-        update6DoF[1] = 0;
-        update6DoF[2] = update_[0];
-        update6DoF[3] = update_[1];
-        update6DoF[4] = update_[2];
-        update6DoF[5] = update_[3];
-        _estimate.UpdateInWorldFrame(update6DoF);
-        updateCache();
-    }
+  VertexPose4DoF(
+    const Eigen::Matrix3d& R_wc,
+    const Eigen::Vector3d& t_wc,
+    const KeyFrame* keyframe
+  );
+
+  virtual bool read(std::istream& is) {
+    return false;
+  }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
+
+  virtual void setToOriginImpl() {}
+
+  virtual void oplusImpl(const double* update_) {
+    double update_6dof[6];
+    update_6dof[0] = 0;
+    update_6dof[1] = 0;
+    update_6dof[2] = update_[0];
+    update_6dof[3] = update_[1];
+    update_6dof[4] = update_[2];
+    update_6dof[5] = update_[3];
+    _estimate.UpdateInWorldFrame(update_6dof);
+    updateCache();
+  }
 };
 
 class VertexVelocity : public g2o::BaseVertex<3,Eigen::Vector3d>

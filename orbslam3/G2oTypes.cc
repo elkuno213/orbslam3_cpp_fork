@@ -508,6 +508,22 @@ bool VertexPose::write(std::ostream& os) const {
   return os.good();
 }
 
+VertexPose4DoF::VertexPose4DoF(const KeyFrame* keyframe) {
+  setEstimate(ImuCamPose(keyframe));
+}
+
+VertexPose4DoF::VertexPose4DoF(const Frame* frame) {
+  setEstimate(ImuCamPose(frame));
+}
+
+VertexPose4DoF::VertexPose4DoF(
+  const Eigen::Matrix3d& R_wc,
+  const Eigen::Vector3d& t_wc,
+  const KeyFrame* keyframe
+) {
+  setEstimate(ImuCamPose(R_wc, t_wc, keyframe));
+}
+
 void EdgeMono::linearizeOplus()
 {
     const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
