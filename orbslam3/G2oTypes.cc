@@ -631,14 +631,12 @@ void EdgeStereoOnlyPose::linearizeOplus()
     _jacobianOplusXi = proj_jac * Rcb * SE3deriv;
 }
 
-VertexVelocity::VertexVelocity(KeyFrame* pKF)
-{
-    setEstimate(pKF->GetVelocity().cast<double>());
+VertexVelocity::VertexVelocity(const KeyFrame* keyframe) {
+  setEstimate(keyframe->GetVelocity().cast<double>());
 }
 
-VertexVelocity::VertexVelocity(Frame* pF)
-{
-    setEstimate(pF->GetVelocity().cast<double>());
+VertexVelocity::VertexVelocity(const Frame* frame) {
+  setEstimate(frame->GetVelocity().cast<double>());
 }
 
 VertexGyroBias::VertexGyroBias(KeyFrame *pKF)

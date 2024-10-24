@@ -179,7 +179,7 @@ Eigen::Vector3f KeyFrame::GetTranslation() const
     return mTcw.translation();
 }
 
-Eigen::Vector3f KeyFrame::GetVelocity()
+Eigen::Vector3f KeyFrame::GetVelocity() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return mVw;

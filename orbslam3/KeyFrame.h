@@ -207,7 +207,7 @@ public:
     Sophus::SE3f GetImuPose();
     Eigen::Matrix3f GetRotation() const;
     Eigen::Vector3f GetTranslation() const;
-    Eigen::Vector3f GetVelocity();
+    Eigen::Vector3f GetVelocity() const;
     bool isVelocitySet();
 
     // Bag of Words Representation
