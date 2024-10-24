@@ -153,26 +153,6 @@ private:
   std::size_t iterations_;
 };
 
-// Class representing an inverse depth point in the host frame of a camera.
-struct InvDepthPoint {
-  // Inverse depth value.
-  double rho;
-  // Observation in the host frame.
-  double u, v;
-  // Camera intrinsic parameters from the host frame.
-  double fx, fy, cx, cy, bf;
-
-  InvDepthPoint() {}
-  InvDepthPoint(
-    const double _rho,
-    const double _u,
-    const double _v,
-    const KeyFrame* host_keyframe
-  );
-
-  void update(const double* update);
-};
-
 // Optimization vertex for the IMU and camera poses.
 class VertexPose : public g2o::BaseVertex<6, ImuCamPose> {
 public:
@@ -383,26 +363,54 @@ public:
   }
 };
 
-// Inverse depth point (just one parameter, inverse depth at the host frame)
-class VertexInvDepth : public g2o::BaseVertex<1,InvDepthPoint>
-{
+// Class representing an inverse depth point in the host frame of a camera.
+struct InvDepthPoint {
+  // Inverse depth value.
+  double rho;
+  // Observation in the host frame.
+  double u, v;
+  // Camera intrinsic parameters from the host frame.
+  double fx, fy, cx, cy, bf;
+
+  InvDepthPoint() {}
+  InvDepthPoint(
+    const double _rho,
+    const double _u,
+    const double _v,
+    const KeyFrame* host_keyframe
+  );
+
+  void update(const double* update);
+};
+
+// Optimization vertex for the inverse depth point at the host frame.
+class VertexInvDepth : public g2o::BaseVertex<1, InvDepthPoint> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexInvDepth(){}
-    VertexInvDepth(double invDepth, double u, double v, KeyFrame* pHostKF){
-        setEstimate(InvDepthPoint(invDepth, u, v, pHostKF));
-    }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  VertexInvDepth() = default;
 
-    virtual void setToOriginImpl() {
-        }
+  VertexInvDepth(
+    const double rho,
+    const double u,
+    const double v,
+    const KeyFrame* keyframe
+  );
 
-    virtual void oplusImpl(const double* update_){
-        _estimate.update(update_);
-        updateCache();
-    }
+  virtual bool read(std::istream& is) {
+    return false;
+  }
+
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
+
+  virtual void setToOriginImpl() {}
+
+  virtual void oplusImpl(const double* update) {
+    _estimate.update(update);
+    updateCache();
+  }
 };
 
 class EdgeMono : public g2o::BaseBinaryEdge<2,Eigen::Vector2d,g2o::VertexSBAPointXYZ,VertexPose>

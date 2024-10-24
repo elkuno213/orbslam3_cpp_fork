@@ -391,26 +391,6 @@ void ImuCamPose::UpdateInWorldFrame(const double* update) {
   }
 }
 
-InvDepthPoint::InvDepthPoint(
-  const double _rho,
-  const double _u,
-  const double _v,
-  const KeyFrame* host_keyframe
-)
-  : rho(_rho)
-  , u(_u)
-  , v(_v)
-  , fx(host_keyframe->fx)
-  , fy(host_keyframe->fy)
-  , cx(host_keyframe->cx)
-  , cy(host_keyframe->cy)
-  , bf(host_keyframe->mbf)
-{}
-
-void InvDepthPoint::update(const double* update) {
-  rho += *update;
-}
-
 VertexPose::VertexPose(const KeyFrame* keyframe) {
   setEstimate(ImuCamPose(keyframe));
 }
@@ -666,6 +646,35 @@ VertexScale::VertexScale() {
 
 VertexScale::VertexScale(const double scale) {
   setEstimate(scale);
+}
+
+InvDepthPoint::InvDepthPoint(
+  const double _rho,
+  const double _u,
+  const double _v,
+  const KeyFrame* host_keyframe
+)
+  : rho(_rho)
+  , u(_u)
+  , v(_v)
+  , fx(host_keyframe->fx)
+  , fy(host_keyframe->fy)
+  , cx(host_keyframe->cx)
+  , cy(host_keyframe->cy)
+  , bf(host_keyframe->mbf)
+{}
+
+void InvDepthPoint::update(const double* update) {
+  rho += *update;
+}
+
+VertexInvDepth::VertexInvDepth(
+  const double rho,
+  const double u,
+  const double v,
+  const KeyFrame* keyframe
+) {
+  setEstimate(InvDepthPoint(rho, u, v, keyframe));
 }
 
 EdgeInertial::EdgeInertial(IMU::Preintegrated *pInt):JRg(pInt->JR_gyro.cast<double>()),
