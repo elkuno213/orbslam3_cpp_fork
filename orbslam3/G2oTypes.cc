@@ -648,19 +648,13 @@ VertexGyroBias::VertexGyroBias(const Frame* frame) {
   setEstimate(bias);
 }
 
-VertexAccBias::VertexAccBias(KeyFrame *pKF)
-{
-    setEstimate(pKF->GetAccBias().cast<double>());
+VertexAccBias::VertexAccBias(const KeyFrame* keyframe) {
+  setEstimate(keyframe->GetAccBias().cast<double>());
 }
 
-VertexAccBias::VertexAccBias(Frame *pF)
-{
-    Eigen::Vector3d ba;
-    ba << pF->mImuBias.ax, pF->mImuBias.ay,pF->mImuBias.az;
-    setEstimate(ba);
+VertexAccBias::VertexAccBias(const Frame* frame) {
+  setEstimate(frame->mImuBias.acc().cast<double>());
 }
-
-
 
 EdgeInertial::EdgeInertial(IMU::Preintegrated *pInt):JRg(pInt->JR_gyro.cast<double>()),
     JVg(pInt->JV_gyro.cast<double>()), JPg(pInt->JP_gyro.cast<double>()), JVa(pInt->JV_acc.cast<double>()),

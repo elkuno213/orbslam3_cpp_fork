@@ -291,27 +291,32 @@ public:
   }
 };
 
-class VertexAccBias : public g2o::BaseVertex<3,Eigen::Vector3d>
-{
+// Optimization vertex for the accelerometer bias.
+class VertexAccBias : public g2o::BaseVertex<3, Eigen::Vector3d> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexAccBias(){}
-    VertexAccBias(KeyFrame* pKF);
-    VertexAccBias(Frame* pF);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  VertexAccBias() = default;
 
-    virtual void setToOriginImpl() {
-        }
+  VertexAccBias(const KeyFrame* keyframe);
 
-    virtual void oplusImpl(const double* update_){
-        Eigen::Vector3d uba;
-        uba << update_[0], update_[1], update_[2];
-        setEstimate(estimate()+uba);
-    }
+  VertexAccBias(const Frame* frame);
+
+  virtual bool read(std::istream& is) {
+    return false;
+  }
+
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
+
+  virtual void setToOriginImpl() {}
+
+  virtual void oplusImpl(const double* update) {
+    const Eigen::Vector3d dbias(update[0], update[1], update[2]);
+    setEstimate(estimate() + dbias);
+  }
 };
-
 
 // Gravity direction vertex
 class GDirection

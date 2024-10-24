@@ -285,7 +285,7 @@ public:
     void SetNewBias(const IMU::Bias &b);
     Eigen::Vector3f GetGyroBias() const;
 
-    Eigen::Vector3f GetAccBias();
+    Eigen::Vector3f GetAccBias() const;
 
     IMU::Bias GetImuBias();
 

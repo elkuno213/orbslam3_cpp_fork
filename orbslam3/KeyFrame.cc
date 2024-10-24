@@ -825,7 +825,7 @@ Eigen::Vector3f KeyFrame::GetGyroBias() const
     return Eigen::Vector3f(mImuBias.wx, mImuBias.wy, mImuBias.wz);
 }
 
-Eigen::Vector3f KeyFrame::GetAccBias()
+Eigen::Vector3f KeyFrame::GetAccBias() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return Eigen::Vector3f(mImuBias.ax, mImuBias.ay, mImuBias.az);
