@@ -122,7 +122,7 @@ Eigen::Matrix3d inverseRightJacobianSO3(const Eigen::Vector3d& w) {
 // ────────────────────────────────────────────────────────────────────────── //
 // Classes
 
-ImuCamPose::ImuCamPose(KeyFrame* keyframe) : its(0) {
+ImuCamPose::ImuCamPose(const KeyFrame* keyframe) : its(0) {
   // Load IMU pose.
   twb = keyframe->GetImuPosition().cast<double>();
   Rwb = keyframe->GetImuRotation().cast<double>();
@@ -173,7 +173,7 @@ ImuCamPose::ImuCamPose(KeyFrame* keyframe) : its(0) {
   DR.setIdentity();
 }
 
-ImuCamPose::ImuCamPose(Frame* frame) : its(0) {
+ImuCamPose::ImuCamPose(const Frame* frame) : its(0) {
   // Load IMU pose.
   twb = frame->GetImuPosition().cast<double>();
   Rwb = frame->GetImuRotation().cast<double>();
@@ -226,7 +226,7 @@ ImuCamPose::ImuCamPose(Frame* frame) : its(0) {
 ImuCamPose::ImuCamPose(
   const Eigen::Matrix3d& Rwc,
   const Eigen::Vector3d& twc,
-  KeyFrame* keyframe
+  const KeyFrame* keyframe
 )
   : its(0) {
   // This is only for posegrpah, we do not care about multicamera.

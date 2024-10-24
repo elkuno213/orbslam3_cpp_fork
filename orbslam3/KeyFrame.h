@@ -202,11 +202,11 @@ public:
     Sophus::SE3f GetPoseInverse();
     Eigen::Vector3f GetCameraCenter();
 
-    Eigen::Vector3f GetImuPosition();
-    Eigen::Matrix3f GetImuRotation();
+    Eigen::Vector3f GetImuPosition() const;
+    Eigen::Matrix3f GetImuRotation() const;
     Sophus::SE3f GetImuPose();
-    Eigen::Matrix3f GetRotation();
-    Eigen::Vector3f GetTranslation();
+    Eigen::Matrix3f GetRotation() const;
+    Eigen::Vector3f GetTranslation() const;
     Eigen::Vector3f GetVelocity();
     bool isVelocitySet();
 
@@ -492,7 +492,7 @@ protected:
     Eigen::Matrix3f mK_;
 
     // Mutex
-    std::mutex mMutexPose; // for pose, velocity and biases
+    mutable std::mutex mMutexPose; // for pose, velocity and biases
     std::mutex mMutexConnections;
     std::mutex mMutexFeatures;
     std::mutex mMutexMap;
@@ -503,7 +503,7 @@ public:
     //Indexes of stereo observations correspondences
     std::vector<int> mvLeftToRightMatch, mvRightToLeftMatch;
 
-    Sophus::SE3f GetRelativePoseTrl();
+    Sophus::SE3f GetRelativePoseTrl() const;
     Sophus::SE3f GetRelativePoseTlr();
 
     //KeyPoints in the right image (for stereo fisheye, coordinates are needed)

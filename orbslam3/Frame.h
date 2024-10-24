@@ -83,10 +83,10 @@ public:
     void SetImuPoseVelocity(const Eigen::Matrix3f &Rwb, const Eigen::Vector3f &twb, const Eigen::Vector3f &Vwb);
 
     Eigen::Matrix<float,3,1> GetImuPosition() const;
-    Eigen::Matrix<float,3,3> GetImuRotation();
+    Eigen::Matrix<float,3,3> GetImuRotation() const;
     Sophus::SE3<float> GetImuPose();
 
-    Sophus::SE3f GetRelativePoseTrl();
+    Sophus::SE3f GetRelativePoseTrl() const;
     Sophus::SE3f GetRelativePoseTlr();
     Eigen::Matrix3f GetRelativePoseTlr_rotation();
     Eigen::Vector3f GetRelativePoseTlr_translation();

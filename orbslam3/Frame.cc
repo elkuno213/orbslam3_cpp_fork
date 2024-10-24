@@ -485,7 +485,7 @@ Eigen::Matrix<float,3,1> Frame::GetImuPosition() const {
     return mRwc * mImuCalib.T_cb.translation() + mOw;
 }
 
-Eigen::Matrix<float,3,3> Frame::GetImuRotation() {
+Eigen::Matrix<float,3,3> Frame::GetImuRotation() const {
     return mRwc * mImuCalib.T_cb.rotationMatrix();
 }
 
@@ -493,7 +493,7 @@ Sophus::SE3<float> Frame::GetImuPose() {
     return mTcw.inverse() * mImuCalib.T_cb;
 }
 
-Sophus::SE3f Frame::GetRelativePoseTrl()
+Sophus::SE3f Frame::GetRelativePoseTrl() const
 {
     return mTrl;
 }

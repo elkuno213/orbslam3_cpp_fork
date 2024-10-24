@@ -150,13 +150,13 @@ Eigen::Vector3f KeyFrame::GetCameraCenter(){
     return mTwc.translation();
 }
 
-Eigen::Vector3f KeyFrame::GetImuPosition()
+Eigen::Vector3f KeyFrame::GetImuPosition() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return mOwb;
 }
 
-Eigen::Matrix3f KeyFrame::GetImuRotation()
+Eigen::Matrix3f KeyFrame::GetImuRotation() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return (mTwc * mImuCalib.T_cb).rotationMatrix();
@@ -168,12 +168,12 @@ Sophus::SE3f KeyFrame::GetImuPose()
     return mTwc * mImuCalib.T_cb;
 }
 
-Eigen::Matrix3f KeyFrame::GetRotation(){
+Eigen::Matrix3f KeyFrame::GetRotation() const {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return mRcw;
 }
 
-Eigen::Vector3f KeyFrame::GetTranslation()
+Eigen::Vector3f KeyFrame::GetTranslation() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return mTcw.translation();
@@ -1108,7 +1108,7 @@ bool KeyFrame::ProjectPointUnDistort(MapPoint* pMP, cv::Point2f &kp, float &u, f
     return true;
 }
 
-Sophus::SE3f KeyFrame::GetRelativePoseTrl()
+Sophus::SE3f KeyFrame::GetRelativePoseTrl() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return mTrl;

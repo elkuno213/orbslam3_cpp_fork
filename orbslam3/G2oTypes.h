@@ -103,12 +103,12 @@ public:
   // Constructors
 
   ImuCamPose() {}
-  ImuCamPose(KeyFrame* keyframe);
-  ImuCamPose(Frame* frame);
+  ImuCamPose(const KeyFrame* keyframe);
+  ImuCamPose(const Frame* frame);
   ImuCamPose(
     const Eigen::Matrix3d& Rwc,
     const Eigen::Vector3d& twc,
-    KeyFrame* keyframe
+    const KeyFrame* keyframe
   );
 
   // ──────────────────────────────────── //
