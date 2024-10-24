@@ -283,7 +283,7 @@ public:
     void UpdateMap(Map* pMap);
 
     void SetNewBias(const IMU::Bias &b);
-    Eigen::Vector3f GetGyroBias();
+    Eigen::Vector3f GetGyroBias() const;
 
     Eigen::Vector3f GetAccBias();
 

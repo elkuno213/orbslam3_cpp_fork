@@ -819,7 +819,7 @@ void KeyFrame::SetNewBias(const IMU::Bias &b)
         mpImuPreintegrated->setNewBias(b);
 }
 
-Eigen::Vector3f KeyFrame::GetGyroBias()
+Eigen::Vector3f KeyFrame::GetGyroBias() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return Eigen::Vector3f(mImuBias.wx, mImuBias.wy, mImuBias.wz);

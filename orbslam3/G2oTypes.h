@@ -264,27 +264,32 @@ public:
   }
 };
 
-class VertexGyroBias : public g2o::BaseVertex<3,Eigen::Vector3d>
-{
+// Optimization vertex for the gyroscope bias.
+class VertexGyroBias : public g2o::BaseVertex<3, Eigen::Vector3d> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexGyroBias(){}
-    VertexGyroBias(KeyFrame* pKF);
-    VertexGyroBias(Frame* pF);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  VertexGyroBias() = default;
 
-    virtual void setToOriginImpl() {
-        }
+  VertexGyroBias(const KeyFrame* keyframe);
 
-    virtual void oplusImpl(const double* update_){
-        Eigen::Vector3d ubg;
-        ubg << update_[0], update_[1], update_[2];
-        setEstimate(estimate()+ubg);
-    }
+  VertexGyroBias(const Frame* frame);
+
+  virtual bool read(std::istream& is) {
+    return false;
+  }
+
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
+
+  virtual void setToOriginImpl() {}
+
+  virtual void oplusImpl(const double* update) {
+    const Eigen::Vector3d dbias(update[0], update[1], update[2]);
+    setEstimate(estimate() + dbias);
+  }
 };
-
 
 class VertexAccBias : public g2o::BaseVertex<3,Eigen::Vector3d>
 {
