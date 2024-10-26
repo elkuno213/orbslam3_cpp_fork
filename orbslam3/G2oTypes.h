@@ -49,6 +49,7 @@ using Vector6d  = Eigen::Matrix<double,  6,  1>;
 using Vector9d  = Eigen::Matrix<double,  9,  1>;
 using Vector12d = Eigen::Matrix<double, 12,  1>;
 using Vector15d = Eigen::Matrix<double, 15,  1>;
+using Matrix6d  = Eigen::Matrix<double,  6,  6>;
 using Matrix9d  = Eigen::Matrix<double,  9,  9>;
 using Matrix12d = Eigen::Matrix<double, 12, 12>;
 using Matrix15d = Eigen::Matrix<double, 15, 15>;
@@ -439,39 +440,31 @@ private:
   const std::size_t cam_idx_;
 };
 
-class EdgeMonoOnlyPose : public g2o::BaseUnaryEdge<2,Eigen::Vector2d,VertexPose>
-{
+class EdgeMonoOnlyPose
+  : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, VertexPose> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeMonoOnlyPose(const Eigen::Vector3f &Xw_, int cam_idx_=0):Xw(Xw_.cast<double>()),
-        cam_idx(cam_idx_){}
+  EdgeMonoOnlyPose(const Eigen::Vector3f& x_w, const std::size_t cam_idx = 0);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
-        const Eigen::Vector2d obs(_measurement);
-        _error = obs - VPose->estimate().projectMonocular(Xw,cam_idx);
-    }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    virtual void linearizeOplus();
+  virtual void linearizeOplus();
 
-    bool isDepthPositive()
-    {
-        const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
-        return VPose->estimate().isDepthPositive(Xw,cam_idx);
-    }
+  void computeError();
 
-    Eigen::Matrix<double,6,6> GetHessian(){
-        linearizeOplus();
-        return _jacobianOplusXi.transpose()*information()*_jacobianOplusXi;
-    }
+  bool isDepthPositive();
+  Matrix6d getHessian();
 
-public:
-    const Eigen::Vector3d Xw;
-    const int cam_idx;
+private:
+  const Eigen::Vector3d x_w_;
+  const std::size_t cam_idx_;
 };
 
 class EdgeStereo : public g2o::BaseBinaryEdge<3,Eigen::Vector3d,g2o::VertexSBAPointXYZ,VertexPose>
