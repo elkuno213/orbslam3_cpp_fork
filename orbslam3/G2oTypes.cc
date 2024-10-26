@@ -504,38 +504,6 @@ VertexPose4DoF::VertexPose4DoF(
   setEstimate(ImuCamPose(R_wc, t_wc, keyframe));
 }
 
-void EdgeStereo::linearizeOplus()
-{
-    const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
-    const g2o::VertexSBAPointXYZ* VPoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
-
-    const Eigen::Matrix3d &Rcw = VPose->estimate().R_cw[cam_idx];
-    const Eigen::Vector3d &tcw = VPose->estimate().t_cw[cam_idx];
-    const Eigen::Vector3d Xc = Rcw*VPoint->estimate() + tcw;
-    const Eigen::Vector3d Xb = VPose->estimate().R_bc[cam_idx]*Xc+VPose->estimate().t_bc[cam_idx];
-    const Eigen::Matrix3d &Rcb = VPose->estimate().R_cb[cam_idx];
-    const double bf = VPose->estimate().bf;
-    const double inv_z2 = 1.0/(Xc(2)*Xc(2));
-
-    Eigen::Matrix<double,3,3> proj_jac;
-    proj_jac.block<2,3>(0,0) = VPose->estimate().cameras[cam_idx]->jacobian(Xc.cast<float>()).cast<double>();
-    proj_jac.block<1,3>(2,0) = proj_jac.block<1,3>(0,0);
-    proj_jac(2,2) += bf*inv_z2;
-
-    _jacobianOplusXi = -proj_jac * Rcw;
-
-    Eigen::Matrix<double,3,6> SE3deriv;
-    double x = Xb(0);
-    double y = Xb(1);
-    double z = Xb(2);
-
-    SE3deriv << 0.0, z,   -y, 1.0, 0.0, 0.0,
-            -z , 0.0, x, 0.0, 1.0, 0.0,
-            y ,  -x , 0.0, 0.0, 0.0, 1.0;
-
-    _jacobianOplusXj = proj_jac * Rcb * SE3deriv;
-}
-
 void EdgeStereoOnlyPose::linearizeOplus()
 {
     const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
@@ -742,6 +710,62 @@ bool EdgeMonoOnlyPose::isDepthPositive() {
 Matrix6d EdgeMonoOnlyPose::getHessian() {
   linearizeOplus();
   return _jacobianOplusXi.transpose() * information() * _jacobianOplusXi;
+}
+
+EdgeStereo::EdgeStereo(const std::size_t cam_idx) : cam_idx_(cam_idx) {}
+
+void EdgeStereo::linearizeOplus() {
+  // Retrieve pointers to the vertices.
+  const g2o::VertexSBAPointXYZ* vpoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
+  const VertexPose* vpose = static_cast<const VertexPose*>(_vertices[1]);
+
+  // Transform the point from world to camera frame, then to body frame.
+  const Eigen::Matrix3d& R_cw = vpose->estimate().R_cw[cam_idx_];
+  const Eigen::Vector3d& t_cw = vpose->estimate().t_cw[cam_idx_];
+  const Eigen::Vector3d x_c   = R_cw * vpoint->estimate() + t_cw;
+
+  const Eigen::Matrix3d& R_bc = vpose->estimate().R_bc[cam_idx_];
+  const Eigen::Vector3d& t_bc = vpose->estimate().t_bc[cam_idx_];
+  const Eigen::Vector3d x_b   = R_bc * x_c + t_bc;
+
+  const Eigen::Matrix3d& R_cb = vpose->estimate().R_cb[cam_idx_];
+  const double bf             = vpose->estimate().bf;
+
+  // Compute the camera projection Jacobian and update the Jacobians.
+  Eigen::Matrix3d proj_jac;
+  proj_jac.block<2, 3>(0, 0)
+    = vpose->estimate().cameras[cam_idx_]->jacobian(x_c.cast<float>()).cast<double>();
+  proj_jac.block<1, 3>(2, 0) = proj_jac.block<1, 3>(0, 0);
+  proj_jac(2, 2) += bf / (x_c.z() * x_c.x());
+
+  _jacobianOplusXi = -proj_jac * R_cw;
+
+  // Compute the derivative of the point in the body frame and update the
+  // Jacobians.
+  Eigen::Matrix<double, 3, 6> derivation_se3;
+  const double x = x_b.x();
+  const double y = x_b.y();
+  const double z = x_b.z();
+  derivation_se3 << 0.0,   z,  -y, 1.0, 0.0, 0.0,
+                     -z, 0.0,   x, 0.0, 1.0, 0.0,
+                      y,  -x, 0.0, 0.0, 0.0, 1.0;
+
+  _jacobianOplusXj = proj_jac * R_cb * derivation_se3;
+}
+
+void EdgeStereo::computeError() {
+  const g2o::VertexSBAPointXYZ* vpoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
+  const VertexPose* vpose = static_cast<const VertexPose*>(_vertices[1]);
+  const Eigen::Vector3d obs(_measurement);
+  _error = obs - vpose->estimate().projectStereo(vpoint->estimate(), cam_idx_);
+}
+
+Matrix9d EdgeStereo::getHessian() {
+  linearizeOplus();
+  Eigen::Matrix<double, 3, 9> J;
+  J.block<3, 3>(0, 0) = _jacobianOplusXi;
+  J.block<3, 6>(0, 3) = _jacobianOplusXj;
+  return J.transpose() * information() * J;
 }
 
 EdgeInertial::EdgeInertial(IMU::Preintegrated *pInt):JRg(pInt->JR_gyro.cast<double>()),

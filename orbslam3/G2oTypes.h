@@ -467,46 +467,30 @@ private:
   const std::size_t cam_idx_;
 };
 
-class EdgeStereo : public g2o::BaseBinaryEdge<3,Eigen::Vector3d,g2o::VertexSBAPointXYZ,VertexPose>
-{
+class EdgeStereo
+  : public g2o::BaseBinaryEdge<3, Eigen::Vector3d, g2o::VertexSBAPointXYZ, VertexPose> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeStereo(int cam_idx_=0): cam_idx(cam_idx_){}
+  EdgeStereo(const std::size_t cam_idx = 0);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const g2o::VertexSBAPointXYZ* VPoint = static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
-        const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[1]);
-        const Eigen::Vector3d obs(_measurement);
-        _error = obs - VPose->estimate().projectStereo(VPoint->estimate(),cam_idx);
-    }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
+  virtual void linearizeOplus();
 
-    virtual void linearizeOplus();
+  void computeError();
 
-    Eigen::Matrix<double,3,9> GetJacobian(){
-        linearizeOplus();
-        Eigen::Matrix<double,3,9> J;
-        J.block<3,3>(0,0) = _jacobianOplusXi;
-        J.block<3,6>(0,3) = _jacobianOplusXj;
-        return J;
-    }
+  Matrix9d getHessian();
 
-    Eigen::Matrix<double,9,9> GetHessian(){
-        linearizeOplus();
-        Eigen::Matrix<double,3,9> J;
-        J.block<3,3>(0,0) = _jacobianOplusXi;
-        J.block<3,6>(0,3) = _jacobianOplusXj;
-        return J.transpose()*information()*J;
-    }
-
-public:
-    const int cam_idx;
+private:
+  const std::size_t cam_idx_;
 };
-
 
 class EdgeStereoOnlyPose : public g2o::BaseUnaryEdge<3,Eigen::Vector3d,VertexPose>
 {
