@@ -648,7 +648,7 @@ VertexScale::VertexScale(const double scale) {
   setEstimate(scale);
 }
 
-InvDepthPoint::InvDepthPoint(
+InverseDepthPoint::InverseDepthPoint(
   const double _rho,
   const double _u,
   const double _v,
@@ -664,17 +664,17 @@ InvDepthPoint::InvDepthPoint(
   , bf(host_keyframe->mbf)
 {}
 
-void InvDepthPoint::update(const double* update) {
+void InverseDepthPoint::update(const double* update) {
   rho += *update;
 }
 
-VertexInvDepth::VertexInvDepth(
+VertexInverseDepthPoint::VertexInverseDepthPoint(
   const double rho,
   const double u,
   const double v,
   const KeyFrame* keyframe
 ) {
-  setEstimate(InvDepthPoint(rho, u, v, keyframe));
+  setEstimate(InverseDepthPoint(rho, u, v, keyframe));
 }
 
 EdgeInertial::EdgeInertial(IMU::Preintegrated *pInt):JRg(pInt->JR_gyro.cast<double>()),

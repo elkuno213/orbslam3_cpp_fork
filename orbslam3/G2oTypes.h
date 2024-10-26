@@ -364,7 +364,7 @@ public:
 };
 
 // Class representing an inverse depth point in the host frame of a camera.
-struct InvDepthPoint {
+struct InverseDepthPoint {
   // Inverse depth value.
   double rho;
   // Observation in the host frame.
@@ -372,8 +372,8 @@ struct InvDepthPoint {
   // Camera intrinsic parameters from the host frame.
   double fx, fy, cx, cy, bf;
 
-  InvDepthPoint() {}
-  InvDepthPoint(
+  InverseDepthPoint() {}
+  InverseDepthPoint(
     const double _rho,
     const double _u,
     const double _v,
@@ -384,13 +384,13 @@ struct InvDepthPoint {
 };
 
 // Optimization vertex for the inverse depth point at the host frame.
-class VertexInvDepth : public g2o::BaseVertex<1, InvDepthPoint> {
+class VertexInverseDepthPoint : public g2o::BaseVertex<1, InverseDepthPoint> {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  VertexInvDepth() = default;
+  VertexInverseDepthPoint() = default;
 
-  VertexInvDepth(
+  VertexInverseDepthPoint(
     const double rho,
     const double u,
     const double v,
