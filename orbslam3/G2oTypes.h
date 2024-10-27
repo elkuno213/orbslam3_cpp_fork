@@ -699,30 +699,28 @@ private:
   const Eigen::Vector3d prior_;
 };
 
-class EdgePriorGyro : public g2o::BaseUnaryEdge<3,Eigen::Vector3d,VertexGyroBias>
-{
+class EdgePriorGyro
+  : public g2o::BaseUnaryEdge<3, Eigen::Vector3d, VertexGyroBias> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgePriorGyro(const Eigen::Vector3f &bprior_):bprior(bprior_.cast<double>()){}
+  EdgePriorGyro(const Eigen::Vector3f& prior);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexGyroBias* VG = static_cast<const VertexGyroBias*>(_vertices[0]);
-        _error = bprior - VG->estimate();
-    }
-    virtual void linearizeOplus();
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    Eigen::Matrix<double,3,3> GetHessian(){
-        linearizeOplus();
-        return _jacobianOplusXi.transpose()*information()*_jacobianOplusXi;
-    }
+  virtual void linearizeOplus();
 
-    const Eigen::Vector3d bprior;
+  void computeError();
+
+private:
+  const Eigen::Vector3d prior_;
 };
-
 
 class Edge4DoF : public g2o::BaseBinaryEdge<6,Vector6d,VertexPose4DoF,VertexPose4DoF>
 {

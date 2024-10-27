@@ -1275,11 +1275,17 @@ void EdgePriorAcc::computeError() {
   _error = prior_ - vbias->estimate();
 }
 
-void EdgePriorGyro::linearizeOplus()
-{
-    // Jacobian wrt bias
-    _jacobianOplusXi.block<3,3>(0,0) = Eigen::Matrix3d::Identity();
+EdgePriorGyro::EdgePriorGyro(const Eigen::Vector3f& prior) : prior_(prior.cast<double>()) {}
 
+
+void EdgePriorGyro::linearizeOplus() {
+  // Jacobian wrt bias.
+  _jacobianOplusXi.block<3, 3>(0, 0) = Eigen::Matrix3d::Identity();
+}
+
+void EdgePriorGyro::computeError() {
+  const VertexGyroBias* vbias = static_cast<const VertexGyroBias*>(_vertices[0]);
+  _error = prior_ - vbias->estimate();
 }
 
 } // namespace ORB_SLAM3
