@@ -600,39 +600,27 @@ public:
   Eigen::Matrix3d getHessian2();
 };
 
-class EdgeAccRW : public g2o::BaseBinaryEdge<3,Eigen::Vector3d,VertexAccBias,VertexAccBias>
-{
+class EdgeAccRW
+  : public g2o::BaseBinaryEdge<3, Eigen::Vector3d, VertexAccBias, VertexAccBias> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeAccRW(){}
+  EdgeAccRW() = default;
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexAccBias* VA1= static_cast<const VertexAccBias*>(_vertices[0]);
-        const VertexAccBias* VA2= static_cast<const VertexAccBias*>(_vertices[1]);
-        _error = VA2->estimate()-VA1->estimate();
-    }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    virtual void linearizeOplus(){
-        _jacobianOplusXi = -Eigen::Matrix3d::Identity();
-        _jacobianOplusXj.setIdentity();
-    }
+  virtual void linearizeOplus();
 
-    Eigen::Matrix<double,6,6> GetHessian(){
-        linearizeOplus();
-        Eigen::Matrix<double,3,6> J;
-        J.block<3,3>(0,0) = _jacobianOplusXi;
-        J.block<3,3>(0,3) = _jacobianOplusXj;
-        return J.transpose()*information()*J;
-    }
+  void computeError();
 
-    Eigen::Matrix3d GetHessian2(){
-        linearizeOplus();
-        return _jacobianOplusXj.transpose()*information()*_jacobianOplusXj;
-    }
+  Matrix6d getHessian();
+  Eigen::Matrix3d getHessian2();
 };
 
 class ConstraintPoseImu

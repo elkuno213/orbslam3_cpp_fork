@@ -1158,6 +1158,30 @@ Eigen::Matrix3d EdgeGyroRW::getHessian2() {
   return _jacobianOplusXj.transpose() * information() * _jacobianOplusXj;
 }
 
+void EdgeAccRW::linearizeOplus() {
+  _jacobianOplusXi = -Eigen::Matrix3d::Identity();
+  _jacobianOplusXj.setIdentity();
+}
+
+void EdgeAccRW::computeError() {
+  const VertexAccBias* vbias_acc_1 = static_cast<const VertexAccBias*>(_vertices[0]);
+  const VertexAccBias* vbias_acc_2 = static_cast<const VertexAccBias*>(_vertices[1]);
+  _error = vbias_acc_2->estimate() - vbias_acc_1->estimate();
+}
+
+Matrix6d EdgeAccRW::getHessian() {
+  linearizeOplus();
+  Eigen::Matrix<double, 3, 6> J;
+  J.block<3, 3>(0, 0) = _jacobianOplusXi;
+  J.block<3, 3>(0, 3) = _jacobianOplusXj;
+  return J.transpose() * information() * J;
+}
+
+Eigen::Matrix3d EdgeAccRW::getHessian2() {
+  linearizeOplus();
+  return _jacobianOplusXj.transpose() * information() * _jacobianOplusXj;
+}
+
 EdgePriorPoseImu::EdgePriorPoseImu(ConstraintPoseImu *c)
 {
     resize(4);
