@@ -492,33 +492,30 @@ private:
   const std::size_t cam_idx_;
 };
 
-class EdgeStereoOnlyPose : public g2o::BaseUnaryEdge<3,Eigen::Vector3d,VertexPose>
-{
+class EdgeStereoOnlyPose
+  : public g2o::BaseUnaryEdge<3, Eigen::Vector3d, VertexPose> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeStereoOnlyPose(const Eigen::Vector3f &Xw_, int cam_idx_=0):
-        Xw(Xw_.cast<double>()), cam_idx(cam_idx_){}
+  EdgeStereoOnlyPose(const Eigen::Vector3f& x_w, const std::size_t cam_idx = 0);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
-        const Eigen::Vector3d obs(_measurement);
-        _error = obs - VPose->estimate().projectStereo(Xw, cam_idx);
-    }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    virtual void linearizeOplus();
+  virtual void linearizeOplus();
 
-    Eigen::Matrix<double,6,6> GetHessian(){
-        linearizeOplus();
-        return _jacobianOplusXi.transpose()*information()*_jacobianOplusXi;
-    }
+  void computeError();
 
-public:
-    const Eigen::Vector3d Xw; // 3D point coordinates
-    const int cam_idx;
+  Matrix6d getHessian();
+
+private:
+  const Eigen::Vector3d x_w_; // 3D point coordinates
+  const std::size_t cam_idx_;
 };
 
 class EdgeInertial : public g2o::BaseMultiEdge<9,Vector9d>

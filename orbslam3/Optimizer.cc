@@ -4863,7 +4863,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
 
         if(!pFrame->mvbOutlier[idx])
         {
-            H.block<6,6>(0,0) += e->GetHessian();
+            H.block<6,6>(0,0) += e->getHessian();
             tot_in++;
         }
         else
@@ -5276,7 +5276,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
 
         if(!pFrame->mvbOutlier[idx])
         {
-            H.block<6,6>(15,15) += e->GetHessian();
+            H.block<6,6>(15,15) += e->getHessian();
             tot_in++;
         }
         else
