@@ -4835,7 +4835,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
     Eigen::Matrix<double,15,15> H;
     H.setZero();
 
-    H.block<9,9>(0,0)+= ei->GetHessian2();
+    H.block<9,9>(0,0)+= ei->getHessian2();
     H.block<3,3>(9,9) += egr->GetHessian2();
     H.block<3,3>(12,12) += ear->GetHessian2();
 
@@ -5236,7 +5236,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
     Eigen::Matrix<double,30,30> H;
     H.setZero();
 
-    H.block<24,24>(0,0)+= ei->GetHessian();
+    H.block<24,24>(0,0)+= ei->getHessian();
 
     Eigen::Matrix<double,6,6> Hgr = egr->GetHessian();
     H.block<3,3>(9,9) += Hgr.block<3,3>(0,0);

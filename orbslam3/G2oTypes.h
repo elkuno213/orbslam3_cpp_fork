@@ -53,6 +53,7 @@ using Matrix6d  = Eigen::Matrix<double,  6,  6>;
 using Matrix9d  = Eigen::Matrix<double,  9,  9>;
 using Matrix12d = Eigen::Matrix<double, 12, 12>;
 using Matrix15d = Eigen::Matrix<double, 15, 15>;
+using Matrix24d = Eigen::Matrix<double, 24, 24>;
 
 // ────────────────────────────────────────────────────────────────────────── //
 // Functions
@@ -518,57 +519,34 @@ private:
   const std::size_t cam_idx_;
 };
 
-class EdgeInertial : public g2o::BaseMultiEdge<9,Vector9d>
-{
+class EdgeInertial : public g2o::BaseMultiEdge<9, Vector9d> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeInertial(IMU::Preintegrated* pInt);
+  EdgeInertial(IMU::Preintegrated* preintegrated);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError();
-    virtual void linearizeOplus();
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    Eigen::Matrix<double,24,24> GetHessian(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,24> J;
-        J.block<9,6>(0,0) = _jacobianOplus[0];
-        J.block<9,3>(0,6) = _jacobianOplus[1];
-        J.block<9,3>(0,9) = _jacobianOplus[2];
-        J.block<9,3>(0,12) = _jacobianOplus[3];
-        J.block<9,6>(0,15) = _jacobianOplus[4];
-        J.block<9,3>(0,21) = _jacobianOplus[5];
-        return J.transpose()*information()*J;
-    }
+  virtual void linearizeOplus();
 
-    Eigen::Matrix<double,18,18> GetHessianNoPose1(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,18> J;
-        J.block<9,3>(0,0) = _jacobianOplus[1];
-        J.block<9,3>(0,3) = _jacobianOplus[2];
-        J.block<9,3>(0,6) = _jacobianOplus[3];
-        J.block<9,6>(0,9) = _jacobianOplus[4];
-        J.block<9,3>(0,15) = _jacobianOplus[5];
-        return J.transpose()*information()*J;
-    }
+  void computeError();
 
-    Eigen::Matrix<double,9,9> GetHessian2(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,9> J;
-        J.block<9,6>(0,0) = _jacobianOplus[4];
-        J.block<9,3>(0,6) = _jacobianOplus[5];
-        return J.transpose()*information()*J;
-    }
+  Matrix24d getHessian();
+  Matrix9d getHessian2();
 
-    const Eigen::Matrix3d JRg, JVg, JPg;
-    const Eigen::Matrix3d JVa, JPa;
-    IMU::Preintegrated* mpInt;
-    const double dt;
-    Eigen::Vector3d g;
+private:
+  const Eigen::Matrix3d JR_gyro_, JV_gyro_, JP_gyro_;
+  const Eigen::Matrix3d JV_acc_, JP_acc_;
+  IMU::Preintegrated* preintegrated_;
+  const double dt_;
+  Eigen::Vector3d g_;
 };
-
 
 // Edge inertial whre gravity is included as optimizable variable and it is not supposed to be pointing in -z axis, as well as scale
 class EdgeInertialGS : public g2o::BaseMultiEdge<9,Vector9d>
