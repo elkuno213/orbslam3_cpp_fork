@@ -1182,46 +1182,85 @@ Eigen::Matrix3d EdgeAccRW::getHessian2() {
   return _jacobianOplusXj.transpose() * information() * _jacobianOplusXj;
 }
 
-EdgePriorPoseImu::EdgePriorPoseImu(ConstraintPoseImu *c)
-{
-    resize(4);
-    Rwb = c->Rwb;
-    twb = c->twb;
-    vwb = c->vwb;
-    bg = c->bg;
-    ba = c->ba;
-    setInformation(c->H);
+ConstraintPoseImu::ConstraintPoseImu(
+  const Eigen::Matrix3d& R_wb,
+  const Eigen::Vector3d& t_wb,
+  const Eigen::Vector3d& v_wb,
+  const Eigen::Vector3d& bias_gyro,
+  const Eigen::Vector3d& bias_acc,
+  const Matrix15d& H
+)
+  : R_wb_(R_wb)
+  , t_wb_(t_wb)
+  , v_wb_(v_wb)
+  , bias_gyro_(bias_gyro)
+  , bias_acc_(bias_acc)
+  , H_(solveHessian(H))
+{}
+
+Matrix15d ConstraintPoseImu::solveHessian(Matrix15d H) {
+  H = (H + H) / 2.0;
+  Eigen::SelfAdjointEigenSolver<Matrix15d> solver(H);
+  Vector15d eigens = solver.eigenvalues();
+  for (std::size_t i = 0; i < 15; i++) {
+    if (eigens[i] < 1e-12) {
+      eigens[i] = 0.0;
+    }
+  }
+  H = solver.eigenvectors() * eigens.asDiagonal() * solver.eigenvectors().transpose();
 }
 
-void EdgePriorPoseImu::computeError()
-{
-    const VertexPose* VP = static_cast<const VertexPose*>(_vertices[0]);
-    const VertexVelocity* VV = static_cast<const VertexVelocity*>(_vertices[1]);
-    const VertexGyroBias* VG = static_cast<const VertexGyroBias*>(_vertices[2]);
-    const VertexAccBias* VA = static_cast<const VertexAccBias*>(_vertices[3]);
+EdgePriorPoseImu::EdgePriorPoseImu(const ConstraintPoseImu* constraint) {
+  // This edge links 4 vertices.
+  resize(4);
 
-    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().R_wb);
-    const Eigen::Vector3d et = Rwb.transpose()*(VP->estimate().t_wb-twb);
-    const Eigen::Vector3d ev = VV->estimate() - vwb;
-    const Eigen::Vector3d ebg = VG->estimate() - bg;
-    const Eigen::Vector3d eba = VA->estimate() - ba;
-
-    _error << er, et, ev, ebg, eba;
+  R_wb_      = constraint->R_wb_;
+  t_wb_      = constraint->t_wb_;
+  v_wb_      = constraint->v_wb_;
+  bias_gyro_ = constraint->bias_gyro_;
+  bias_acc_  = constraint->bias_acc_;
+  setInformation(constraint->H_);
 }
 
-void EdgePriorPoseImu::linearizeOplus()
-{
-    const VertexPose* VP = static_cast<const VertexPose*>(_vertices[0]);
-    const Eigen::Vector3d er = logSO3(Rwb.transpose()*VP->estimate().R_wb);
-    _jacobianOplus[0].setZero();
-    _jacobianOplus[0].block<3,3>(0,0) = inverseRightJacobianSO3(er);
-    _jacobianOplus[0].block<3,3>(3,3) = Rwb.transpose()*VP->estimate().R_wb;
-    _jacobianOplus[1].setZero();
-    _jacobianOplus[1].block<3,3>(6,0) = Eigen::Matrix3d::Identity();
-    _jacobianOplus[2].setZero();
-    _jacobianOplus[2].block<3,3>(9,0) = Eigen::Matrix3d::Identity();
-    _jacobianOplus[3].setZero();
-    _jacobianOplus[3].block<3,3>(12,0) = Eigen::Matrix3d::Identity();
+void EdgePriorPoseImu::computeError() {
+  // Retrieve pointers to the vertices.
+  const VertexPose*          vpose = static_cast<const VertexPose*    >(_vertices[0]);
+  const VertexVelocity*  vvelocity = static_cast<const VertexVelocity*>(_vertices[1]);
+  const VertexGyroBias* vbias_gyro = static_cast<const VertexGyroBias*>(_vertices[2]);
+  const VertexAccBias*   vbias_acc = static_cast<const VertexAccBias* >(_vertices[3]);
+
+  // Calculate the error.
+  const Eigen::Vector3d er  = logSO3(R_wb_.transpose() * vpose->estimate().R_wb);
+  const Eigen::Vector3d et  = R_wb_.transpose() * (vpose->estimate().t_wb - t_wb_);
+  const Eigen::Vector3d ev  = vvelocity->estimate() - v_wb_;
+  const Eigen::Vector3d ebias_gyro = vbias_gyro->estimate() - bias_gyro_;
+  const Eigen::Vector3d ebias_acc  = vbias_acc ->estimate() - bias_acc_ ;
+
+  _error << er, et, ev, ebias_gyro, ebias_acc;
+}
+
+void EdgePriorPoseImu::linearizeOplus() {
+  const VertexPose* vpose  = static_cast<const VertexPose*>(_vertices[0]);
+  const Eigen::Vector3d er = logSO3(R_wb_.transpose() * vpose->estimate().R_wb);
+  _jacobianOplus[0].setZero();
+  _jacobianOplus[0].block<3, 3>(0, 0) = inverseRightJacobianSO3(er);
+  _jacobianOplus[0].block<3, 3>(3, 3) = R_wb_.transpose() * vpose->estimate().R_wb;
+  _jacobianOplus[1].setZero();
+  _jacobianOplus[1].block<3, 3>(6, 0) = Eigen::Matrix3d::Identity();
+  _jacobianOplus[2].setZero();
+  _jacobianOplus[2].block<3, 3>(9, 0) = Eigen::Matrix3d::Identity();
+  _jacobianOplus[3].setZero();
+  _jacobianOplus[3].block<3, 3>(12, 0) = Eigen::Matrix3d::Identity();
+}
+
+Matrix15d EdgePriorPoseImu::getHessian() {
+  linearizeOplus();
+  Matrix15d J;
+  J.block<15, 6>(0, 0)  = _jacobianOplus[0];
+  J.block<15, 3>(0, 6)  = _jacobianOplus[1];
+  J.block<15, 3>(0, 9)  = _jacobianOplus[2];
+  J.block<15, 3>(0, 12) = _jacobianOplus[3];
+  return J.transpose() * information() * J;
 }
 
 void EdgePriorAcc::linearizeOplus()

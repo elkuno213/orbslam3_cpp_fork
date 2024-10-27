@@ -623,65 +623,56 @@ public:
   Eigen::Matrix3d getHessian2();
 };
 
-class ConstraintPoseImu
-{
+class ConstraintPoseImu {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ConstraintPoseImu(const Eigen::Matrix3d &Rwb_, const Eigen::Vector3d &twb_, const Eigen::Vector3d &vwb_,
-                       const Eigen::Vector3d &bg_, const Eigen::Vector3d &ba_, const Matrix15d &H_):
-                       Rwb(Rwb_), twb(twb_), vwb(vwb_), bg(bg_), ba(ba_), H(H_)
-    {
-        H = (H+H)/2;
-        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double,15,15> > es(H);
-        Eigen::Matrix<double,15,1> eigs = es.eigenvalues();
-        for(int i=0;i<15;i++)
-            if(eigs[i]<1e-12)
-                eigs[i]=0;
-        H = es.eigenvectors()*eigs.asDiagonal()*es.eigenvectors().transpose();
-    }
+  ConstraintPoseImu(
+    const Eigen::Matrix3d& R_wb,
+    const Eigen::Vector3d& t_wb,
+    const Eigen::Vector3d& v_wb,
+    const Eigen::Vector3d& bias_gyro,
+    const Eigen::Vector3d& bias_acc,
+    const Matrix15d& H
+  );
 
-    Eigen::Matrix3d Rwb;
-    Eigen::Vector3d twb;
-    Eigen::Vector3d vwb;
-    Eigen::Vector3d bg;
-    Eigen::Vector3d ba;
-    Matrix15d H;
+  const Eigen::Matrix3d R_wb_;
+  const Eigen::Vector3d t_wb_;
+  const Eigen::Vector3d v_wb_;
+  const Eigen::Vector3d bias_gyro_;
+  const Eigen::Vector3d bias_acc_;
+  const Matrix15d H_;
+
+private:
+  Matrix15d solveHessian(Matrix15d H);
 };
 
-class EdgePriorPoseImu : public g2o::BaseMultiEdge<15,Vector15d>
-{
+class EdgePriorPoseImu : public g2o::BaseMultiEdge<15, Vector15d> {
 public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        EdgePriorPoseImu(ConstraintPoseImu* c);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        virtual bool read(std::istream& is){return false;}
-        virtual bool write(std::ostream& os) const{return false;}
+  EdgePriorPoseImu(const ConstraintPoseImu* constraint);
 
-        void computeError();
-        virtual void linearizeOplus();
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-        Eigen::Matrix<double,15,15> GetHessian(){
-            linearizeOplus();
-            Eigen::Matrix<double,15,15> J;
-            J.block<15,6>(0,0) = _jacobianOplus[0];
-            J.block<15,3>(0,6) = _jacobianOplus[1];
-            J.block<15,3>(0,9) = _jacobianOplus[2];
-            J.block<15,3>(0,12) = _jacobianOplus[3];
-            return J.transpose()*information()*J;
-        }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-        Eigen::Matrix<double,9,9> GetHessianNoPose(){
-            linearizeOplus();
-            Eigen::Matrix<double,15,9> J;
-            J.block<15,3>(0,0) = _jacobianOplus[1];
-            J.block<15,3>(0,3) = _jacobianOplus[2];
-            J.block<15,3>(0,6) = _jacobianOplus[3];
-            return J.transpose()*information()*J;
-        }
-        Eigen::Matrix3d Rwb;
-        Eigen::Vector3d twb, vwb;
-        Eigen::Vector3d bg, ba;
+  void computeError();
+
+  virtual void linearizeOplus();
+
+  Matrix15d getHessian();
+
+private:
+  Eigen::Matrix3d R_wb_;
+  Eigen::Vector3d t_wb_;
+  Eigen::Vector3d v_wb_;
+  Eigen::Vector3d bias_gyro_;
+  Eigen::Vector3d bias_acc_;
 };
 
 // Priors for biases

@@ -5250,7 +5250,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
     H.block<3,3>(27,12) += Har.block<3,3>(3,0);
     H.block<3,3>(27,27) += Har.block<3,3>(3,3);
 
-    H.block<15,15>(0,0) += ep->GetHessian();
+    H.block<15,15>(0,0) += ep->getHessian();
 
     int tot_in = 0, tot_out = 0;
     for(std::size_t i=0, iend=vpEdgesMono.size(); i<iend; i++)
