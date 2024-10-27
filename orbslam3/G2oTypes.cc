@@ -1134,6 +1134,30 @@ void EdgeInertialGS::linearizeOplus() {
   _jacobianOplus[7].block<3, 1>(6, 0) = R_bw_1 * (t_wb_2 - t_wb_1 - v_1 * dt);
 }
 
+void EdgeGyroRW::linearizeOplus() {
+  _jacobianOplusXi = -Eigen::Matrix3d::Identity();
+  _jacobianOplusXj.setIdentity();
+}
+
+void EdgeGyroRW::computeError() {
+  const VertexGyroBias* vbias_gyro_1 = static_cast<const VertexGyroBias*>(_vertices[0]);
+  const VertexGyroBias* vbias_gyro_2 = static_cast<const VertexGyroBias*>(_vertices[1]);
+  _error = vbias_gyro_2->estimate() - vbias_gyro_1->estimate();
+}
+
+Matrix6d EdgeGyroRW::getHessian() {
+  linearizeOplus();
+  Eigen::Matrix<double, 3, 6> J;
+  J.block<3, 3>(0, 0) = _jacobianOplusXi;
+  J.block<3, 3>(0, 3) = _jacobianOplusXj;
+  return J.transpose() * information() * J;
+}
+
+Eigen::Matrix3d EdgeGyroRW::getHessian2() {
+  linearizeOplus();
+  return _jacobianOplusXj.transpose() * information() * _jacobianOplusXj;
+}
+
 EdgePriorPoseImu::EdgePriorPoseImu(ConstraintPoseImu *c)
 {
     resize(4);

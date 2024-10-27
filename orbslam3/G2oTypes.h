@@ -577,41 +577,28 @@ private:
   Eigen::Vector3d g_, g0_;
 };
 
-class EdgeGyroRW : public g2o::BaseBinaryEdge<3,Eigen::Vector3d,VertexGyroBias,VertexGyroBias>
-{
+class EdgeGyroRW
+  : public g2o::BaseBinaryEdge<3, Eigen::Vector3d, VertexGyroBias, VertexGyroBias> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeGyroRW(){}
+  EdgeGyroRW() = default;
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexGyroBias* VG1= static_cast<const VertexGyroBias*>(_vertices[0]);
-        const VertexGyroBias* VG2= static_cast<const VertexGyroBias*>(_vertices[1]);
-        _error = VG2->estimate()-VG1->estimate();
-    }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    virtual void linearizeOplus(){
-        _jacobianOplusXi = -Eigen::Matrix3d::Identity();
-        _jacobianOplusXj.setIdentity();
-    }
+  virtual void linearizeOplus();
 
-    Eigen::Matrix<double,6,6> GetHessian(){
-        linearizeOplus();
-        Eigen::Matrix<double,3,6> J;
-        J.block<3,3>(0,0) = _jacobianOplusXi;
-        J.block<3,3>(0,3) = _jacobianOplusXj;
-        return J.transpose()*information()*J;
-    }
+  void computeError();
 
-    Eigen::Matrix3d GetHessian2(){
-        linearizeOplus();
-        return _jacobianOplusXj.transpose()*information()*_jacobianOplusXj;
-    }
+  Matrix6d getHessian();
+  Eigen::Matrix3d getHessian2();
 };
-
 
 class EdgeAccRW : public g2o::BaseBinaryEdge<3,Eigen::Vector3d,VertexAccBias,VertexAccBias>
 {
