@@ -1263,11 +1263,16 @@ Matrix15d EdgePriorPoseImu::getHessian() {
   return J.transpose() * information() * J;
 }
 
-void EdgePriorAcc::linearizeOplus()
-{
-    // Jacobian wrt bias
-    _jacobianOplusXi.block<3,3>(0,0) = Eigen::Matrix3d::Identity();
+EdgePriorAcc::EdgePriorAcc(const Eigen::Vector3f& prior) : prior_(prior.cast<double>()) {}
 
+void EdgePriorAcc::linearizeOplus() {
+  // Jacobian wrt bias.
+  _jacobianOplusXi.block<3, 3>(0, 0) = Eigen::Matrix3d::Identity();
+}
+
+void EdgePriorAcc::computeError() {
+  const VertexAccBias* vbias = static_cast<const VertexAccBias*>(_vertices[0]);
+  _error = prior_ - vbias->estimate();
 }
 
 void EdgePriorGyro::linearizeOplus()

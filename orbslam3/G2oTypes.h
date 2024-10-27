@@ -675,29 +675,28 @@ private:
   Eigen::Vector3d bias_acc_;
 };
 
-// Priors for biases
-class EdgePriorAcc : public g2o::BaseUnaryEdge<3,Eigen::Vector3d,VertexAccBias>
-{
+// Edge for the prior of the accelerometer bias.
+class EdgePriorAcc
+  : public g2o::BaseUnaryEdge<3, Eigen::Vector3d, VertexAccBias> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgePriorAcc(const Eigen::Vector3f &bprior_):bprior(bprior_.cast<double>()){}
+  EdgePriorAcc(const Eigen::Vector3f& prior);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexAccBias* VA = static_cast<const VertexAccBias*>(_vertices[0]);
-        _error = bprior - VA->estimate();
-    }
-    virtual void linearizeOplus();
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    Eigen::Matrix<double,3,3> GetHessian(){
-        linearizeOplus();
-        return _jacobianOplusXi.transpose()*information()*_jacobianOplusXi;
-    }
+  virtual void linearizeOplus();
 
-    const Eigen::Vector3d bprior;
+  void computeError();
+
+private:
+  const Eigen::Vector3d prior_;
 };
 
 class EdgePriorGyro : public g2o::BaseUnaryEdge<3,Eigen::Vector3d,VertexGyroBias>
