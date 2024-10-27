@@ -54,6 +54,7 @@ using Matrix9d  = Eigen::Matrix<double,  9,  9>;
 using Matrix12d = Eigen::Matrix<double, 12, 12>;
 using Matrix15d = Eigen::Matrix<double, 15, 15>;
 using Matrix24d = Eigen::Matrix<double, 24, 24>;
+using Matrix27d = Eigen::Matrix<double, 27, 27>;
 
 // ────────────────────────────────────────────────────────────────────────── //
 // Functions
@@ -548,93 +549,33 @@ private:
   Eigen::Vector3d g_;
 };
 
-// Edge inertial whre gravity is included as optimizable variable and it is not supposed to be pointing in -z axis, as well as scale
-class EdgeInertialGS : public g2o::BaseMultiEdge<9,Vector9d>
-{
+// Edge inertial where gravity is included as optimizable variable and it is not
+// supposed to be pointing in -z axis, as well as scale.
+class EdgeInertialGS : public g2o::BaseMultiEdge<9, Vector9d> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    // EdgeInertialGS(IMU::Preintegrated* pInt);
-    EdgeInertialGS(IMU::Preintegrated* pInt);
+  EdgeInertialGS(IMU::Preintegrated* preintegrated);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError();
-    virtual void linearizeOplus();
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    const Eigen::Matrix3d JRg, JVg, JPg;
-    const Eigen::Matrix3d JVa, JPa;
-    IMU::Preintegrated* mpInt;
-    const double dt;
-    Eigen::Vector3d g, gI;
+  virtual void linearizeOplus();
 
-    Eigen::Matrix<double,27,27> GetHessian(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,27> J;
-        J.block<9,6>(0,0) = _jacobianOplus[0];
-        J.block<9,3>(0,6) = _jacobianOplus[1];
-        J.block<9,3>(0,9) = _jacobianOplus[2];
-        J.block<9,3>(0,12) = _jacobianOplus[3];
-        J.block<9,6>(0,15) = _jacobianOplus[4];
-        J.block<9,3>(0,21) = _jacobianOplus[5];
-        J.block<9,2>(0,24) = _jacobianOplus[6];
-        J.block<9,1>(0,26) = _jacobianOplus[7];
-        return J.transpose()*information()*J;
-    }
+  void computeError();
 
-    Eigen::Matrix<double,27,27> GetHessian2(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,27> J;
-        J.block<9,3>(0,0) = _jacobianOplus[2];
-        J.block<9,3>(0,3) = _jacobianOplus[3];
-        J.block<9,2>(0,6) = _jacobianOplus[6];
-        J.block<9,1>(0,8) = _jacobianOplus[7];
-        J.block<9,3>(0,9) = _jacobianOplus[1];
-        J.block<9,3>(0,12) = _jacobianOplus[5];
-        J.block<9,6>(0,15) = _jacobianOplus[0];
-        J.block<9,6>(0,21) = _jacobianOplus[4];
-        return J.transpose()*information()*J;
-    }
-
-    Eigen::Matrix<double,9,9> GetHessian3(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,9> J;
-        J.block<9,3>(0,0) = _jacobianOplus[2];
-        J.block<9,3>(0,3) = _jacobianOplus[3];
-        J.block<9,2>(0,6) = _jacobianOplus[6];
-        J.block<9,1>(0,8) = _jacobianOplus[7];
-        return J.transpose()*information()*J;
-    }
-
-
-
-    Eigen::Matrix<double,1,1> GetHessianScale(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,1> J = _jacobianOplus[7];
-        return J.transpose()*information()*J;
-    }
-
-    Eigen::Matrix<double,3,3> GetHessianBiasGyro(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,3> J = _jacobianOplus[2];
-        return J.transpose()*information()*J;
-    }
-
-    Eigen::Matrix<double,3,3> GetHessianBiasAcc(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,3> J = _jacobianOplus[3];
-        return J.transpose()*information()*J;
-    }
-
-    Eigen::Matrix<double,2,2> GetHessianGDir(){
-        linearizeOplus();
-        Eigen::Matrix<double,9,2> J = _jacobianOplus[6];
-        return J.transpose()*information()*J;
-    }
+private:
+  const Eigen::Matrix3d JR_gyro_, JV_gyro_, JP_gyro_;
+  const Eigen::Matrix3d JV_acc_, JP_acc_;
+  IMU::Preintegrated* preintegrated_;
+  const double dt;
+  Eigen::Vector3d g_, g0_;
 };
-
-
 
 class EdgeGyroRW : public g2o::BaseBinaryEdge<3,Eigen::Vector3d,VertexGyroBias,VertexGyroBias>
 {
