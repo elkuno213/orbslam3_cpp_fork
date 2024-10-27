@@ -722,32 +722,30 @@ private:
   const Eigen::Vector3d prior_;
 };
 
-class Edge4DoF : public g2o::BaseBinaryEdge<6,Vector6d,VertexPose4DoF,VertexPose4DoF>
-{
+class Edge4DoF
+  : public g2o::BaseBinaryEdge<6, Vector6d, VertexPose4DoF, VertexPose4DoF> {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    Edge4DoF(const Eigen::Matrix4d &deltaT){
-        dTij = deltaT;
-        dRij = deltaT.block<3,3>(0,0);
-        dtij = deltaT.block<3,1>(0,3);
-    }
+  Edge4DoF(const Eigen::Matrix4d& dT);
 
-    virtual bool read(std::istream& is){return false;}
-    virtual bool write(std::ostream& os) const{return false;}
+  virtual bool read(std::istream& is) {
+    return false;
+  }
 
-    void computeError(){
-        const VertexPose4DoF* VPi = static_cast<const VertexPose4DoF*>(_vertices[0]);
-        const VertexPose4DoF* VPj = static_cast<const VertexPose4DoF*>(_vertices[1]);
-        _error << logSO3(VPi->estimate().R_cw[0]*VPj->estimate().R_cw[0].transpose()*dRij.transpose()),
-                 VPi->estimate().R_cw[0]*(-VPj->estimate().R_cw[0].transpose()*VPj->estimate().t_cw[0])+VPi->estimate().t_cw[0] - dtij;
-    }
+  virtual bool write(std::ostream& os) const {
+    return false;
+  }
 
-    // virtual void linearizeOplus(); // numerical implementation
+  void computeError();
 
-    Eigen::Matrix4d dTij;
-    Eigen::Matrix3d dRij;
-    Eigen::Vector3d dtij;
+  // TODO: why is this commented out?
+  // virtual void linearizeOplus(); // numerical implementation
+
+private:
+  Eigen::Matrix4d dT_ij;
+  Eigen::Matrix3d dR_ij;
+  Eigen::Vector3d dt_ij;
 };
 
 } // namespace ORB_SLAM3

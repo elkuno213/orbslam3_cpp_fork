@@ -1288,4 +1288,23 @@ void EdgePriorGyro::computeError() {
   _error = prior_ - vbias->estimate();
 }
 
+Edge4DoF::Edge4DoF(const Eigen::Matrix4d& dT)
+  : dT_ij(dT)
+  , dR_ij(dT.block<3, 3>(0, 0))
+  , dt_ij(dT.block<3, 1>(0, 3))
+{}
+
+void Edge4DoF::computeError() {
+  const VertexPose4DoF* vpose_i = static_cast<const VertexPose4DoF*>(_vertices[0]);
+  const VertexPose4DoF* vpose_j = static_cast<const VertexPose4DoF*>(_vertices[1]);
+
+  const Eigen::Matrix3d& R_cw_i = vpose_i->estimate().R_cw[0];
+  const Eigen::Vector3d& t_cw_i = vpose_i->estimate().t_cw[0];
+  const Eigen::Matrix3d& R_cw_j = vpose_j->estimate().R_cw[0];
+  const Eigen::Vector3d& t_cw_j = vpose_j->estimate().t_cw[0];
+
+  _error << logSO3(R_cw_i * R_cw_j.transpose() * dR_ij.transpose()),
+            R_cw_i * (-R_cw_j.transpose() * t_cw_j) + t_cw_i - dt_ij;
+}
+
 } // namespace ORB_SLAM3
