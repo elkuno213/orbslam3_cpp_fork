@@ -20,11 +20,11 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <thread>
 #include <opencv2/core/core.hpp>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include "Atlas.h"
 #include "FrameDrawer.h"

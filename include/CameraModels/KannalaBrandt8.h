@@ -20,7 +20,7 @@
 #ifndef CAMERAMODELS_KANNALABRANDT8_H
 #define CAMERAMODELS_KANNALABRANDT8_H
 
-#include <assert.h>
+#include <cassert>
 #include "GeometricCamera.h"
 #include "TwoViewReconstruction.h"
 

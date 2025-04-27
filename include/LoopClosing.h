@@ -22,13 +22,13 @@
 
 #include <mutex>
 #include <thread>
+#include <Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h>
 #include <boost/algorithm/string.hpp>
 #include "Atlas.h"
 #include "KeyFrame.h"
 #include "KeyFrameDatabase.h"
 #include "LocalMapping.h"
 #include "ORBVocabulary.h"
-#include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
 #include "Tracking.h"
 
 namespace ORB_SLAM3 {

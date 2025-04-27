@@ -21,10 +21,10 @@
 #define ORB_SLAM3_OPTIMIZABLETYPES_H
 
 #include <Eigen/Geometry>
+#include <Thirdparty/g2o/g2o/core/base_unary_edge.h>
 #include <Thirdparty/g2o/g2o/types/sim3.h>
 #include <Thirdparty/g2o/g2o/types/types_six_dof_expmap.h>
 #include <include/CameraModels/GeometricCamera.h>
-#include "Thirdparty/g2o/g2o/core/base_unary_edge.h"
 
 namespace ORB_SLAM3 {
 class EdgeSE3ProjectXYZOnlyPose

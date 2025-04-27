@@ -23,9 +23,9 @@
 // Flag to activate the measurement of time in each process (track,localmap, place recognition).
 // #define REGISTER_TIMES
 
+#include <cstdio>
+#include <cstdlib>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include "CameraModels/GeometricCamera.h"
 

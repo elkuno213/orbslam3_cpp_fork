@@ -19,15 +19,15 @@
 
 #include <algorithm>
 #include <chrono>
+#include <csignal>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <System.h>
 #include <librealsense2/rs.hpp>
 #include <opencv2/core/core.hpp>
-#include <signal.h>
-#include <stdlib.h>
+#include "System.h"
 
 using namespace std;
 

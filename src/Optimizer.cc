@@ -22,18 +22,18 @@
 #include <mutex>
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
+#include <Thirdparty/g2o/g2o/core/block_solver.h>
+#include <Thirdparty/g2o/g2o/core/optimization_algorithm_gauss_newton.h>
+#include <Thirdparty/g2o/g2o/core/optimization_algorithm_levenberg.h>
+#include <Thirdparty/g2o/g2o/core/robust_kernel_impl.h>
+#include <Thirdparty/g2o/g2o/core/sparse_block_matrix.h>
+#include <Thirdparty/g2o/g2o/solvers/linear_solver_dense.h>
+#include <Thirdparty/g2o/g2o/solvers/linear_solver_eigen.h>
+#include <Thirdparty/g2o/g2o/types/types_six_dof_expmap.h>
 #include <unsupported/Eigen/MatrixFunctions>
 #include "Converter.h"
 #include "G2oTypes.h"
 #include "OptimizableTypes.h"
-#include "Thirdparty/g2o/g2o/core/block_solver.h"
-#include "Thirdparty/g2o/g2o/core/optimization_algorithm_gauss_newton.h"
-#include "Thirdparty/g2o/g2o/core/optimization_algorithm_levenberg.h"
-#include "Thirdparty/g2o/g2o/core/robust_kernel_impl.h"
-#include "Thirdparty/g2o/g2o/core/sparse_block_matrix.h"
-#include "Thirdparty/g2o/g2o/solvers/linear_solver_dense.h"
-#include "Thirdparty/g2o/g2o/solvers/linear_solver_eigen.h"
-#include "Thirdparty/g2o/g2o/types/types_six_dof_expmap.h"
 
 namespace ORB_SLAM3 {
 bool sortByVal(const pair<MapPoint*, int>& a, const pair<MapPoint*, int>& b) {

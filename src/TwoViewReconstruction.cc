@@ -19,9 +19,9 @@
 
 #include "TwoViewReconstruction.h"
 #include <thread>
+#include <Thirdparty/DBoW2/DUtils/Random.h>
 #include "Converter.h"
 #include "GeometricTools.h"
-#include "Thirdparty/DBoW2/DUtils/Random.h"
 
 using namespace std;
 namespace ORB_SLAM3 {

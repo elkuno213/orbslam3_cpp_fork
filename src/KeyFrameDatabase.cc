@@ -19,8 +19,8 @@
 
 #include "KeyFrameDatabase.h"
 #include <mutex>
+#include <Thirdparty/DBoW2/DBoW2/BowVector.h>
 #include "KeyFrame.h"
-#include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 
 using namespace std;
 

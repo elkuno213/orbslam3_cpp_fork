@@ -21,6 +21,8 @@
 #define KEYFRAME_H
 
 #include <mutex>
+#include <Thirdparty/DBoW2/DBoW2/BowVector.h>
+#include <Thirdparty/DBoW2/DBoW2/FeatureVector.h>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
@@ -32,8 +34,6 @@
 #include "ORBVocabulary.h"
 #include "ORBextractor.h"
 #include "SerializationUtils.h"
-#include "Thirdparty/DBoW2/DBoW2/BowVector.h"
-#include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
 
 namespace ORB_SLAM3 {
 

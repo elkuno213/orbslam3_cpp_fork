@@ -20,7 +20,7 @@
 #ifndef CAMERAMODELS_PINHOLE_H
 #define CAMERAMODELS_PINHOLE_H
 
-#include <assert.h>
+#include <cassert>
 #include "GeometricCamera.h"
 #include "TwoViewReconstruction.h"
 

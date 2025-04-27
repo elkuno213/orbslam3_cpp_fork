@@ -20,16 +20,16 @@
 #include <algorithm>
 #include <chrono>
 #include <condition_variable>
+#include <csignal>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <System.h>
 #include <librealsense2/rs.hpp>
+#include <librealsense2/rsutil.h>
 #include <opencv2/core/core.hpp>
-#include <signal.h>
-#include <stdlib.h>
-#include "librealsense2/rsutil.h"
+#include "System.h"
 
 using namespace std;
 

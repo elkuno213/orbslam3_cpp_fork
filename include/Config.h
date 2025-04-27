@@ -20,9 +20,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <cstdio>
+#include <cstdlib>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 namespace ORB_SLAM3 {

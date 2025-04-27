@@ -20,10 +20,10 @@
 #include "Sim3Solver.h"
 #include <cmath>
 #include <vector>
+#include <Thirdparty/DBoW2/DUtils/Random.h>
 #include <opencv2/core/core.hpp>
 #include "KeyFrame.h"
 #include "ORBmatcher.h"
-#include "Thirdparty/DBoW2/DUtils/Random.h"
 
 namespace ORB_SLAM3 {
 

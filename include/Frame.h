@@ -22,16 +22,16 @@
 
 #include <mutex>
 #include <vector>
+#include <Eigen/Core>
+#include <Thirdparty/DBoW2/DBoW2/BowVector.h>
+#include <Thirdparty/DBoW2/DBoW2/FeatureVector.h>
+#include <Thirdparty/Sophus/sophus/geometry.hpp>
 #include <opencv2/opencv.hpp>
+#include <sophus/se3.hpp>
 #include "Converter.h"
-#include "Eigen/Core"
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
 #include "Settings.h"
-#include "Thirdparty/DBoW2/DBoW2/BowVector.h"
-#include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
-#include "Thirdparty/Sophus/sophus/geometry.hpp"
-#include "sophus/se3.hpp"
 
 namespace ORB_SLAM3 {
 #define FRAME_GRID_ROWS 48

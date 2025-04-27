@@ -21,11 +21,11 @@
 #define CONVERTER_H
 
 #include <Eigen/Dense>
+#include <Thirdparty/Sophus/sophus/geometry.hpp>
+#include <Thirdparty/Sophus/sophus/sim3.hpp>
+#include <Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h>
+#include <Thirdparty/g2o/g2o/types/types_six_dof_expmap.h>
 #include <opencv2/core/core.hpp>
-#include "Thirdparty/Sophus/sophus/geometry.hpp"
-#include "Thirdparty/Sophus/sophus/sim3.hpp"
-#include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
-#include "Thirdparty/g2o/g2o/types/types_six_dof_expmap.h"
 
 namespace ORB_SLAM3 {
 
