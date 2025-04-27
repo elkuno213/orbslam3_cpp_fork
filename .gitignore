@@ -93,3 +93,7 @@ borrar/*
 */ExecMean.txt
 
 Pangolin/
+
+!.clang-format
+!.vscode/settings.json
+!.vscode/extensions.json

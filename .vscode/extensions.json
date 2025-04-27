@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    // c++
+    "ms-vscode.cpptools",
+    "llvm-vs-code-extensions.vscode-clangd",
+    "vadimcn.vscode-lldb",
+    // cmake
+    "josetr.cmake-language-support-vscode",
+    // tools
+    "Gruntfuggly.todo-tree"
+  ]
+}
