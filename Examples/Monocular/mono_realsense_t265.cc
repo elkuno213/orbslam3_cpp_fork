@@ -26,7 +26,8 @@
 #include <iostream>
 #include <sstream>
 #include <librealsense2/rs.hpp>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include "System.h"
 
 using namespace std;

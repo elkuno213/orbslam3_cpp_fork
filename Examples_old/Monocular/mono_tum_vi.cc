@@ -22,7 +22,9 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <unistd.h>
 #include "Converter.h"
 #include "System.h"

@@ -22,7 +22,10 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <opencv2/core/core.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include "System.h"
 
 using namespace std;

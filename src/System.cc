@@ -29,13 +29,18 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/string.hpp>
 #include <openssl/md5.h>
-#include <pangolin/pangolin.h>
-#include "Converter.h"
+#include "Atlas.h"
+#include "FrameDrawer.h"
+#include "KeyFrameDatabase.h"
+#include "LocalMapping.h"
+#include "LoopClosing.h"
+#include "Map.h"
+#include "MapDrawer.h"
+#include "MapPoint.h"
+#include "Settings.h"
+#include "Tracking.h"
+#include "Viewer.h"
 
 namespace ORB_SLAM3 {
 

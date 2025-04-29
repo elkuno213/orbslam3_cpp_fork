@@ -28,7 +28,8 @@
 #include <sstream>
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rsutil.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include "System.h"
 
 using namespace std;

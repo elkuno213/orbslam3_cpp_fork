@@ -20,24 +20,16 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <cstdio>
-#include <cstdlib>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
-#include <opencv2/core/core.hpp>
-#include <unistd.h>
-#include "Atlas.h"
-#include "FrameDrawer.h"
+#include <vector>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
+#include <sophus/se3.hpp>
 #include "ImuTypes.h"
-#include "KeyFrameDatabase.h"
-#include "LocalMapping.h"
-#include "LoopClosing.h"
-#include "MapDrawer.h"
 #include "ORBVocabulary.h"
-#include "Settings.h"
-#include "Tracking.h"
-#include "Viewer.h"
 
 namespace ORB_SLAM3 {
 
@@ -65,14 +57,17 @@ public:
   }
 };
 
-class Viewer;
-class FrameDrawer;
-class MapDrawer;
 class Atlas;
-class Tracking;
+class FrameDrawer;
+class KeyFrameDatabase;
 class LocalMapping;
 class LoopClosing;
+class Map;
+class MapDrawer;
+class MapPoint;
 class Settings;
+class Tracking;
+class Viewer;
 
 class System {
 public:

@@ -23,7 +23,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include "ImuTypes.h"
 #include "System.h"
 
