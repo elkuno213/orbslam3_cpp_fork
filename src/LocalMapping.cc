@@ -19,12 +19,20 @@
 
 #include "LocalMapping.h"
 #include <chrono>
-#include <mutex>
-#include "Converter.h"
+#include <list>
+#include <map>
+#include <set>
+#include <utility>
+#include "Atlas.h"
 #include "GeometricTools.h"
+#include "KeyFrame.h"
 #include "LoopClosing.h"
+#include "Map.h"
+#include "MapPoint.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
+#include "System.h"
+#include "Tracking.h"
 
 namespace ORB_SLAM3 {
 

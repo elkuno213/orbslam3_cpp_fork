@@ -25,19 +25,17 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include "Atlas.h"
-#include "KeyFrame.h"
-#include "KeyFrameDatabase.h"
-#include "LoopClosing.h"
-#include "Settings.h"
-#include "Tracking.h"
+#include <Eigen/Core>
 
 namespace ORB_SLAM3 {
 
+class Atlas;
+class KeyFrame;
+class LoopClosing;
+class Map;
+class MapPoint;
 class System;
 class Tracking;
-class LoopClosing;
-class Atlas;
 
 class LocalMapping {
 public:
