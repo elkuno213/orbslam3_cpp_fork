@@ -20,7 +20,6 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -45,16 +44,8 @@ public:
 
   static eLevel th;
 
-public:
-  static void PrintMess(std::string str, eLevel lev) {
-    if (lev <= th) {
-      std::cout << str << std::endl;
-    }
-  }
-
-  static void SetTh(eLevel _th) {
-    th = _th;
-  }
+  static void PrintMess(std::string str, eLevel lev);
+  static void SetTh(eLevel _th);
 };
 
 class Atlas;
