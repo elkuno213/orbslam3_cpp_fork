@@ -24,14 +24,14 @@
 #include <mutex>
 #include <utility>
 #include <vector>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include "Atlas.h"
-#include "MapPoint.h"
-#include "Tracking.h"
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
+#include "Frame.h"
 
 namespace ORB_SLAM3 {
 
+class Atlas;
+class MapPoint;
 class Tracking;
 class Viewer;
 
