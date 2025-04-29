@@ -20,8 +20,10 @@
 #ifndef FRAMEDRAWER_H
 #define FRAMEDRAWER_H
 
+#include <map>
 #include <mutex>
-#include <unordered_set>
+#include <utility>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include "Atlas.h"
@@ -51,32 +53,32 @@ protected:
   void DrawTextInfo(cv::Mat& im, int nState, cv::Mat& imText);
 
   // Info of the frame to be drawn
-  cv::Mat              mIm, mImRight;
-  int                  N;
-  vector<cv::KeyPoint> mvCurrentKeys, mvCurrentKeysRight;
-  vector<bool>         mvbMap, mvbVO;
-  bool                 mbOnlyTracking;
-  int                  mnTracked, mnTrackedVO;
-  vector<cv::KeyPoint> mvIniKeys;
-  vector<int>          mvIniMatches;
-  int                  mState;
-  std::vector<float>   mvCurrentDepth;
-  float                mThDepth;
+  cv::Mat                   mIm, mImRight;
+  int                       N;
+  std::vector<cv::KeyPoint> mvCurrentKeys, mvCurrentKeysRight;
+  std::vector<bool>         mvbMap, mvbVO;
+  bool                      mbOnlyTracking;
+  int                       mnTracked, mnTrackedVO;
+  std::vector<cv::KeyPoint> mvIniKeys;
+  std::vector<int>          mvIniMatches;
+  int                       mState;
+  std::vector<float>        mvCurrentDepth;
+  float                     mThDepth;
 
   Atlas* mpAtlas;
 
-  std::mutex                              mMutex;
-  vector<pair<cv::Point2f, cv::Point2f> > mvTracks;
+  std::mutex                                        mMutex;
+  std::vector<std::pair<cv::Point2f, cv::Point2f> > mvTracks;
 
-  Frame                mCurrentFrame;
-  vector<MapPoint*>    mvpLocalMap;
-  vector<cv::KeyPoint> mvMatchedKeys;
-  vector<MapPoint*>    mvpMatchedMPs;
-  vector<cv::KeyPoint> mvOutlierKeys;
-  vector<MapPoint*>    mvpOutlierMPs;
+  Frame                     mCurrentFrame;
+  std::vector<MapPoint*>    mvpLocalMap;
+  std::vector<cv::KeyPoint> mvMatchedKeys;
+  std::vector<MapPoint*>    mvpMatchedMPs;
+  std::vector<cv::KeyPoint> mvOutlierKeys;
+  std::vector<MapPoint*>    mvpOutlierMPs;
 
-  map<long unsigned int, cv::Point2f> mmProjectPoints;
-  map<long unsigned int, cv::Point2f> mmMatchedInImage;
+  std::map<long unsigned int, cv::Point2f> mmProjectPoints;
+  std::map<long unsigned int, cv::Point2f> mmMatchedInImage;
 };
 
 } // namespace ORB_SLAM3
