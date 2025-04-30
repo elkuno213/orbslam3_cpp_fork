@@ -22,14 +22,13 @@
 
 #include <list>
 #include <vector>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3 {
 
 class ExtractorNode {
 public:
-  ExtractorNode() : bNoMore(false) {
-  }
+  ExtractorNode();
 
   void DivideNode(ExtractorNode& n1, ExtractorNode& n2, ExtractorNode& n3, ExtractorNode& n4);
 
@@ -48,8 +47,7 @@ public:
 
   ORBextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST);
 
-  ~ORBextractor() {
-  }
+  ~ORBextractor();
 
   // Compute the ORB features and descriptors on an image.
   // ORB are dispersed on the image using an octree.
@@ -90,7 +88,7 @@ public:
 
 protected:
   void ComputePyramid(cv::Mat image);
-  void ComputeKeyPointsOctTree(std::vector<std::vector<cv::KeyPoint> >& allKeypoints);
+  void ComputeKeyPointsOctTree(std::vector<std::vector<cv::KeyPoint>>& allKeypoints);
   std::vector<cv::KeyPoint> DistributeOctTree(
     const std::vector<cv::KeyPoint>& vToDistributeKeys,
     const int&                       minX,
@@ -100,8 +98,8 @@ protected:
     const int&                       nFeatures,
     const int&                       level
   );
+  void ComputeKeyPointsOld(std::vector<std::vector<cv::KeyPoint>>& allKeypoints);
 
-  void                   ComputeKeyPointsOld(std::vector<std::vector<cv::KeyPoint> >& allKeypoints);
   std::vector<cv::Point> pattern;
 
   int    nfeatures;

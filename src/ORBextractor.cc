@@ -54,11 +54,8 @@
 
 #include "ORBextractor.h"
 #include <iostream>
-#include <vector>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/imgproc.hpp>
 
 namespace ORB_SLAM3 {
 
@@ -400,6 +397,9 @@ static int bit_pattern_31_[256 * 4] = {
   -1,  -6,  0,   -11 /*mean (0.127148), correlation (0.547401)*/
 };
 
+ExtractorNode::ExtractorNode() : bNoMore(false) {
+}
+
 ORBextractor::ORBextractor(
   int _nfeatures, float _scaleFactor, int _nlevels, int _iniThFAST, int _minThFAST
 )
@@ -462,6 +462,9 @@ ORBextractor::ORBextractor(
     umax[v] = v0;
     ++v0;
   }
+}
+
+ORBextractor::~ORBextractor() {
 }
 
 static void computeOrientation(
