@@ -18,8 +18,10 @@
  */
 
 #include "Map.h"
-#include <mutex>
+#include <iostream>
+#include "KeyFrame.h"
 #include "KeyFrameDatabase.h"
+#include "MapPoint.h"
 
 namespace ORB_SLAM3 {
 

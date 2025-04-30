@@ -20,19 +20,25 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <list>
+#include <map>
 #include <mutex>
 #include <set>
-#include <boost/serialization/base_object.hpp>
+#include <string>
+#include <Eigen/Core>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/vector.hpp>
 #include <pangolin/pangolin.h>
-#include "KeyFrame.h"
-#include "MapPoint.h"
+#include <sophus/se3.hpp>
+#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 
-class MapPoint;
-class KeyFrame;
 class Atlas;
+class GeometricCamera;
+class KeyFrame;
 class KeyFrameDatabase;
+class MapPoint;
 
 class Map {
   friend class boost::serialization::access;
