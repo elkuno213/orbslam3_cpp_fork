@@ -19,6 +19,7 @@
 
 #include "Map.h"
 #include <mutex>
+#include "KeyFrameDatabase.h"
 
 namespace ORB_SLAM3 {
 

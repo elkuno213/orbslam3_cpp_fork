@@ -18,9 +18,17 @@
  */
 
 #include "KeyFrame.h"
-#include <mutex>
+#include <iostream>
+#include <list>
 #include "Converter.h"
-#include "ImuTypes.h"
+#include "Frame.h"
+#include "GeometricCamera.h"
+#include "KeyFrameDatabase.h"
+#include "Map.h"
+#include "MapPoint.h"
+
+// #include <boost/serialization/base_object.hpp>
+// #include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {
 
@@ -518,7 +526,8 @@ void KeyFrame::UpdateConnections(bool upParent) {
        mit != mend;
        mit++) {
     if (!upParent) {
-      std::cout << "  UPDATE_CONN: KF " << mit->first->mnId << " ; num matches: " << mit->second << std::endl;
+      std::cout << "  UPDATE_CONN: KF " << mit->first->mnId << " ; num matches: " << mit->second
+                << std::endl;
     }
     if (mit->second > nmax) {
       nmax   = mit->second;
@@ -771,7 +780,8 @@ std::vector<std::size_t> KeyFrame::GetFeaturesInArea(
   float factorX = r;
   float factorY = r;
 
-  const int nMinCellX = std::max(0, (int)std::floor((x - mnMinX - factorX) * mfGridElementWidthInv));
+  const int nMinCellX
+    = std::max(0, (int)std::floor((x - mnMinX - factorX) * mfGridElementWidthInv));
   if (nMinCellX >= mnGridCols) {
     return vIndices;
   }
@@ -782,13 +792,16 @@ std::vector<std::size_t> KeyFrame::GetFeaturesInArea(
     return vIndices;
   }
 
-  const int nMinCellY = std::max(0, (int)std::floor((y - mnMinY - factorY) * mfGridElementHeightInv));
+  const int nMinCellY
+    = std::max(0, (int)std::floor((y - mnMinY - factorY) * mfGridElementHeightInv));
   if (nMinCellY >= mnGridRows) {
     return vIndices;
   }
 
-  const int nMaxCellY
-    = std::min((int)mnGridRows - 1, (int)std::ceil((y - mnMinY + factorY) * mfGridElementHeightInv));
+  const int nMaxCellY = std::min(
+    (int)mnGridRows - 1,
+    (int)std::ceil((y - mnMinY + factorY) * mfGridElementHeightInv)
+  );
   if (nMaxCellY < 0) {
     return vIndices;
   }
@@ -1212,6 +1225,22 @@ Eigen::Matrix<float, 3, 3> KeyFrame::GetRightRotation() {
 Eigen::Vector3f KeyFrame::GetRightTranslation() {
   std::unique_lock<std::mutex> lock(mMutexPose);
   return (mTrl * mTcw).translation();
+}
+
+void KeyFrame::PrintPointDistribution() {
+  int left = 0, right = 0;
+  int Nlim = (NLeft != -1) ? NLeft : N;
+  for (int i = 0; i < N; i++) {
+    if (mvpMapPoints[i]) {
+      if (i < Nlim) {
+        left++;
+      } else {
+        right++;
+      }
+    }
+  }
+  std::cout << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right
+            << std::endl;
 }
 
 void KeyFrame::SetORBVocabulary(ORBVocabulary* pORBVoc) {

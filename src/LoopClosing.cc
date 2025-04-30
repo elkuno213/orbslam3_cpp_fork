@@ -21,6 +21,7 @@
 #include "Atlas.h"
 #include "G2oTypes.h"
 #include "KeyFrame.h"
+#include "KeyFrameDatabase.h"
 #include "LocalMapping.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"

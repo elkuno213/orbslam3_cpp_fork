@@ -20,29 +20,29 @@
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
+#include <map>
 #include <mutex>
+#include <set>
+#include <vector>
+#include <Eigen/Core>
 #include <Thirdparty/DBoW2/DBoW2/BowVector.h>
 #include <Thirdparty/DBoW2/DBoW2/FeatureVector.h>
-#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/array_wrapper.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
-#include "Frame.h"
-#include "GeometricCamera.h"
+#include <opencv2/core.hpp>
+#include <sophus/se3.hpp>
 #include "ImuTypes.h"
-#include "KeyFrameDatabase.h"
-#include "MapPoint.h"
 #include "ORBVocabulary.h"
-#include "ORBextractor.h"
-#include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {
 
+class Frame;
+class GeometricCamera;
+class KeyFrameDatabase;
 class Map;
 class MapPoint;
-class Frame;
-class KeyFrameDatabase;
-
-class GeometricCamera;
 
 class KeyFrame {
   friend class boost::serialization::access;
@@ -522,20 +522,7 @@ public:
   Eigen::Matrix<float, 3, 3> GetRightRotation();
   Eigen::Vector3f            GetRightTranslation();
 
-  void PrintPointDistribution() {
-    int left = 0, right = 0;
-    int Nlim = (NLeft != -1) ? NLeft : N;
-    for (int i = 0; i < N; i++) {
-      if (mvpMapPoints[i]) {
-        if (i < Nlim) {
-          left++;
-        } else {
-          right++;
-        }
-      }
-    }
-    std::cout << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right << std::endl;
-  }
+  void PrintPointDistribution();
 };
 
 } // namespace ORB_SLAM3
