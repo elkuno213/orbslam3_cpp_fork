@@ -20,26 +20,26 @@
 #ifndef ATLAS_H
 #define ATLAS_H
 
+#include <map>
 #include <mutex>
 #include <set>
-#include <boost/serialization/export.hpp>
+#include <vector>
+#include <Eigen/Core>
+#include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
+#include "Frame.h"
 #include "GeometricCamera.h"
 #include "KannalaBrandt8.h"
 #include "KeyFrame.h"
 #include "Map.h"
 #include "MapPoint.h"
+#include "ORBVocabulary.h"
 #include "Pinhole.h"
 
 namespace ORB_SLAM3 {
+
 class Viewer;
-class Map;
-class MapPoint;
-class KeyFrame;
 class KeyFrameDatabase;
-class Frame;
-class KannalaBrandt8;
-class Pinhole;
 
 // BOOST_CLASS_EXPORT_GUID(Pinhole, "Pinhole")
 // BOOST_CLASS_EXPORT_GUID(KannalaBrandt8, "KannalaBrandt8")
