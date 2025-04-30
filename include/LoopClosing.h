@@ -20,23 +20,29 @@
 #ifndef LOOPCLOSING_H
 #define LOOPCLOSING_H
 
+#include <functional>
+#include <list>
+#include <map>
 #include <mutex>
+#include <set>
+#include <string>
 #include <thread>
-#include <Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h>
-#include <boost/algorithm/string.hpp>
-#include "Atlas.h"
-#include "KeyFrame.h"
-#include "KeyFrameDatabase.h"
-#include "LocalMapping.h"
+#include <utility>
+#include <vector>
+#include <Thirdparty/g2o/g2o/types/sim3.h>
+#include <opencv2/core.hpp>
 #include "ORBVocabulary.h"
-#include "Tracking.h"
 
 namespace ORB_SLAM3 {
 
-class Tracking;
-class LocalMapping;
+class Atlas;
+class KeyFrame;
 class KeyFrameDatabase;
+class LocalMapping;
 class Map;
+class MapPoint;
+class Tracking;
+class Viewer;
 
 class LoopClosing {
 public:
@@ -45,7 +51,7 @@ public:
     KeyFrame*,
     g2o::Sim3,
     std::less<KeyFrame*>,
-    Eigen::aligned_allocator<std::pair<KeyFrame* const, g2o::Sim3> > >
+    Eigen::aligned_allocator<std::pair<KeyFrame* const, g2o::Sim3>>>
     KeyFrameAndPose;
 
 public:

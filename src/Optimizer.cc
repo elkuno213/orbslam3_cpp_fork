@@ -34,6 +34,7 @@
 #include "Converter.h"
 #include "G2oTypes.h"
 #include "OptimizableTypes.h"
+#include "System.h"
 
 namespace ORB_SLAM3 {
 bool sortByVal(const pair<MapPoint*, int>& a, const pair<MapPoint*, int>& b) {

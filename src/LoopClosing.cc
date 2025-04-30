@@ -18,13 +18,13 @@
  */
 
 #include "LoopClosing.h"
-#include <mutex>
-#include <thread>
-#include "Converter.h"
 #include "G2oTypes.h"
+#include "KeyFrame.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
 #include "Sim3Solver.h"
+#include "System.h"
+#include "Tracking.h"
 
 namespace ORB_SLAM3 {
 
