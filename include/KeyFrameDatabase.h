@@ -65,20 +65,29 @@ public:
 
   // Loop and Merge Detection
   void DetectCandidates(
-    KeyFrame* pKF, float minScore, vector<KeyFrame*>& vpLoopCand, vector<KeyFrame*>& vpMergeCand
+    KeyFrame*               pKF,
+    float                   minScore,
+    std::vector<KeyFrame*>& vpLoopCand,
+    std::vector<KeyFrame*>& vpMergeCand
   );
   void DetectBestCandidates(
-    KeyFrame* pKF, vector<KeyFrame*>& vpLoopCand, vector<KeyFrame*>& vpMergeCand, int nMinWords
+    KeyFrame*               pKF,
+    std::vector<KeyFrame*>& vpLoopCand,
+    std::vector<KeyFrame*>& vpMergeCand,
+    int                     nMinWords
   );
   void DetectNBestCandidates(
-    KeyFrame* pKF, vector<KeyFrame*>& vpLoopCand, vector<KeyFrame*>& vpMergeCand, int nNumCandidates
+    KeyFrame*               pKF,
+    std::vector<KeyFrame*>& vpLoopCand,
+    std::vector<KeyFrame*>& vpMergeCand,
+    int                     nNumCandidates
   );
 
   // Relocalization
   std::vector<KeyFrame*> DetectRelocalizationCandidates(Frame* F, Map* pMap);
 
   void PreSave();
-  void PostLoad(map<long unsigned int, KeyFrame*> mpKFid);
+  void PostLoad(std::map<long unsigned int, KeyFrame*> mpKFid);
   void SetORBVocabulary(ORBVocabulary* pORBVoc);
 
 protected:
@@ -86,10 +95,10 @@ protected:
   const ORBVocabulary* mpVoc;
 
   // Inverted file
-  std::vector<list<KeyFrame*> > mvInvertedFile;
+  std::vector<std::list<KeyFrame*>> mvInvertedFile;
 
   // For save relation without pointer, this is necessary for save/load function
-  std::vector<list<long unsigned int> > mvBackupInvertedFileId;
+  std::vector<std::list<long unsigned int>> mvBackupInvertedFileId;
 
   // Mutex
   std::mutex mMutex;
