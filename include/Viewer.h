@@ -21,19 +21,17 @@
 #define VIEWER_H
 
 #include <mutex>
-#include "FrameDrawer.h"
-#include "MapDrawer.h"
-#include "Settings.h"
-#include "System.h"
-#include "Tracking.h"
+#include <string>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3 {
 
-class Tracking;
 class FrameDrawer;
 class MapDrawer;
-class System;
 class Settings;
+class System;
+class Tracking;
 
 class Viewer {
 public:

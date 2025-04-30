@@ -18,8 +18,13 @@
  */
 
 #include "Viewer.h"
-#include <mutex>
+#include <opencv2/highgui.hpp>
 #include <pangolin/pangolin.h>
+#include "FrameDrawer.h"
+#include "MapDrawer.h"
+#include "Settings.h"
+#include "System.h"
+#include "Tracking.h"
 
 namespace ORB_SLAM3 {
 
