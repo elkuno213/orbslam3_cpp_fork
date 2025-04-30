@@ -20,18 +20,18 @@
 #include "Tracking.h"
 #include <chrono>
 #include <iostream>
-#include <mutex>
+#include "Atlas.h"
 #include "Converter.h"
 #include "FrameDrawer.h"
-#include "G2oTypes.h"
-#include "GeometricTools.h"
 #include "KannalaBrandt8.h"
+#include "LocalMapping.h"
 #include "MLPnPsolver.h"
+#include "MapDrawer.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
 #include "Pinhole.h"
-
-using namespace std;
+#include "System.h"
+#include "Viewer.h"
 
 namespace ORB_SLAM3 {
 

@@ -18,8 +18,10 @@
  */
 
 #include "LoopClosing.h"
+#include "Atlas.h"
 #include "G2oTypes.h"
 #include "KeyFrame.h"
+#include "LocalMapping.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
 #include "Sim3Solver.h"

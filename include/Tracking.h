@@ -20,34 +20,32 @@
 #ifndef TRACKING_H
 #define TRACKING_H
 
+#include <fstream>
+#include <list>
 #include <mutex>
-#include <unordered_set>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include "Atlas.h"
+#include <string>
+#include <vector>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
+#include <sophus/se3.hpp>
 #include "Frame.h"
-#include "FrameDrawer.h"
-#include "GeometricCamera.h"
 #include "ImuTypes.h"
-#include "KeyFrameDatabase.h"
-#include "LocalMapping.h"
-#include "LoopClosing.h"
-#include "MapDrawer.h"
 #include "ORBVocabulary.h"
-#include "ORBextractor.h"
-#include "Settings.h"
-#include "System.h"
-#include "Viewer.h"
 
 namespace ORB_SLAM3 {
 
-class Viewer;
-class FrameDrawer;
 class Atlas;
+class FrameDrawer;
+class GeometricCamera;
+class KeyFrameDatabase;
 class LocalMapping;
 class LoopClosing;
-class System;
+class Map;
+class MapDrawer;
+class ORBextractor;
 class Settings;
+class System;
+class Viewer;
 
 class Tracking {
 public:
@@ -354,10 +352,10 @@ protected:
   std::ofstream f_track_stats;
 
   std::ofstream f_track_times;
-  double   mTime_PreIntIMU;
-  double   mTime_PosePred;
-  double   mTime_LocalMapTrack;
-  double   mTime_NewKF_Dec;
+  double        mTime_PreIntIMU;
+  double        mTime_PosePred;
+  double        mTime_LocalMapTrack;
+  double        mTime_NewKF_Dec;
 
   GeometricCamera *mpCamera, *mpCamera2;
 
