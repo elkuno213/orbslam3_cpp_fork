@@ -18,11 +18,15 @@
  */
 
 #include "KeyFrameDatabase.h"
-#include <mutex>
 #include <Thirdparty/DBoW2/DBoW2/BowVector.h>
+#include "Frame.h"
 #include "KeyFrame.h"
+#include "Map.h"
 
 namespace ORB_SLAM3 {
+
+KeyFrameDatabase::KeyFrameDatabase() {
+}
 
 KeyFrameDatabase::KeyFrameDatabase(const ORBVocabulary& voc) : mpVoc(&voc) {
   mvInvertedFile.resize(voc.size());

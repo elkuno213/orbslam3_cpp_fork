@@ -22,20 +22,18 @@
 
 #include <list>
 #include <mutex>
-#include <set>
 #include <vector>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/vector.hpp>
+#include <Eigen/Core>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/library_version_type.hpp>
 #include <boost/serialization/list.hpp>
-#include "Frame.h"
-#include "KeyFrame.h"
-#include "Map.h"
+#include <boost/serialization/vector.hpp>
 #include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 
-class KeyFrame;
 class Frame;
+class KeyFrame;
 class Map;
 
 class KeyFrameDatabase {
@@ -49,8 +47,7 @@ class KeyFrameDatabase {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  KeyFrameDatabase() {
-  }
+  KeyFrameDatabase();
   KeyFrameDatabase(const ORBVocabulary& voc);
 
   void add(KeyFrame* pKF);
