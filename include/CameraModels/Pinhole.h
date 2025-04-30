@@ -20,11 +20,19 @@
 #ifndef CAMERAMODELS_PINHOLE_H
 #define CAMERAMODELS_PINHOLE_H
 
-#include <cassert>
+#include <fstream>
+#include <vector>
+#include <Eigen/Core>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <opencv2/core.hpp>
+#include <sophus/se3.hpp>
 #include "GeometricCamera.h"
-#include "TwoViewReconstruction.h"
 
 namespace ORB_SLAM3 {
+
+class TwoViewReconstruction;
+
 class Pinhole : public GeometricCamera {
   friend class boost::serialization::access;
 
@@ -34,28 +42,10 @@ class Pinhole : public GeometricCamera {
   }
 
 public:
-  Pinhole() {
-    mvParameters.resize(4);
-    mnId   = nNextId++;
-    mnType = CAM_PINHOLE;
-  }
-  Pinhole(const std::vector<float> _vParameters) : GeometricCamera(_vParameters), tvr(nullptr) {
-    assert(mvParameters.size() == 4);
-    mnId   = nNextId++;
-    mnType = CAM_PINHOLE;
-  }
-
-  Pinhole(Pinhole* pPinhole) : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
-    assert(mvParameters.size() == 4);
-    mnId   = nNextId++;
-    mnType = CAM_PINHOLE;
-  }
-
-  ~Pinhole() {
-    if (tvr) {
-      delete tvr;
-    }
-  }
+  Pinhole();
+  Pinhole(const std::vector<float> _vParameters);
+  Pinhole(Pinhole* pPinhole);
+  ~Pinhole();
 
   cv::Point2f     project(const cv::Point3f& p3D);
   Eigen::Vector2d project(const Eigen::Vector3d& v3D);
@@ -100,9 +90,7 @@ public:
     const float         sigmaLevel1,
     const float         sigmaLevel2,
     Eigen::Vector3f&    x3Dtriangulated
-  ) {
-    return false;
-  }
+  );
 
   friend std::ostream& operator<<(std::ostream& os, const Pinhole& ph);
   friend std::istream& operator>>(std::istream& os, Pinhole& ph);

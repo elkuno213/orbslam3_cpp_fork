@@ -18,7 +18,8 @@
  */
 
 #include "Pinhole.h"
-#include <boost/serialization/export.hpp>
+#include <cassert>
+#include "TwoViewReconstruction.h"
 
 // BOOST_CLASS_EXPORT_IMPLEMENT(ORB_SLAM3::Pinhole)
 
@@ -26,6 +27,30 @@ namespace ORB_SLAM3 {
 // BOOST_CLASS_EXPORT_GUID(Pinhole, "Pinhole")
 
 long unsigned int GeometricCamera::nNextId = 0;
+
+Pinhole::Pinhole() {
+  mvParameters.resize(4);
+  mnId   = nNextId++;
+  mnType = CAM_PINHOLE;
+}
+Pinhole::Pinhole(const std::vector<float> _vParameters)
+  : GeometricCamera(_vParameters), tvr(nullptr) {
+  assert(mvParameters.size() == 4);
+  mnId   = nNextId++;
+  mnType = CAM_PINHOLE;
+}
+
+Pinhole::Pinhole(Pinhole* pPinhole) : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
+  assert(mvParameters.size() == 4);
+  mnId   = nNextId++;
+  mnType = CAM_PINHOLE;
+}
+
+Pinhole::~Pinhole() {
+  if (tvr) {
+    delete tvr;
+  }
+}
 
 cv::Point2f Pinhole::project(const cv::Point3f& p3D) {
   return cv::Point2f(
@@ -148,6 +173,19 @@ bool Pinhole::epipolarConstrain(
   return dsqr < 3.84 * unc;
 }
 
+bool Pinhole::matchAndtriangulate(
+  const cv::KeyPoint& kp1,
+  const cv::KeyPoint& kp2,
+  GeometricCamera*    pOther,
+  Sophus::SE3f&       Tcw1,
+  Sophus::SE3f&       Tcw2,
+  const float         sigmaLevel1,
+  const float         sigmaLevel2,
+  Eigen::Vector3f&    x3Dtriangulated
+) {
+  return false;
+}
+
 std::ostream& operator<<(std::ostream& os, const Pinhole& ph) {
   os << ph.mvParameters[0] << " " << ph.mvParameters[1] << " " << ph.mvParameters[2] << " "
      << ph.mvParameters[3];
@@ -156,7 +194,7 @@ std::ostream& operator<<(std::ostream& os, const Pinhole& ph) {
 
 std::istream& operator>>(std::istream& is, Pinhole& ph) {
   float nextParam;
-  for (size_t i = 0; i < 4; i++) {
+  for (std::size_t i = 0; i < 4; i++) {
     assert(is.good()); // Make sure the input stream is good
     is >> nextParam;
     ph.mvParameters[i] = nextParam;
@@ -176,8 +214,8 @@ bool Pinhole::IsEqual(GeometricCamera* pCam) {
   }
 
   bool is_same_camera = true;
-  for (size_t i = 0; i < size(); ++i) {
-    if (abs(mvParameters[i] - pPinholeCam->getParameter(i)) > 1e-6) {
+  for (std::size_t i = 0; i < size(); ++i) {
+    if (std::abs(mvParameters[i] - pPinholeCam->getParameter(i)) > 1e-6) {
       is_same_camera = false;
       break;
     }
