@@ -20,6 +20,7 @@
 #include "Viewer.h"
 #include <opencv2/highgui.hpp>
 #include <pangolin/pangolin.h>
+#include "Atlas.h"
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
 #include "Settings.h"

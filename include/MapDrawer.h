@@ -21,14 +21,17 @@
 #define MAPDRAWER_H
 
 #include <mutex>
+#include <string>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
 #include <pangolin/pangolin.h>
-#include "Atlas.h"
-#include "KeyFrame.h"
-#include "MapPoint.h"
-#include "Settings.h"
+#include <sophus/se3.hpp>
 
 namespace ORB_SLAM3 {
 
+class Atlas;
+class KeyFrame;
+class MapPoint;
 class Settings;
 
 class MapDrawer {
