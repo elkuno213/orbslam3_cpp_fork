@@ -24,12 +24,12 @@
 namespace ORB_SLAM3 {
 
 Viewer::Viewer(
-  System*       pSystem,
-  FrameDrawer*  pFrameDrawer,
-  MapDrawer*    pMapDrawer,
-  Tracking*     pTracking,
-  const string& strSettingPath,
-  Settings*     settings
+  System*            pSystem,
+  FrameDrawer*       pFrameDrawer,
+  MapDrawer*         pMapDrawer,
+  Tracking*          pTracking,
+  const std::string& strSettingPath,
+  Settings*          settings
 )
   : both(false)
   , mpSystem(pSystem)
@@ -51,7 +51,7 @@ Viewer::Viewer(
       std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
       try {
         throw -1;
-      } catch (exception& e) {
+      } catch (std::exception& e) {
       }
     }
   }
@@ -196,14 +196,13 @@ void Viewer::Run() {
   bool bStepByStep       = false;
   bool bCameraView       = true;
 
-  if(mpTracker->mSensor == mpSystem->MONOCULAR || mpTracker->mSensor == mpSystem->STEREO || mpTracker->mSensor == mpSystem->RGBD)
-    {
+  if(mpTracker->mSensor == mpSystem->MONOCULAR || mpTracker->mSensor == mpSystem->STEREO || mpTracker->mSensor == mpSystem->RGBD) {
     menuShowGraph = true;
   }
 
   float trackedImageScale = mpTracker->GetImageScale();
 
-  cout << "Starting the Viewer" << endl;
+  std::cout << "Starting the Viewer" << std::endl;
   while (1) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -272,7 +271,7 @@ void Viewer::Run() {
     }
 
     if (menuStepByStep && !bStepByStep) {
-      // cout << "Viewer: step by step" << endl;
+      // std::cout << "Viewer: step by step" << std::endl;
       mpTracker->SetStepByStep(true);
       bStepByStep = true;
     } else if (!menuStepByStep && bStepByStep) {
@@ -362,40 +361,40 @@ void Viewer::Run() {
 }
 
 void Viewer::RequestFinish() {
-  unique_lock<mutex> lock(mMutexFinish);
+  std::unique_lock<std::mutex> lock(mMutexFinish);
   mbFinishRequested = true;
 }
 
 bool Viewer::CheckFinish() {
-  unique_lock<mutex> lock(mMutexFinish);
+  std::unique_lock<std::mutex> lock(mMutexFinish);
   return mbFinishRequested;
 }
 
 void Viewer::SetFinish() {
-  unique_lock<mutex> lock(mMutexFinish);
+  std::unique_lock<std::mutex> lock(mMutexFinish);
   mbFinished = true;
 }
 
 bool Viewer::isFinished() {
-  unique_lock<mutex> lock(mMutexFinish);
+  std::unique_lock<std::mutex> lock(mMutexFinish);
   return mbFinished;
 }
 
 void Viewer::RequestStop() {
-  unique_lock<mutex> lock(mMutexStop);
+  std::unique_lock<std::mutex> lock(mMutexStop);
   if (!mbStopped) {
     mbStopRequested = true;
   }
 }
 
 bool Viewer::isStopped() {
-  unique_lock<mutex> lock(mMutexStop);
+  std::unique_lock<std::mutex> lock(mMutexStop);
   return mbStopped;
 }
 
 bool Viewer::Stop() {
-  unique_lock<mutex> lock(mMutexStop);
-  unique_lock<mutex> lock2(mMutexFinish);
+  std::unique_lock<std::mutex> lock(mMutexStop);
+  std::unique_lock<std::mutex> lock2(mMutexFinish);
 
   if (mbFinishRequested) {
     return false;
@@ -409,7 +408,7 @@ bool Viewer::Stop() {
 }
 
 void Viewer::Release() {
-  unique_lock<mutex> lock(mMutexStop);
+  std::unique_lock<std::mutex> lock(mMutexStop);
   mbStopped = false;
 }
 
