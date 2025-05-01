@@ -22,6 +22,7 @@
 #include <Thirdparty/DBoW2/DBoW2/FeatureVector.h>
 #include <opencv2/core/core.hpp>
 #include <stdint-gcc.h>
+#include "GeometricCamera.h"
 
 using namespace std;
 
