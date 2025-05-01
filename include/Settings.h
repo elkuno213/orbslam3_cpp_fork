@@ -222,7 +222,7 @@ private:
     if (node.empty()) {
       if (required) {
         std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
-        exit(-1);
+        std::exit(-1);
       } else {
         std::cerr << name << " optional parameter does not exist..." << std::endl;
         found = false;
