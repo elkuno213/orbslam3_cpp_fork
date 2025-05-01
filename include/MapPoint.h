@@ -20,22 +20,21 @@
 #ifndef MAPPOINT_H
 #define MAPPOINT_H
 
+#include <map>
 #include <mutex>
-#include <boost/serialization/array.hpp>
+#include <set>
+#include <tuple>
+#include <Eigen/Core>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/array_wrapper.hpp>
 #include <boost/serialization/map.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <opencv2/core/core.hpp>
-#include "Converter.h"
-#include "Frame.h"
-#include "KeyFrame.h"
-#include "Map.h"
-#include "SerializationUtils.h"
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3 {
 
+class Frame;
 class KeyFrame;
 class Map;
-class Frame;
 
 class MapPoint {
   friend class boost::serialization::access;
