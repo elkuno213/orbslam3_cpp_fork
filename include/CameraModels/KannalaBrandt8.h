@@ -20,11 +20,19 @@
 #ifndef CAMERAMODELS_KANNALABRANDT8_H
 #define CAMERAMODELS_KANNALABRANDT8_H
 
-#include <cassert>
+#include <fstream>
+#include <vector>
+#include <Eigen/Core>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <opencv2/core.hpp>
+#include <sophus/se3.hpp>
 #include "GeometricCamera.h"
-#include "TwoViewReconstruction.h"
 
 namespace ORB_SLAM3 {
+
+class TwoViewReconstruction;
+
 class KannalaBrandt8 : public GeometricCamera {
   friend class boost::serialization::access;
 
@@ -35,33 +43,10 @@ class KannalaBrandt8 : public GeometricCamera {
   }
 
 public:
-  KannalaBrandt8() : precision(1e-6) {
-    mvParameters.resize(8);
-    mnId   = nNextId++;
-    mnType = CAM_FISHEYE;
-  }
-  KannalaBrandt8(const std::vector<float> _vParameters)
-    : GeometricCamera(_vParameters), precision(1e-6), mvLappingArea(2, 0), tvr(nullptr) {
-    assert(mvParameters.size() == 8);
-    mnId   = nNextId++;
-    mnType = CAM_FISHEYE;
-  }
-
-  KannalaBrandt8(const std::vector<float> _vParameters, const float _precision)
-    : GeometricCamera(_vParameters), precision(_precision), mvLappingArea(2, 0) {
-    assert(mvParameters.size() == 8);
-    mnId   = nNextId++;
-    mnType = CAM_FISHEYE;
-  }
-  KannalaBrandt8(KannalaBrandt8* pKannala)
-    : GeometricCamera(pKannala->mvParameters)
-    , precision(pKannala->precision)
-    , mvLappingArea(2, 0)
-    , tvr(nullptr) {
-    assert(mvParameters.size() == 8);
-    mnId   = nNextId++;
-    mnType = CAM_FISHEYE;
-  }
+  KannalaBrandt8();
+  KannalaBrandt8(const std::vector<float> _vParameters);
+  KannalaBrandt8(const std::vector<float> _vParameters, const float _precision);
+  KannalaBrandt8(KannalaBrandt8* pKannala);
 
   cv::Point2f     project(const cv::Point3f& p3D);
   Eigen::Vector2d project(const Eigen::Vector3d& v3D);

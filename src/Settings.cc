@@ -19,6 +19,7 @@
 
 #include "Settings.h"
 #include <iostream>
+#include <opencv2/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/core/persistence.hpp>
 #include "CameraModels/KannalaBrandt8.h"

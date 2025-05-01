@@ -18,12 +18,41 @@
  */
 
 #include "KannalaBrandt8.h"
-#include <boost/serialization/export.hpp>
+#include <cassert>
+#include "TwoViewReconstruction.h"
 
 // BOOST_CLASS_EXPORT_IMPLEMENT(ORB_SLAM3::KannalaBrandt8)
 
 namespace ORB_SLAM3 {
 // BOOST_CLASS_EXPORT_GUID(KannalaBrandt8, "KannalaBrandt8")
+
+KannalaBrandt8::KannalaBrandt8() : precision(1e-6) {
+  mvParameters.resize(8);
+  mnId   = nNextId++;
+  mnType = CAM_FISHEYE;
+}
+KannalaBrandt8::KannalaBrandt8(const std::vector<float> _vParameters)
+  : GeometricCamera(_vParameters), precision(1e-6), mvLappingArea(2, 0), tvr(nullptr) {
+  assert(mvParameters.size() == 8);
+  mnId   = nNextId++;
+  mnType = CAM_FISHEYE;
+}
+
+KannalaBrandt8::KannalaBrandt8(const std::vector<float> _vParameters, const float _precision)
+  : GeometricCamera(_vParameters), precision(_precision), mvLappingArea(2, 0) {
+  assert(mvParameters.size() == 8);
+  mnId   = nNextId++;
+  mnType = CAM_FISHEYE;
+}
+KannalaBrandt8::KannalaBrandt8(KannalaBrandt8* pKannala)
+  : GeometricCamera(pKannala->mvParameters)
+  , precision(pKannala->precision)
+  , mvLappingArea(2, 0)
+  , tvr(nullptr) {
+  assert(mvParameters.size() == 8);
+  mnId   = nNextId++;
+  mnType = CAM_FISHEYE;
+}
 
 cv::Point2f KannalaBrandt8::project(const cv::Point3f& p3D) {
   const float x2_plus_y2 = p3D.x * p3D.x + p3D.y * p3D.y;
@@ -194,10 +223,10 @@ bool KannalaBrandt8::ReconstructWithTwoViews(
   std::vector<cv::KeyPoint> vKeysUn1 = vKeys1, vKeysUn2 = vKeys2;
   std::vector<cv::Point2f>  vPts1(vKeys1.size()), vPts2(vKeys2.size());
 
-  for (size_t i = 0; i < vKeys1.size(); i++) {
+  for (std::size_t i = 0; i < vKeys1.size(); i++) {
     vPts1[i] = vKeys1[i].pt;
   }
-  for (size_t i = 0; i < vKeys2.size(); i++) {
+  for (std::size_t i = 0; i < vKeys2.size(); i++) {
     vPts2[i] = vKeys2[i].pt;
   }
 
@@ -208,10 +237,10 @@ bool KannalaBrandt8::ReconstructWithTwoViews(
   cv::fisheye::undistortPoints(vPts1, vPts1, K, D, R, K);
   cv::fisheye::undistortPoints(vPts2, vPts2, K, D, R, K);
 
-  for (size_t i = 0; i < vKeys1.size(); i++) {
+  for (std::size_t i = 0; i < vKeys1.size(); i++) {
     vKeysUn1[i].pt = vPts1[i];
   }
-  for (size_t i = 0; i < vKeys2.size(); i++) {
+  for (std::size_t i = 0; i < vKeys2.size(); i++) {
     vKeysUn2[i].pt = vPts2[i];
   }
 
@@ -418,7 +447,7 @@ std::ostream& operator<<(std::ostream& os, const KannalaBrandt8& kb) {
 
 std::istream& operator>>(std::istream& is, KannalaBrandt8& kb) {
   float nextParam;
-  for (size_t i = 0; i < 8; i++) {
+  for (std::size_t i = 0; i < 8; i++) {
     assert(is.good()); // Make sure the input stream is good
     is >> nextParam;
     kb.mvParameters[i] = nextParam;
@@ -460,7 +489,7 @@ bool KannalaBrandt8::IsEqual(GeometricCamera* pCam) {
   }
 
   bool is_same_camera = true;
-  for (size_t i = 0; i < size(); ++i) {
+  for (std::size_t i = 0; i < size(); ++i) {
     if (abs(mvParameters[i] - pKBCam->getParameter(i)) > 1e-6) {
       is_same_camera = false;
       break;
