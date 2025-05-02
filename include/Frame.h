@@ -141,7 +141,7 @@ public:
   // Compute the cell of a keypoint (return false if outside the grid)
   bool PosInGrid(const cv::KeyPoint& kp, int& posX, int& posY);
 
-  vector<size_t> GetFeaturesInArea(
+  std::vector<std::size_t> GetFeaturesInArea(
     const float& x,
     const float& y,
     const float& r,
@@ -314,13 +314,13 @@ public:
   KeyFrame* mpReferenceKF;
 
   // Scale pyramid info.
-  int           mnScaleLevels;
-  float         mfScaleFactor;
-  float         mfLogScaleFactor;
-  vector<float> mvScaleFactors;
-  vector<float> mvInvScaleFactors;
-  vector<float> mvLevelSigma2;
-  vector<float> mvInvLevelSigma2;
+  int                mnScaleLevels;
+  float              mfScaleFactor;
+  float              mfLogScaleFactor;
+  std::vector<float> mvScaleFactors;
+  std::vector<float> mvInvScaleFactors;
+  std::vector<float> mvLevelSigma2;
+  std::vector<float> mvInvLevelSigma2;
 
   // Undistorted Image Bounds (computed once).
   static float mnMinX;
@@ -330,8 +330,8 @@ public:
 
   static bool mbInitialComputations;
 
-  map<long unsigned int, cv::Point2f> mmProjectPoints;
-  map<long unsigned int, cv::Point2f> mmMatchedInImage;
+  std::map<long unsigned int, cv::Point2f> mmProjectPoints;
+  std::map<long unsigned int, cv::Point2f> mmMatchedInImage;
 
   string mNameFile;
 
