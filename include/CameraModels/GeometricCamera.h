@@ -21,19 +21,11 @@
 #define CAMERAMODELS_GEOMETRICCAMERA_H
 
 #include <vector>
-#include <Eigen/Geometry>
+#include <Eigen/Core>
 #include <boost/serialization/access.hpp>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
-#include "Converter.h"
-#include "GeometricTools.h"
 
 namespace ORB_SLAM3 {
 class GeometricCamera {
@@ -91,11 +83,11 @@ public:
   float getParameter(const int i) {
     return mvParameters[i];
   }
-  void setParameter(const float p, const size_t i) {
+  void setParameter(const float p, const std::size_t i) {
     mvParameters[i] = p;
   }
 
-  size_t size() {
+  std::size_t size() {
     return mvParameters.size();
   }
 
