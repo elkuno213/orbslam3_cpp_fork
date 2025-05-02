@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include "ImuTypes.h"
 #include "Optimizer.h"
 #include "System.h"

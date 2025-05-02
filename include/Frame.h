@@ -20,27 +20,23 @@
 #ifndef FRAME_H
 #define FRAME_H
 
+#include <map>
 #include <mutex>
 #include <vector>
 #include <Eigen/Core>
-#include <Thirdparty/DBoW2/DBoW2/BowVector.h>
-#include <Thirdparty/DBoW2/DBoW2/FeatureVector.h>
-#include <Thirdparty/Sophus/sophus/geometry.hpp>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
-#include "Converter.h"
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
-#include "Settings.h"
 
 namespace ORB_SLAM3 {
 #define FRAME_GRID_ROWS 48
 #define FRAME_GRID_COLS 64
 
-class MapPoint;
-class KeyFrame;
 class ConstraintPoseImu;
 class GeometricCamera;
+class KeyFrame;
+class MapPoint;
 class ORBextractor;
 
 class Frame {
@@ -408,20 +404,7 @@ public:
 
   cv::Mat imgLeft, imgRight;
 
-  void PrintPointDistribution() {
-    int left = 0, right = 0;
-    int Nlim = (Nleft != -1) ? Nleft : N;
-    for (int i = 0; i < N; i++) {
-      if (mvpMapPoints[i] && !mvbOutlier[i]) {
-        if (i < Nlim) {
-          left++;
-        } else {
-          right++;
-        }
-      }
-    }
-    cout << "Point distribution in Frame: left-> " << left << " --- right-> " << right << endl;
-  }
+  void PrintPointDistribution();
 
   Sophus::SE3<double> T_test;
 };

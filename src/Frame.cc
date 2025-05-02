@@ -18,13 +18,14 @@
  */
 
 #include "Frame.h"
+#include <iostream>
 #include <thread>
-#include <include/CameraModels/KannalaBrandt8.h>
-#include <include/CameraModels/Pinhole.h>
+#include <CameraModels/KannalaBrandt8.h>
+#include <CameraModels/Pinhole.h>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/imgproc.hpp>
 #include "Converter.h"
-#include "G2oTypes.h"
 #include "GeometricCamera.h"
-#include "KeyFrame.h"
 #include "MapPoint.h"
 #include "ORBextractor.h"
 #include "ORBmatcher.h"
@@ -1435,6 +1436,22 @@ bool Frame::isInFrustumChecks(MapPoint* pMP, float viewingCosLimit, bool bRight)
 
 Eigen::Vector3f Frame::UnprojectStereoFishEye(const int& i) {
   return mRwc * mvStereo3Dpoints[i] + mOw;
+}
+
+void Frame::PrintPointDistribution() {
+  int left = 0, right = 0;
+  int Nlim = (Nleft != -1) ? Nleft : N;
+  for (int i = 0; i < N; i++) {
+    if (mvpMapPoints[i] && !mvbOutlier[i]) {
+      if (i < Nlim) {
+        left++;
+      } else {
+        right++;
+      }
+    }
+  }
+  std::cout << "Point distribution in Frame: left-> " << left << " --- right-> " << right
+            << std::endl;
 }
 
 } // namespace ORB_SLAM3

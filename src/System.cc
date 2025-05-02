@@ -29,6 +29,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <opencv2/imgproc.hpp>
 #include <openssl/md5.h>
 #include "Atlas.h"
 #include "FrameDrawer.h"

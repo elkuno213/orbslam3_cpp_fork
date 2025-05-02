@@ -22,6 +22,7 @@
 #include <vector>
 #include <Thirdparty/DBoW2/DUtils/Random.h>
 #include <opencv2/core/core.hpp>
+#include "Converter.h"
 #include "GeometricCamera.h"
 #include "KeyFrame.h"
 #include "ORBmatcher.h"

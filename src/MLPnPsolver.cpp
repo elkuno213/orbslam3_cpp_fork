@@ -49,6 +49,7 @@
 
 #include "MLPnPsolver.h"
 #include <Eigen/Sparse>
+#include "Converter.h"
 #include "GeometricCamera.h"
 
 namespace ORB_SLAM3 {

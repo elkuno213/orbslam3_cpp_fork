@@ -20,6 +20,7 @@
 #include "Tracking.h"
 #include <chrono>
 #include <iostream>
+#include <opencv2/imgproc.hpp>
 #include "Atlas.h"
 #include "Converter.h"
 #include "FrameDrawer.h"
@@ -32,6 +33,7 @@
 #include "ORBmatcher.h"
 #include "Optimizer.h"
 #include "Pinhole.h"
+#include "Settings.h"
 #include "System.h"
 #include "Viewer.h"
 
