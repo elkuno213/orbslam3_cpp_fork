@@ -20,12 +20,12 @@
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
-#include <Eigen/Dense>
-#include <Thirdparty/Sophus/sophus/geometry.hpp>
-#include <Thirdparty/Sophus/sophus/sim3.hpp>
-#include <Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h>
-#include <Thirdparty/g2o/g2o/types/types_six_dof_expmap.h>
-#include <opencv2/core/core.hpp>
+#include <Eigen/Core>
+#include <Thirdparty/g2o/g2o/types/se3quat.h>
+#include <Thirdparty/g2o/g2o/types/sim3.h>
+#include <opencv2/core.hpp>
+#include <sophus/geometry.hpp>
+#include <sophus/sim3.hpp>
 
 namespace ORB_SLAM3 {
 

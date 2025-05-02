@@ -18,6 +18,8 @@
  */
 
 #include "Converter.h"
+#include <vector>
+#include <sophus/rxso3.hpp>
 
 namespace ORB_SLAM3 {
 
