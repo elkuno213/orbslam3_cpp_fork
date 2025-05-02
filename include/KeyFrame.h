@@ -35,6 +35,7 @@
 #include <sophus/se3.hpp>
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
+#include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {
 

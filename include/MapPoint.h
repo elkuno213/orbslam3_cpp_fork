@@ -29,6 +29,7 @@
 #include <boost/serialization/array_wrapper.hpp>
 #include <boost/serialization/map.hpp>
 #include <opencv2/core.hpp>
+#include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {
 

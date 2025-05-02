@@ -25,6 +25,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
+#include <opencv2/features2d.hpp>
 #include <sophus/se3.hpp>
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"

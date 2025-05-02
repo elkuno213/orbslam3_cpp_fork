@@ -21,14 +21,12 @@
 #define IMUTYPES_H
 
 #include <mutex>
-#include <utility>
 #include <vector>
 #include <Eigen/Core>
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
-#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/array_wrapper.hpp>
 #include <boost/serialization/vector.hpp>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
 #include "SerializationUtils.h"
 
@@ -49,12 +47,8 @@ public:
     const float&  ang_vel_y,
     const float&  ang_vel_z,
     const double& timestamp
-  )
-    : a(acc_x, acc_y, acc_z), w(ang_vel_x, ang_vel_y, ang_vel_z), t(timestamp) {
-  }
-  Point(const cv::Point3f Acc, const cv::Point3f Gyro, const double& timestamp)
-    : a(Acc.x, Acc.y, Acc.z), w(Gyro.x, Gyro.y, Gyro.z), t(timestamp) {
-  }
+  );
+  Point(const cv::Point3f Acc, const cv::Point3f Gyro, const double& timestamp);
 
 public:
   Eigen::Vector3f a;
@@ -78,8 +72,7 @@ class Bias {
   }
 
 public:
-  Bias() : bax(0), bay(0), baz(0), bwx(0), bwy(0), bwz(0) {
-  }
+  Bias();
   Bias(
     const float& b_acc_x,
     const float& b_acc_y,
@@ -87,14 +80,7 @@ public:
     const float& b_ang_vel_x,
     const float& b_ang_vel_y,
     const float& b_ang_vel_z
-  )
-    : bax(b_acc_x)
-    , bay(b_acc_y)
-    , baz(b_acc_z)
-    , bwx(b_ang_vel_x)
-    , bwy(b_ang_vel_y)
-    , bwz(b_ang_vel_z) {
-  }
+  );
   void                 CopyFrom(Bias& b);
   friend std::ostream& operator<<(std::ostream& out, const Bias& b);
 
@@ -119,20 +105,15 @@ class Calib {
   }
 
 public:
+  Calib();
   Calib(
     const Sophus::SE3<float>& Tbc,
     const float&              ng,
     const float&              na,
     const float&              ngw,
     const float&              naw
-  ) {
-    Set(Tbc, ng, na, ngw, naw);
-  }
-
+  );
   Calib(const Calib& calib);
-  Calib() {
-    mbIsSet = false;
-  }
 
   // void Set(const cv::Mat &cvTbc, const float &ng, const float &na, const float &ngw, const float
   // &naw);
@@ -155,8 +136,7 @@ public:
 // Integration of 1 gyro measurement
 class IntegratedRotation {
 public:
-  IntegratedRotation() {
-  }
+  IntegratedRotation();
   IntegratedRotation(const Eigen::Vector3f& angVel, const Bias& imuBias, const float& time);
 
 public:
@@ -195,12 +175,10 @@ class Preintegrated {
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  Preintegrated();
   Preintegrated(const Bias& b_, const Calib& calib);
   Preintegrated(Preintegrated* pImuPre);
-  Preintegrated() {
-  }
-  ~Preintegrated() {
-  }
+  ~Preintegrated();
   void CopyFrom(Preintegrated* pImuPre);
   void Initialize(const Bias& b_);
   void IntegrateNewMeasurement(
@@ -228,13 +206,7 @@ public:
   Bias GetOriginalBias();
   Bias GetUpdatedBias();
 
-  void printMeasurements() const {
-    std::cout << "pint meas:\n";
-    for (int i = 0; i < mvMeasurements.size(); i++) {
-      std::cout << "meas " << mvMeasurements[i].t << std::endl;
-    }
-    std::cout << "end pint meas:\n";
-  }
+  void printMeasurements() const;
 
 public:
   float                           dT;

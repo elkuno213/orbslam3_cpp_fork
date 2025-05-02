@@ -28,6 +28,22 @@ namespace IMU {
 
 const float eps = 1e-4;
 
+Point::Point(
+  const float&  acc_x,
+  const float&  acc_y,
+  const float&  acc_z,
+  const float&  ang_vel_x,
+  const float&  ang_vel_y,
+  const float&  ang_vel_z,
+  const double& timestamp
+)
+  : a(acc_x, acc_y, acc_z), w(ang_vel_x, ang_vel_y, ang_vel_z), t(timestamp) {
+}
+
+Point::Point(const cv::Point3f Acc, const cv::Point3f Gyro, const double& timestamp)
+  : a(Acc.x, Acc.y, Acc.z), w(Gyro.x, Gyro.y, Gyro.z), t(timestamp) {
+}
+
 Eigen::Matrix3f NormalizeRotation(const Eigen::Matrix3f& R) {
   Eigen::JacobiSVD<Eigen::Matrix3f> svd(R, Eigen::ComputeFullU | Eigen::ComputeFullV);
   return svd.matrixU() * svd.matrixV().transpose();
@@ -72,6 +88,9 @@ Eigen::Matrix3f InverseRightJacobianSO3(const Eigen::Vector3f& v) {
   return InverseRightJacobianSO3(v(0), v(1), v(2));
 }
 
+IntegratedRotation::IntegratedRotation() {
+}
+
 IntegratedRotation::IntegratedRotation(
   const Eigen::Vector3f& angVel, const Bias& imuBias, const float& time
 ) {
@@ -93,6 +112,12 @@ IntegratedRotation::IntegratedRotation(
     rightJ
       = Eigen::Matrix3f::Identity() - W * (1.0f - cos(d)) / d2 + W * W * (d - sin(d)) / (d2 * d);
   }
+}
+
+Preintegrated::Preintegrated() {
+}
+
+Preintegrated::~Preintegrated() {
 }
 
 Preintegrated::Preintegrated(const Bias& b_, const Calib& calib) {
@@ -170,7 +195,7 @@ void Preintegrated::Reintegrate() {
   std::unique_lock<std::mutex>  lock(mMutex);
   const std::vector<integrable> aux = mvMeasurements;
   Initialize(bu);
-  for (size_t i = 0; i < aux.size(); i++) {
+  for (std::size_t i = 0; i < aux.size(); i++) {
     IntegrateNewMeasurement(aux[i].a, aux[i].w, aux[i].t);
   }
 }
@@ -254,10 +279,10 @@ void Preintegrated::MergePrevious(Preintegrated* pPrev) {
   const std::vector<integrable> aux2 = mvMeasurements;
 
   Initialize(bav);
-  for (size_t i = 0; i < aux1.size(); i++) {
+  for (std::size_t i = 0; i < aux1.size(); i++) {
     IntegrateNewMeasurement(aux1[i].a, aux1[i].w, aux1[i].t);
   }
-  for (size_t i = 0; i < aux2.size(); i++) {
+  for (std::size_t i = 0; i < aux2.size(); i++) {
     IntegrateNewMeasurement(aux2[i].a, aux2[i].w, aux2[i].t);
   }
 }
@@ -354,6 +379,28 @@ Eigen::Matrix<float, 6, 1> Preintegrated::GetDeltaBias() {
   return db;
 }
 
+void Preintegrated::printMeasurements() const {
+  std::cout << "pint meas:\n";
+  for (int i = 0; i < mvMeasurements.size(); i++) {
+    std::cout << "meas " << mvMeasurements[i].t << std::endl;
+  }
+  std::cout << "end pint meas:\n";
+}
+
+Bias::Bias() : bax(0), bay(0), baz(0), bwx(0), bwy(0), bwz(0) {
+}
+
+Bias::Bias(
+  const float& b_acc_x,
+  const float& b_acc_y,
+  const float& b_acc_z,
+  const float& b_ang_vel_x,
+  const float& b_ang_vel_y,
+  const float& b_ang_vel_z
+)
+  : bax(b_acc_x), bay(b_acc_y), baz(b_acc_z), bwx(b_ang_vel_x), bwy(b_ang_vel_y), bwz(b_ang_vel_z) {
+}
+
 void Bias::CopyFrom(Bias& b) {
   bax = b.bax;
   bay = b.bay;
@@ -410,6 +457,20 @@ void Calib::Set(
   mTcb = mTbc.inverse();
   Cov.diagonal() << ng2, ng2, ng2, na2, na2, na2;
   CovWalk.diagonal() << ngw2, ngw2, ngw2, naw2, naw2, naw2;
+}
+
+Calib::Calib(
+  const Sophus::SE3<float>& Tbc,
+  const float&              ng,
+  const float&              na,
+  const float&              ngw,
+  const float&              naw
+) {
+  Set(Tbc, ng, na, ngw, naw);
+}
+
+Calib::Calib() {
+  mbIsSet = false;
 }
 
 Calib::Calib(const Calib& calib) {
