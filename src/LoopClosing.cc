@@ -19,6 +19,7 @@
 
 #include "LoopClosing.h"
 #include "Atlas.h"
+#include "Converter.h"
 #include "G2oTypes.h"
 #include "KeyFrame.h"
 #include "KeyFrameDatabase.h"

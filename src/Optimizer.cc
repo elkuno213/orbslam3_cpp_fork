@@ -32,6 +32,7 @@
 #include <Thirdparty/g2o/g2o/solvers/linear_solver_dense.h>
 #include <Thirdparty/g2o/g2o/solvers/linear_solver_eigen.h>
 #include <Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h>
+#include "Frame.h"
 #include "G2oTypes.h"
 #include "KeyFrame.h"
 #include "Map.h"
