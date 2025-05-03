@@ -50,12 +50,17 @@
 #ifndef ORB_SLAM3_MLPNPSOLVER_H
 #define ORB_SLAM3_MLPNPSOLVER_H
 
-#include <Eigen/Dense>
+#include <vector>
+#include <Eigen/Core>
 #include <Eigen/Sparse>
-#include "Frame.h"
-#include "MapPoint.h"
+#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3 {
+
+class Frame;
+class GeometricCamera;
+class MapPoint;
+
 class MLPnPsolver {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

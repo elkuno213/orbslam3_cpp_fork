@@ -48,11 +48,13 @@
  ******************************************************************************/
 
 #include "MLPnPsolver.h"
-#include <Eigen/Sparse>
 #include "Converter.h"
+#include "Frame.h"
 #include "GeometricCamera.h"
+#include "MapPoint.h"
 
 namespace ORB_SLAM3 {
+
 MLPnPsolver::MLPnPsolver(const Frame& F, const std::vector<MapPoint*>& vpMapPointMatches)
   : mnInliersi(0), mnIterations(0), mnBestInliers(0), N(0), mpCamera(F.mpCamera) {
   mvpMapPointMatches = vpMapPointMatches;
@@ -1091,4 +1093,5 @@ void MLPnPsolver::mlpnpJacs(
   jacs(1, 4) = s2 * t65 - t14 * t101 * t167 * t212 * (1.0 / 2.0);
   jacs(1, 5) = s3 * t65 - t14 * t101 * t167 * t216 * (1.0 / 2.0);
 }
+
 } // namespace ORB_SLAM3
