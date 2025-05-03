@@ -19,14 +19,11 @@
 
 #include "Sim3Solver.h"
 #include <cmath>
-#include <vector>
-#include <Thirdparty/DBoW2/DUtils/Random.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include "Converter.h"
 #include "GeometricCamera.h"
 #include "KeyFrame.h"
 #include "MapPoint.h"
-#include "ORBmatcher.h"
 
 namespace ORB_SLAM3 {
 
