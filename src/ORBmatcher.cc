@@ -18,13 +18,12 @@
  */
 
 #include "ORBmatcher.h"
-#include <climits>
+#include <utility>
 #include <Thirdparty/DBoW2/DBoW2/FeatureVector.h>
-#include <opencv2/core/core.hpp>
-#include <stdint-gcc.h>
+#include "Frame.h"
 #include "GeometricCamera.h"
-
-using namespace std;
+#include "KeyFrame.h"
+#include "MapPoint.h"
 
 namespace ORB_SLAM3 {
 

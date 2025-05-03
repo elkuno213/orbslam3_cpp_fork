@@ -25,6 +25,7 @@
 #include "Converter.h"
 #include "GeometricCamera.h"
 #include "KeyFrame.h"
+#include "MapPoint.h"
 #include "ORBmatcher.h"
 
 namespace ORB_SLAM3 {
