@@ -60,7 +60,7 @@ class MLPnPsolver {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  MLPnPsolver(const Frame& F, const vector<MapPoint*>& vpMapPointMatches);
+  MLPnPsolver(const Frame& F, const std::vector<MapPoint*>& vpMapPointMatches);
 
   ~MLPnPsolver();
 
@@ -76,7 +76,11 @@ public:
   // Find metod is necessary?
 
   bool iterate(
-    int nIterations, bool& bNoMore, vector<bool>& vbInliers, int& nInliers, Eigen::Matrix4f& Tout
+    int                nIterations,
+    bool&              bNoMore,
+    std::vector<bool>& vbInliers,
+    int&               nInliers,
+    Eigen::Matrix4f&   Tout
   );
 
   // Type definitions needed by the original code
@@ -87,7 +91,7 @@ public:
   typedef Eigen::Vector3d bearingVector_t;
 
   /** An array of bearing-vectors */
-  typedef std::vector<bearingVector_t, Eigen::aligned_allocator<bearingVector_t> > bearingVectors_t;
+  typedef std::vector<bearingVector_t, Eigen::aligned_allocator<bearingVector_t>> bearingVectors_t;
 
   /** A 2-matrix containing the 2D covariance information of a bearing vector
    */
@@ -97,19 +101,19 @@ public:
   typedef Eigen::Matrix3d cov3_mat_t;
 
   /** An array of 3D covariance matrices */
-  typedef std::vector<cov3_mat_t, Eigen::aligned_allocator<cov3_mat_t> > cov3_mats_t;
+  typedef std::vector<cov3_mat_t, Eigen::aligned_allocator<cov3_mat_t>> cov3_mats_t;
 
   /** A 3-vector describing a point in 3D-space */
   typedef Eigen::Vector3d point_t;
 
   /** An array of 3D-points */
-  typedef std::vector<point_t, Eigen::aligned_allocator<point_t> > points_t;
+  typedef std::vector<point_t, Eigen::aligned_allocator<point_t>> points_t;
 
   /** A homogeneous 3-vector describing a point in 3D-space */
   typedef Eigen::Vector4d point4_t;
 
   /** An array of homogeneous 3D-points */
-  typedef std::vector<point4_t, Eigen::aligned_allocator<point4_t> > points4_t;
+  typedef std::vector<point4_t, Eigen::aligned_allocator<point4_t>> points4_t;
 
   /** A 3-vector containing the rodrigues parameters of a rotation matrix */
   typedef Eigen::Vector3d rodrigues_t;
@@ -192,45 +196,45 @@ private:
   //----------------------------------------------------
   // Fields of the solver
   //----------------------------------------------------
-  vector<MapPoint*> mvpMapPointMatches;
+  std::vector<MapPoint*> mvpMapPointMatches;
 
   // 2D Points
-  vector<cv::Point2f> mvP2D;
+  std::vector<cv::Point2f> mvP2D;
   // Substitued by bearing vectors
   bearingVectors_t mvBearingVecs;
 
-  vector<float> mvSigma2;
+  std::vector<float> mvSigma2;
 
   // 3D Points
-  // vector<cv::Point3f> mvP3Dw;
+  // std::vector<cv::Point3f> mvP3Dw;
   points_t mvP3Dw;
 
   // Index in Frame
-  vector<size_t> mvKeyPointIndices;
+  std::vector<std::size_t> mvKeyPointIndices;
 
   // Current Estimation
-  double          mRi[3][3];
-  double          mti[3];
-  Eigen::Matrix4f mTcwi;
-  vector<bool>    mvbInliersi;
-  int             mnInliersi;
+  double            mRi[3][3];
+  double            mti[3];
+  Eigen::Matrix4f   mTcwi;
+  std::vector<bool> mvbInliersi;
+  int               mnInliersi;
 
   // Current Ransac State
-  int             mnIterations;
-  vector<bool>    mvbBestInliers;
-  int             mnBestInliers;
-  Eigen::Matrix4f mBestTcw;
+  int               mnIterations;
+  std::vector<bool> mvbBestInliers;
+  int               mnBestInliers;
+  Eigen::Matrix4f   mBestTcw;
 
   // Refined
-  Eigen::Matrix4f mRefinedTcw;
-  vector<bool>    mvbRefinedInliers;
-  int             mnRefinedInliers;
+  Eigen::Matrix4f   mRefinedTcw;
+  std::vector<bool> mvbRefinedInliers;
+  int               mnRefinedInliers;
 
   // Number of Correspondences
   int N;
 
   // Indices for random selection [0 .. N-1]
-  vector<size_t> mvAllIndices;
+  std::vector<std::size_t> mvAllIndices;
 
   // RANSAC probability
   double mRansacProb;
@@ -251,7 +255,7 @@ private:
   int mRansacMinSet;
 
   // Max square error associated with scale level. Max error = th*th*sigma(level)*sigma(level)
-  vector<float> mvMaxError;
+  std::vector<float> mvMaxError;
 
   GeometricCamera* mpCamera;
 };

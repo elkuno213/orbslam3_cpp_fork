@@ -53,7 +53,7 @@
 #include "GeometricCamera.h"
 
 namespace ORB_SLAM3 {
-MLPnPsolver::MLPnPsolver(const Frame& F, const vector<MapPoint*>& vpMapPointMatches)
+MLPnPsolver::MLPnPsolver(const Frame& F, const std::vector<MapPoint*>& vpMapPointMatches)
   : mnInliersi(0), mnIterations(0), mnBestInliers(0), N(0), mpCamera(F.mpCamera) {
   mvpMapPointMatches = vpMapPointMatches;
   mvBearingVecs.reserve(F.mvpMapPoints.size());
@@ -64,7 +64,7 @@ MLPnPsolver::MLPnPsolver(const Frame& F, const vector<MapPoint*>& vpMapPointMatc
   mvAllIndices.reserve(F.mvpMapPoints.size());
 
   int idx = 0;
-  for (size_t i = 0, iend = mvpMapPointMatches.size(); i < iend; i++) {
+  for (std::size_t i = 0, iend = mvpMapPointMatches.size(); i < iend; i++) {
     MapPoint* pMP = vpMapPointMatches[i];
 
     if (pMP) {
@@ -101,7 +101,7 @@ MLPnPsolver::MLPnPsolver(const Frame& F, const vector<MapPoint*>& vpMapPointMatc
 
 // RANSAC methods
 bool MLPnPsolver::iterate(
-  int nIterations, bool& bNoMore, vector<bool>& vbInliers, int& nInliers, Eigen::Matrix4f& Tout
+  int nIterations, bool& bNoMore, std::vector<bool>& vbInliers, int& nInliers, Eigen::Matrix4f& Tout
 ) {
   Tout.setIdentity();
   bNoMore = false;
@@ -113,7 +113,7 @@ bool MLPnPsolver::iterate(
     return false;
   }
 
-  vector<size_t> vAvailableIndices;
+  std::vector<std::size_t> vAvailableIndices;
 
   int nCurrentIterations = 0;
   while (mnIterations < mRansacMaxIts || nCurrentIterations < nIterations) {
@@ -125,7 +125,7 @@ bool MLPnPsolver::iterate(
     // Bearing vectors and 3D points used for this ransac iteration
     bearingVectors_t bearingVecs(mRansacMinSet);
     points_t         p3DS(mRansacMinSet);
-    vector<int>      indexes(mRansacMinSet);
+    std::vector<int> indexes(mRansacMinSet);
 
     // Get min set of points
     for (short i = 0; i < mRansacMinSet; ++i) {
@@ -190,7 +190,7 @@ bool MLPnPsolver::iterate(
 
       if (Refine()) {
         nInliers  = mnRefinedInliers;
-        vbInliers = vector<bool>(mvpMapPointMatches.size(), false);
+        vbInliers = std::vector<bool>(mvpMapPointMatches.size(), false);
         for (int i = 0; i < N; i++) {
           if (mvbRefinedInliers[i]) {
             vbInliers[mvKeyPointIndices[i]] = true;
@@ -206,7 +206,7 @@ bool MLPnPsolver::iterate(
     bNoMore = true;
     if (mnBestInliers >= mRansacMinInliers) {
       nInliers  = mnBestInliers;
-      vbInliers = vector<bool>(mvpMapPointMatches.size(), false);
+      vbInliers = std::vector<bool>(mvpMapPointMatches.size(), false);
       for (int i = 0; i < N; i++) {
         if (mvbBestInliers[i]) {
           vbInliers[mvKeyPointIndices[i]] = true;
@@ -253,13 +253,13 @@ void MLPnPsolver::SetRansacParameters(
   if (mRansacMinInliers == N) {
     nIterations = 1;
   } else {
-    nIterations = ceil(log(1 - mRansacProb) / log(1 - pow(mRansacEpsilon, 3)));
+    nIterations = ceil(log(1 - mRansacProb) / log(1 - std::pow(mRansacEpsilon, 3)));
   }
 
-  mRansacMaxIts = max(1, min(nIterations, mRansacMaxIts));
+  mRansacMaxIts = std::max(1, std::min(nIterations, mRansacMaxIts));
 
   mvMaxError.resize(mvSigma2.size());
-  for (size_t i = 0; i < mvSigma2.size(); i++) {
+  for (std::size_t i = 0; i < mvSigma2.size(); i++) {
     mvMaxError[i] = mvSigma2[i] * th2;
   }
 }
@@ -294,10 +294,10 @@ void MLPnPsolver::CheckInliers() {
 }
 
 bool MLPnPsolver::Refine() {
-  vector<int> vIndices;
+  std::vector<int> vIndices;
   vIndices.reserve(mvbBestInliers.size());
 
-  for (size_t i = 0; i < mvbBestInliers.size(); i++) {
+  for (std::size_t i = 0; i < mvbBestInliers.size(); i++) {
     if (mvbBestInliers[i]) {
       vIndices.push_back(i);
     }
@@ -306,9 +306,9 @@ bool MLPnPsolver::Refine() {
   // Bearing vectors and 3D points used for this ransac iteration
   bearingVectors_t bearingVecs;
   points_t         p3DS;
-  vector<int>      indexes;
+  std::vector<int> indexes;
 
-  for (size_t i = 0; i < vIndices.size(); i++) {
+  for (std::size_t i = 0; i < vIndices.size(); i++) {
     int idx = vIndices[i];
 
     bearingVecs.push_back(mvBearingVecs[idx]);
@@ -357,7 +357,7 @@ void MLPnPsolver::computePose(
   const std::vector<int>& indices,
   transformation_t&       result
 ) {
-  size_t numberCorrespondences = indices.size();
+  std::size_t numberCorrespondences = indices.size();
   assert(numberCorrespondences > 5);
 
   bool planar = false;
@@ -366,7 +366,7 @@ void MLPnPsolver::computePose(
   Eigen::MatrixXd              points3(3, numberCorrespondences);
   points_t                     points3v(numberCorrespondences);
   points4_t                    points4v(numberCorrespondences);
-  for (size_t i = 0; i < numberCorrespondences; i++) {
+  for (std::size_t i = 0; i < numberCorrespondences; i++) {
     bearingVector_t f_current = f[indices[i]];
     points3.col(i)            = p[indices[i]];
     // nullspace of right vector
@@ -398,7 +398,7 @@ void MLPnPsolver::computePose(
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigen_solver(planarTest);
     eigenRot = eigen_solver.eigenvectors().real();
     eigenRot.transposeInPlace();
-    for (size_t i = 0; i < numberCorrespondences; i++) {
+    for (std::size_t i = 0; i < numberCorrespondences; i++) {
       points3.col(i) = eigenRot * points3.col(i);
     }
   }
@@ -414,7 +414,7 @@ void MLPnPsolver::computePose(
   if (covMats.size() == numberCorrespondences) {
     use_cov = true;
     int l   = 0;
-    for (size_t i = 0; i < numberCorrespondences; ++i) {
+    for (std::size_t i = 0; i < numberCorrespondences; ++i) {
       // invert matrix
       cov2_mat_t temp          = nullspaces[i].transpose() * covMats[i] * nullspaces[i];
       temp                     = temp.inverse().eval();
@@ -442,7 +442,7 @@ void MLPnPsolver::computePose(
 
   // fill design matrix
   if (planar) {
-    for (size_t i = 0; i < numberCorrespondences; ++i) {
+    for (std::size_t i = 0; i < numberCorrespondences; ++i) {
       point_t pt3_current = points3.col(i);
 
       // r12
@@ -474,7 +474,7 @@ void MLPnPsolver::computePose(
       A(2 * i + 1, 8) = nullspaces[i](2, 1);
     }
   } else {
-    for (size_t i = 0; i < numberCorrespondences; ++i) {
+    for (std::size_t i = 0; i < numberCorrespondences; ++i) {
       point_t pt3_current = points3.col(i);
 
       // r11
@@ -535,8 +535,7 @@ void MLPnPsolver::computePose(
   ////////////////////////////////
   rotation_t    Rout;
   translation_t tout;
-  if (planar) // planar case
-  {
+  if (planar) { // planar case
     rotation_t tmp;
     // until now, we only estimated
     // row one and two of the transposed rotation matrix
@@ -572,7 +571,7 @@ void MLPnPsolver::computePose(
     R2.col(1) = -Rout1.col(1);
     R2.col(2) = Rout1.col(2);
 
-    vector<transformation_t, Eigen::aligned_allocator<transformation_t>> Ts(4);
+    std::vector<transformation_t, Eigen::aligned_allocator<transformation_t>> Ts(4);
     Ts[0].block<3, 3>(0, 0) = R1;
     Ts[0].block<3, 1>(0, 3) = t;
     Ts[1].block<3, 3>(0, 0) = R1;
@@ -582,7 +581,7 @@ void MLPnPsolver::computePose(
     Ts[3].block<3, 3>(0, 0) = R2;
     Ts[3].block<3, 1>(0, 3) = -t;
 
-    vector<double> normVal(4);
+    std::vector<double> normVal(4);
     for (int i = 0; i < 4; ++i) {
       point_t reproPt;
       double  norms = 0.0;
@@ -598,8 +597,7 @@ void MLPnPsolver::computePose(
     int idx = std::distance(std::begin(normVal), findMinRepro);
     Rout    = Ts[idx].block<3, 3>(0, 0);
     tout    = Ts[idx].block<3, 1>(0, 3);
-  } else // non-planar
-  {
+  } else { // non-planar
     rotation_t tmp;
     tmp << result1(0, 0), result1(3, 0), result1(6, 0), result1(1, 0), result1(4, 0), result1(7, 0),
       result1(2, 0), result1(5, 0), result1(8, 0);
@@ -619,8 +617,8 @@ void MLPnPsolver::computePose(
     tout = Rout * (scale * translation_t(result1(9, 0), result1(10, 0), result1(11, 0)));
 
     // find correct direction in terms of reprojection error, just take the first 6 correspondences
-    vector<double>                                                     error(2);
-    vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>> Ts(2);
+    std::vector<double>                                                     error(2);
+    std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>> Ts(2);
     for (int s = 0; s < 2; ++s) {
       error[s]                = 0.0;
       Ts[s]                   = Eigen::Matrix4d::Identity();
@@ -888,7 +886,7 @@ void MLPnPsolver::mlpnpJacs(
   double t43  = t42 + 1.0;
   double t44  = Z1 * t43;
   double t23  = t3 - t39 + t41 + t44;
-  double t25  = 1.0 / pow(t8, 3.0 / 2.0);
+  double t25  = 1.0 / std::pow(t8, 3.0 / 2.0);
   double t26  = 1.0 / (t8 * t8);
   double t35  = t12 * t14 * w1 * w2;
   double t36  = t5 * t10 * t25 * w3;
@@ -952,7 +950,7 @@ void MLPnPsolver::mlpnpJacs(
   double t98  = t6 * t10 * t25 * w1;
   double t99  = t6 * t13 * t26 * w1 * 2.0;
   double t100 = t6 * t10 * t25;
-  double t101 = 1.0 / pow(t63, 3.0 / 2.0);
+  double t101 = 1.0 / std::pow(t63, 3.0 / 2.0);
   double t111 = t6 * t12 * t14;
   double t112 = t10 * t25 * w2 * w3;
   double t113 = t12 * t14 * w1 * w3;
