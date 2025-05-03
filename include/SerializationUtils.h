@@ -22,10 +22,8 @@
 
 #include <vector>
 #include <Eigen/Core>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
+#include <boost/serialization/array_wrapper.hpp>
+#include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
 
 namespace ORB_SLAM3 {
