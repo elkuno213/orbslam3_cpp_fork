@@ -134,7 +134,7 @@ private:
   int mMaxIterations;
 
   // Ransac sets
-  std::vector<std::vector<size_t> > mvSets;
+  std::vector<std::vector<std::size_t> > mvSets;
 };
 
 } // namespace ORB_SLAM3
