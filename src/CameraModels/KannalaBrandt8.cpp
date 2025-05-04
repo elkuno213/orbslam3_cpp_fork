@@ -19,6 +19,7 @@
 
 #include "KannalaBrandt8.h"
 #include <cassert>
+#include <opencv2/calib3d.hpp>
 #include "TwoViewReconstruction.h"
 
 // BOOST_CLASS_EXPORT_IMPLEMENT(ORB_SLAM3::KannalaBrandt8)

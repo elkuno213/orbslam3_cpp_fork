@@ -18,9 +18,11 @@
  */
 
 #include "TwoViewReconstruction.h"
+#include <algorithm>
+#include <cmath>
+#include <numeric>
 #include <thread>
 #include <Thirdparty/DBoW2/DUtils/Random.h>
-#include "Converter.h"
 #include "GeometricTools.h"
 
 namespace ORB_SLAM3 {
