@@ -4,6 +4,7 @@ This is a modernized fork of the [original ORB-SLAM3](https://github.com/UZ-SLAM
 
 ## Key Improvements
 
+- Optimized include directives to reduce compilation time and improve build efficiency.
 - Refactored codebase for clarity, modularity, and maintainability.
 - Updated to use C++20 features and modern best practices.
 - Improved documentation and code comments.
