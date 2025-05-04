@@ -17,48 +17,44 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include "System.h"
 
-using namespace std;
-
 void LoadImages(
-  const string&   strImagePath,
-  const string&   strPathTimes,
-  vector<string>& vstrImages,
-  vector<double>& vTimeStamps
+  const std::string&        strImagePath,
+  const std::string&        strPathTimes,
+  std::vector<std::string>& vstrImages,
+  std::vector<double>&      vTimeStamps
 );
 
 int main(int argc, char** argv) {
   if (argc < 5) {
-    cerr << endl
-         << "Usage: ./mono_euroc path_to_vocabulary path_to_settings path_to_sequence_folder_1 "
-            "path_to_times_file_1 (path_to_image_folder_2 path_to_times_file_2 ... "
-            "path_to_image_folder_N path_to_times_file_N) (trajectory_file_name)"
-         << endl;
+    std::cerr
+      << std::endl
+      << "Usage: ./mono_euroc path_to_vocabulary path_to_settings path_to_sequence_folder_1 "
+         "path_to_times_file_1 (path_to_image_folder_2 path_to_times_file_2 ... "
+         "path_to_image_folder_N path_to_times_file_N) (trajectory_file_name)"
+      << std::endl;
     return 1;
   }
 
   const int num_seq = (argc - 3) / 2;
-  cout << "num_seq = " << num_seq << endl;
-  bool   bFileName = (((argc - 3) % 2) == 1);
-  string file_name;
+  std::cout << "num_seq = " << num_seq << std::endl;
+  bool        bFileName = (((argc - 3) % 2) == 1);
+  std::string file_name;
   if (bFileName) {
-    file_name = string(argv[argc - 1]);
-    cout << "file name: " << file_name << endl;
+    file_name = std::string(argv[argc - 1]);
+    std::cout << "file name: " << file_name << std::endl;
   }
 
   // Load all sequences:
-  int                     seq;
-  vector<vector<string> > vstrImageFilenames;
-  vector<vector<double> > vTimestampsCam;
-  vector<int>             nImages;
+  int                               seq;
+  std::vector<vector<std::string> > vstrImageFilenames;
+  std::vector<vector<double> >      vTimestampsCam;
+  std::vector<int>                  nImages;
 
   vstrImageFilenames.resize(num_seq);
   vTimestampsCam.resize(num_seq);
@@ -66,25 +62,25 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    cout << "Loading images for sequence " << seq << "...";
+    std::cout << "Loading images for sequence " << seq << "...";
     LoadImages(
-      string(argv[(2 * seq) + 3]) + "/mav0/cam0/data",
-      string(argv[(2 * seq) + 4]),
+      std::string(argv[(2 * seq) + 3]) + "/mav0/cam0/data",
+      std::string(argv[(2 * seq) + 4]),
       vstrImageFilenames[seq],
       vTimestampsCam[seq]
     );
-    cout << "LOADED!" << endl;
+    std::cout << "LOADED!" << std::endl;
 
     nImages[seq] = vstrImageFilenames[seq].size();
     tot_images   += nImages[seq];
   }
 
   // Vector for tracking time statistics
-  vector<float> vTimesTrack;
+  std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
 
-  cout << endl << "-------" << endl;
-  cout.precision(17);
+  std::cout << std::endl << "-------" << std::endl;
+  std::cout.precision(17);
 
   int   fps = 20;
   float dT  = 1.f / fps;
@@ -108,7 +104,8 @@ int main(int argc, char** argv) {
       double tframe = vTimestampsCam[seq][ni];
 
       if (im.empty()) {
-        cerr << endl << "Failed to load image at: " << vstrImageFilenames[seq][ni] << endl;
+        std::cerr << std::endl
+                  << "Failed to load image at: " << vstrImageFilenames[seq][ni] << std::endl;
         return 1;
       }
 
@@ -145,7 +142,7 @@ int main(int argc, char** argv) {
 #endif
 
       // Pass the image to the SLAM system
-      // cout << "tframe = " << tframe << endl;
+      // std::cout << "tframe = " << tframe << std::endl;
       SLAM.TrackMonocular(im, tframe); // TODO change to monocular_inertial
 
 #ifdef COMPILEDWITHC11
@@ -183,12 +180,12 @@ int main(int argc, char** argv) {
     }
 
     if (seq < num_seq - 1) {
-      string kf_file_submap = "./SubMaps/kf_SubMap_" + std::to_string(seq) + ".txt";
-      string f_file_submap  = "./SubMaps/f_SubMap_" + std::to_string(seq) + ".txt";
+      std::string kf_file_submap = "./SubMaps/kf_SubMap_" + std::to_string(seq) + ".txt";
+      std::string f_file_submap  = "./SubMaps/f_SubMap_" + std::to_string(seq) + ".txt";
       SLAM.SaveTrajectoryEuRoC(f_file_submap);
       SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file_submap);
 
-      cout << "Changing the dataset" << endl;
+      std::cout << "Changing the dataset" << std::endl;
 
       SLAM.ChangeDataset();
     }
@@ -198,8 +195,8 @@ int main(int argc, char** argv) {
 
   // Save camera trajectory
   if (bFileName) {
-    const string kf_file = "kf_" + string(argv[argc - 1]) + ".txt";
-    const string f_file  = "f_" + string(argv[argc - 1]) + ".txt";
+    const std::string kf_file = "kf_" + std::string(argv[argc - 1]) + ".txt";
+    const std::string f_file  = "f_" + std::string(argv[argc - 1]) + ".txt";
     SLAM.SaveTrajectoryEuRoC(f_file);
     SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file);
   } else {
@@ -211,20 +208,20 @@ int main(int argc, char** argv) {
 }
 
 void LoadImages(
-  const string&   strImagePath,
-  const string&   strPathTimes,
-  vector<string>& vstrImages,
-  vector<double>& vTimeStamps
+  const std::string&        strImagePath,
+  const std::string&        strPathTimes,
+  std::vector<std::string>& vstrImages,
+  std::vector<double>&      vTimeStamps
 ) {
-  ifstream fTimes;
+  std::ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);
   vstrImages.reserve(5000);
   while (!fTimes.eof()) {
-    string s;
-    getline(fTimes, s);
+    std::string s;
+    std::getline(fTimes, s);
     if (!s.empty()) {
-      stringstream ss;
+      std::stringstream ss;
       ss << s;
       vstrImages.push_back(strImagePath + "/" + ss.str() + ".png");
       double t;

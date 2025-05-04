@@ -17,22 +17,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <iostream>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
 #include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
-#include "../../../include/System.h"
-#include "../include/ImuTypes.h"
-
-using namespace std;
+#include "ImuTypes.h"
+#include "System.h"
 
 class ImuGrabber {
 public:
@@ -73,10 +65,10 @@ int main(int argc, char** argv) {
   ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
   bool bEqual = false;
   if (argc < 4 || argc > 5) {
-    cerr << endl
-         << "Usage: rosrun ORB_SLAM3 Stereo_Inertial path_to_vocabulary path_to_settings "
-            "do_rectify [do_equalize]"
-         << endl;
+    std::cerr << std::endl
+              << "Usage: rosrun ORB_SLAM3 Stereo_Inertial path_to_vocabulary path_to_settings "
+                 "do_rectify [do_equalize]"
+              << std::endl;
     ros::shutdown();
     return 1;
   }
@@ -99,7 +91,7 @@ int main(int argc, char** argv) {
     // Load settings related to stereo calibration
     cv::FileStorage fsSettings(argv[2], cv::FileStorage::READ);
     if (!fsSettings.isOpened()) {
-      cerr << "ERROR: Wrong path to settings" << endl;
+      std::cerr << "ERROR: Wrong path to settings" << std::endl;
       return -1;
     }
 
@@ -124,7 +116,7 @@ int main(int argc, char** argv) {
     if(K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() || R_r.empty() || D_l.empty() || D_r.empty() ||
                 rows_l==0 || rows_r==0 || cols_l==0 || cols_r==0)
         {
-      cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << endl;
+      std::cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << std::endl;
       return -1;
     }
 
@@ -240,7 +232,7 @@ void ImageGrabber::SyncWithImu() {
       imgRightBuf.pop();
       this->mBufMutexRight.unlock();
 
-      vector<ORB_SLAM3::IMU::Point> vImuMeas;
+      std::vector<ORB_SLAM3::IMU::Point> vImuMeas;
       mpImuGb->mBufMutex.lock();
       if (!mpImuGb->imuBuf.empty()) {
         // Load imu measurements from buffer

@@ -17,19 +17,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <iostream>
 #include <cv_bridge/cv_bridge.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/time_synchronizer.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/core.hpp>
 #include <ros/ros.h>
-#include "../../../include/System.h"
-
-using namespace std;
+#include "System.h"
 
 class ImageGrabber {
 public:
@@ -50,8 +46,9 @@ int main(int argc, char** argv) {
   ros::start();
 
   if (argc != 4) {
-    cerr << endl
-         << "Usage: rosrun ORB_SLAM3 Stereo path_to_vocabulary path_to_settings do_rectify" << endl;
+    std::cerr << std::endl
+              << "Usage: rosrun ORB_SLAM3 Stereo path_to_vocabulary path_to_settings do_rectify"
+              << std::endl;
     ros::shutdown();
     return 1;
   }
@@ -61,14 +58,14 @@ int main(int argc, char** argv) {
 
   ImageGrabber igb(&SLAM);
 
-  stringstream ss(argv[3]);
-  ss >> boolalpha >> igb.do_rectify;
+  std::stringstream ss(argv[3]);
+  ss >> std::boolalpha >> igb.do_rectify;
 
   if (igb.do_rectify) {
     // Load settings related to stereo calibration
     cv::FileStorage fsSettings(argv[2], cv::FileStorage::READ);
     if (!fsSettings.isOpened()) {
-      cerr << "ERROR: Wrong path to settings" << endl;
+      std::cerr << "ERROR: Wrong path to settings" << std::endl;
       return -1;
     }
 
@@ -93,7 +90,7 @@ int main(int argc, char** argv) {
     if(K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() || R_r.empty() || D_l.empty() || D_r.empty() ||
                 rows_l==0 || rows_r==0 || cols_l==0 || cols_r==0)
         {
-      cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << endl;
+      std::cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << std::endl;
       return -1;
     }
 

@@ -17,19 +17,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <iostream>
 #include <cv_bridge/cv_bridge.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/time_synchronizer.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <ros/ros.h>
-#include "../../../include/System.h"
-
-using namespace std;
+#include "System.h"
 
 class ImageGrabber {
 public:
@@ -46,7 +41,8 @@ int main(int argc, char** argv) {
   ros::start();
 
   if (argc != 3) {
-    cerr << endl << "Usage: rosrun ORB_SLAM3 RGBD path_to_vocabulary path_to_settings" << endl;
+    std::cerr << std::endl
+              << "Usage: rosrun ORB_SLAM3 RGBD path_to_vocabulary path_to_settings" << std::endl;
     ros::shutdown();
     return 1;
   }

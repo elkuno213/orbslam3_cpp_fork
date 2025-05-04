@@ -17,22 +17,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <iostream>
-#include <mutex>
-#include <queue>
-#include <thread>
 #include <vector>
 #include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
-#include "../../../include/System.h"
-#include "../include/ImuTypes.h"
-
-using namespace std;
+#include "ImuTypes.h"
+#include "System.h"
 
 class ImuGrabber {
 public:
@@ -69,10 +61,10 @@ int main(int argc, char** argv) {
   ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
   bool bEqual = false;
   if (argc < 3 || argc > 4) {
-    cerr
-      << endl
+    std::cerr
+      << std::endl
       << "Usage: rosrun ORB_SLAM3 Mono_Inertial path_to_vocabulary path_to_settings [do_equalize]"
-      << endl;
+      << std::endl;
     ros::shutdown();
     return 1;
   }
@@ -143,7 +135,7 @@ void ImageGrabber::SyncWithImu() {
         this->mBufMutex.unlock();
       }
 
-      vector<ORB_SLAM3::IMU::Point> vImuMeas;
+      std::vector<ORB_SLAM3::IMU::Point> vImuMeas;
       mpImuGb->mBufMutex.lock();
       if (!mpImuGb->imuBuf.empty()) {
         // Load imu measurements from buffer

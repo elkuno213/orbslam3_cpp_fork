@@ -17,27 +17,18 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
 #include <condition_variable>
 #include <csignal>
-#include <cstdlib>
-#include <ctime>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <librealsense2/rs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include "ImuTypes.h"
 #include "System.h"
 
-using namespace std;
-
 bool b_continue_session;
 
 void exit_loop_handler(int s) {
-  cout << "Finishing session" << endl;
+  std::cout << "Finishing session" << std::endl;
   b_continue_session = false;
 }
 
@@ -51,18 +42,18 @@ rs2_vector interpolateMeasure(
 
 int main(int argc, char** argv) {
   if (argc < 3 || argc > 4) {
-    cerr << endl
-         << "Usage: ./mono_inertial_realsense_t265 path_to_vocabulary path_to_settings "
-            "(trajectory_file_name)"
-         << endl;
+    std::cerr << std::endl
+              << "Usage: ./mono_inertial_realsense_t265 path_to_vocabulary path_to_settings "
+                 "(trajectory_file_name)"
+              << std::endl;
     return 1;
   }
 
-  string file_name;
-  bool   bFileName = false;
+  std::string file_name;
+  bool        bFileName = false;
 
   if (argc == 4) {
-    file_name = string(argv[argc - 1]);
+    file_name = std::string(argv[argc - 1]);
     bFileName = true;
   }
 
@@ -96,17 +87,17 @@ int main(int argc, char** argv) {
   std::mutex              imu_mutex;
   std::condition_variable cond_image_rec;
 
-  vector<double>     v_accel_timestamp;
-  vector<rs2_vector> v_accel_data;
-  vector<double>     v_gyro_timestamp;
-  vector<rs2_vector> v_gyro_data;
+  std::vector<double>     v_accel_timestamp;
+  std::vector<rs2_vector> v_accel_data;
+  std::vector<double>     v_gyro_timestamp;
+  std::vector<rs2_vector> v_gyro_data;
 
-  double             prev_accel_timestamp = 0;
-  rs2_vector         prev_accel_data;
-  double             current_accel_timestamp = 0;
-  rs2_vector         current_accel_data;
-  vector<double>     v_accel_timestamp_sync;
-  vector<rs2_vector> v_accel_data_sync;
+  double                  prev_accel_timestamp = 0;
+  rs2_vector              prev_accel_data;
+  double                  current_accel_timestamp = 0;
+  rs2_vector              current_accel_data;
+  std::vector<double>     v_accel_timestamp_sync;
+  std::vector<rs2_vector> v_accel_data_sync;
 
   cv::Mat imCV, imCV_right;
   int     width_img, height_img; // width_img = 848, height_img = 800;
@@ -121,8 +112,8 @@ int main(int argc, char** argv) {
       count_im_buffer++;
 
       double new_timestamp_image = fs.get_timestamp() * 1e-3;
-      if (abs(timestamp_image - new_timestamp_image) < 0.001) {
-        // cout << "Two frames with the same timeStamp!!!\n";
+      if (std::abs(timestamp_image - new_timestamp_image) < 0.001) {
+        // std::cout << "Two frames with the same timeStamp!!!\n";
         count_im_buffer--;
         return;
       }
@@ -218,7 +209,7 @@ int main(int argc, char** argv) {
   std::cout << " Model = " << intrinsics_cam.model << std::endl;
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  vector<ORB_SLAM3::IMU::Point> vImuMeas;
+  std::vector<ORB_SLAM3::IMU::Point> vImuMeas;
 
   double  timestamp;
   cv::Mat im;
@@ -253,7 +244,7 @@ int main(int argc, char** argv) {
 #endif
 
       if (count_im_buffer > 1) {
-        cout << count_im_buffer - 1 << " dropped frs\n";
+        std::cout << count_im_buffer - 1 << " dropped frs\n";
       }
       count_im_buffer = 0;
 
@@ -329,11 +320,11 @@ int main(int argc, char** argv) {
       );
       vImuMeas.push_back(lastPoint);
 
-      if(isnan(vAccel[i].x) || isnan(vAccel[i].y) || isnan(vAccel[i].z) ||
-               isnan(vGyro[i].x) || isnan(vGyro[i].y) || isnan(vGyro[i].z) ||
-               isnan(vGyro_times[i])){
-        // cerr << "NAN AT MAIN" << endl;
-        exit(-1);
+      if(std::isnan(vAccel[i].x) || std::isnan(vAccel[i].y) || std::isnan(vAccel[i].z) ||
+               std::isnan(vGyro[i].x) || std::isnan(vGyro[i].y) || std::isnan(vGyro[i].z) ||
+               std::isnan(vGyro_times[i])){
+        // std::cerr << "NAN AT MAIN" << std::endl;
+        std::exit(-1);
       }
     }
 
@@ -369,8 +360,8 @@ int main(int argc, char** argv) {
     )
                         .count();
 
-    // cout << "Time process: " << timeProcess << endl;
-    // cout << "Time SLAM: " << timeSLAM << endl;
+    // std::cout << "Time process: " << timeProcess << std::endl;
+    // std::cout << "Time SLAM: " << timeSLAM << std::endl;
 
     // Clear the previous IMU measurements to load the new ones
     vImuMeas.clear();

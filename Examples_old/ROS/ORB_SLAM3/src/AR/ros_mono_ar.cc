@@ -17,18 +17,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <iostream>
+#include <thread>
 #include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <ros/ros.h>
-#include "../../../include/System.h"
+#include "System.h"
 #include "ViewerAR.h"
-
-using namespace std;
 
 ORB_SLAM3::ViewerAR viewerAR;
 bool                bRGB = true;
@@ -51,7 +47,8 @@ int main(int argc, char** argv) {
   ros::start();
 
   if (argc != 3) {
-    cerr << endl << "Usage: rosrun ORB_SLAM3 Mono path_to_vocabulary path_to_settings" << endl;
+    std::cerr << std::endl
+              << "Usage: rosrun ORB_SLAM3 Mono path_to_vocabulary path_to_settings" << std::endl;
     ros::shutdown();
     return 1;
   }
@@ -59,16 +56,16 @@ int main(int argc, char** argv) {
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::MONOCULAR, false);
 
-  cout << endl << endl;
-  cout << "-----------------------" << endl;
-  cout << "Augmented Reality Demo" << endl;
-  cout << "1) Translate the camera to initialize SLAM." << endl;
-  cout << "2) Look at a planar region and translate the camera." << endl;
-  cout << "3) Press Insert Cube to place a virtual cube in the plane. " << endl;
-  cout << endl;
-  cout << "You can place several cubes in different planes." << endl;
-  cout << "-----------------------" << endl;
-  cout << endl;
+  std::cout << std::endl << std::endl;
+  std::cout << "-----------------------" << std::endl;
+  std::cout << "Augmented Reality Demo" << std::endl;
+  std::cout << "1) Translate the camera to initialize SLAM." << std::endl;
+  std::cout << "2) Look at a planar region and translate the camera." << std::endl;
+  std::cout << "3) Press Insert Cube to place a virtual cube in the plane. " << std::endl;
+  std::cout << std::endl;
+  std::cout << "You can place several cubes in different planes." << std::endl;
+  std::cout << "-----------------------" << std::endl;
+  std::cout << std::endl;
 
   viewerAR.SetSLAM(&SLAM);
 
@@ -107,7 +104,7 @@ int main(int argc, char** argv) {
     DistCoef.at<float>(4) = k3;
   }
 
-  thread tViewer = thread(&ORB_SLAM3::ViewerAR::Run, &viewerAR);
+  std::thread tViewer = std::thread(&ORB_SLAM3::ViewerAR::Run, &viewerAR);
 
   ros::spin();
 
@@ -135,8 +132,8 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg) {
   cv::Mat imu;
   cv::Mat Tcw   = mpSLAM->TrackMonocular(cv_ptr->image, cv_ptr->header.stamp.toSec());
   int     state = mpSLAM->GetTrackingState();
-  vector<ORB_SLAM3::MapPoint*> vMPs  = mpSLAM->GetTrackedMapPoints();
-  vector<cv::KeyPoint>         vKeys = mpSLAM->GetTrackedKeyPointsUn();
+  std::vector<ORB_SLAM3::MapPoint*> vMPs  = mpSLAM->GetTrackedMapPoints();
+  std::vector<cv::KeyPoint>         vKeys = mpSLAM->GetTrackedKeyPointsUn();
 
   cv::undistort(im, imu, K, DistCoef);
 

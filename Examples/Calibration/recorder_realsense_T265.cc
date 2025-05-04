@@ -17,23 +17,16 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
 #include <condition_variable>
 #include <csignal>
-#include <cstdlib>
-#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rsutil.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-using namespace std;
+#include <opencv2/imgproc.hpp>
 
 bool b_continue_session;
 
@@ -42,7 +35,7 @@ const int   colsRedIm       = reductionFactor * 848;
 const int   rowsRedIm       = reductionFactor * 800;
 
 void exit_loop_handler(int s) {
-  cout << "Finishing session" << endl;
+  std::cout << "Finishing session" << std::endl;
   b_continue_session = false;
 }
 
@@ -56,7 +49,7 @@ static rs2_option get_sensor_option(const rs2::sensor& sensor) {
   // Starting from 0 until RS2_OPTION_COUNT (exclusive)
   for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); i++) {
     rs2_option option_type = static_cast<rs2_option>(i);
-    // SDK enum types can be streamed to get a string that represents them
+    // SDK enum types can be streamed to get a std::string that represents them
     std::cout << "  " << i << ": " << option_type;
 
     // To control an option, use the following api:
@@ -85,11 +78,12 @@ static rs2_option get_sensor_option(const rs2::sensor& sensor) {
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    cerr << endl << "Usage: ./recorder_realsense_D435i path_to_saving_folder" << endl;
+    std::cerr << std::endl
+              << "Usage: ./recorder_realsense_D435i path_to_saving_folder" << std::endl;
     return 1;
   }
 
-  string directory = string(argv[argc - 1]);
+  std::string directory = std::string(argv[argc - 1]);
 
   struct sigaction sigIntHandler;
 
@@ -115,10 +109,10 @@ int main(int argc, char** argv) {
   std::mutex              imu_mutex;
   std::condition_variable cond_image_rec;
 
-  vector<double>     v_gyro_timestamp;
-  vector<rs2_vector> v_gyro_data;
-  vector<double>     v_acc_timestamp;
-  vector<rs2_vector> v_acc_data;
+  std::vector<double>     v_gyro_timestamp;
+  std::vector<rs2_vector> v_gyro_data;
+  std::vector<double>     v_acc_timestamp;
+  std::vector<rs2_vector> v_acc_data;
 
   cv::Mat imCV_left, imCV_right;
   int     width_img, height_img;
@@ -171,18 +165,18 @@ int main(int argc, char** argv) {
   width_img                     = intrinsics_cam.width;
   height_img                    = intrinsics_cam.height;
 
-  cv::Mat  imLeft, imRight;
-  ofstream accFile, gyroFile, cam0TsFile, cam1TsFile;
+  cv::Mat       imLeft, imRight;
+  std::ofstream accFile, gyroFile, cam0TsFile, cam1TsFile;
   accFile.open(directory + "/IMU/acc.txt");
   gyroFile.open(directory + "/IMU/gyro.txt");
   cam0TsFile.open(directory + "/cam0/times.txt");
   cam1TsFile.open(directory + "/cam1/times.txt");
 
-  cout << directory + "/IMU/acc.txt" << endl;
+  std::cout << directory + "/IMU/acc.txt" << std::endl;
 
   if (!accFile.is_open() || !gyroFile.is_open() || !cam0TsFile.is_open()) {
-    cerr << "FILES NOT OPENED" << endl;
-    exit(-1);
+    std::cerr << "FILES NOT OPENED" << std::endl;
+    std::exit(-1);
   }
 
   // Clear IMU vectors
@@ -236,21 +230,21 @@ int main(int argc, char** argv) {
     cv::imshow("cam1", imRight);
 
     // save image and IMU data
-    long int imTsInt     = (long int)(1e9 * imTs);
-    string   imgRepoLeft = directory + "/cam0/" + to_string(imTsInt) + ".png";
+    long int    imTsInt     = (long int)(1e9 * imTs);
+    std::string imgRepoLeft = directory + "/cam0/" + std::to_string(imTsInt) + ".png";
     if (!imLeft.empty()) {
       cv::imwrite(imgRepoLeft, imLeft);
-      cam0TsFile << imTsInt << endl;
+      cam0TsFile << imTsInt << std::endl;
     } else {
-      cout << " left image empty!! \n";
+      std::cout << " left image empty!! \n";
     }
 
-    string imgRepoRight = directory + "/cam1/" + to_string(imTsInt) + ".png";
+    std::string imgRepoRight = directory + "/cam1/" + std::to_string(imTsInt) + ".png";
     if (!imRight.empty()) {
       cv::imwrite(imgRepoRight, imRight);
-      cam1TsFile << imTsInt << endl;
+      cam1TsFile << imTsInt << std::endl;
     } else {
-      cout << "right image empty!! \n";
+      std::cout << "right image empty!! \n";
     }
 
     // assert(vAccel.size() == vAccel_times.size());
@@ -258,12 +252,12 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < vAccel.size(); ++i) {
       accFile << std::setprecision(15) << vAccel_times[i] << "," << vAccel[i].x << ","
-              << vAccel[i].y << "," << vAccel[i].z << endl;
+              << vAccel[i].y << "," << vAccel[i].z << std::endl;
     }
 
     for (int i = 0; i < vGyro.size(); ++i) {
       gyroFile << std::setprecision(15) << vGyro_times[i] << "," << vGyro[i].x << "," << vGyro[i].y
-               << "," << vGyro[i].z << endl;
+               << "," << vGyro[i].z << std::endl;
     }
 
     cv::waitKey(10);
@@ -274,5 +268,5 @@ int main(int argc, char** argv) {
   cam0TsFile.close();
   cam1TsFile.close();
 
-  cout << "System shutdown!\n";
+  std::cout << "System shutdown!\n";
 }

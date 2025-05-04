@@ -17,42 +17,33 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
 #include <csignal>
-#include <cstdlib>
-#include <ctime>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <librealsense2/rs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include "System.h"
 
-using namespace std;
-
 bool b_continue_session;
 
 void exit_loop_handler(int s) {
-  cout << "Finishing session" << endl;
+  std::cout << "Finishing session" << std::endl;
   b_continue_session = false;
 }
 
 int main(int argc, char** argv) {
   if (argc < 3 || argc > 4) {
-    cerr
-      << endl
+    std::cerr
+      << std::endl
       << "Usage: ./mono_realsense_t265 path_to_vocabulary path_to_settings (trajectory_file_name)"
-      << endl;
+      << std::endl;
     return 1;
   }
 
-  string file_name;
-  bool   bFileName = false;
+  std::string file_name;
+  bool        bFileName = false;
 
   if (argc == 4) {
-    file_name = string(argv[argc - 1]);
+    file_name = std::string(argv[argc - 1]);
     bFileName = true;
   }
 
@@ -76,11 +67,11 @@ int main(int argc, char** argv) {
 
   rs2::pipeline_profile pipe_profile = pipe.start(cfg);
 
-  cout.precision(17);
+  std::cout.precision(17);
 
-  /*cout << "Start processing sequence ..." << endl;
-  cout << "Images in the sequence: " << nImages << endl;
-  cout << "IMU data in the sequence: " << nImu << endl << endl;*/
+  /*cout << "Start processing sequence ..." << std::endl;
+  std::cout << "Images in the sequence: " << nImages << std::endl;
+  std::cout << "IMU data in the sequence: " << nImu << std::endl << std::endl;*/
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::MONOCULAR, true);
@@ -102,7 +93,7 @@ int main(int argc, char** argv) {
     rs2::frameset frame_set = pipe.wait_for_frames();
 
     double timestamp_ms = frame_set.get_timestamp(); // RS2_FRAME_METADATA_SENSOR_TIMESTAMP
-    // cout << "timestamp: " << timestamp_ms << endl;
+    // std::cout << "timestamp: " << timestamp_ms << std::endl;
 
     if (rs2::video_frame image_frame = frame_set.first_or_default(RS2_STREAM_FISHEYE)) {
       rs2::video_frame frame = frame_set.get_fisheye_frame(1); // Left image

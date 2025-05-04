@@ -21,9 +21,9 @@
 #include <cstdlib>
 #include <mutex>
 #include <thread>
-#include <opencv2/highgui/highgui.hpp>
-
-using namespace std;
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include "MapPoint.h"
 
 namespace ORB_SLAM3 {
 
@@ -32,12 +32,12 @@ const float eps = 1e-4;
 cv::Mat ExpSO3(const float& x, const float& y, const float& z) {
   cv::Mat     I  = cv::Mat::eye(3, 3, CV_32F);
   const float d2 = x * x + y * y + z * z;
-  const float d  = sqrt(d2);
+  const float d  = std::sqrt(d2);
   cv::Mat     W  = (cv::Mat_<float>(3, 3) << 0, -z, y, z, 0, -x, -y, x, 0);
   if (d < eps) {
     return (I + W + 0.5f * W * W);
   } else {
-    return (I + W * sin(d) / d + W * W * (1.0f - cos(d)) / d2);
+    return (I + W * std::sin(d) / d + W * W * (1.0f - std::cos(d)) / d2);
   }
 }
 
@@ -51,10 +51,10 @@ ViewerAR::ViewerAR() {
 void ViewerAR::Run() {
   int w, h, wui;
 
-  cv::Mat              im, Tcw;
-  int                  status;
-  vector<cv::KeyPoint> vKeys;
-  vector<MapPoint*>    vMPs;
+  cv::Mat                   im, Tcw;
+  int                       status;
+  std::vector<cv::KeyPoint> vKeys;
+  std::vector<MapPoint*>    vMPs;
 
   while (1) {
     GetImagePose(im, Tcw, status, vKeys, vMPs);
@@ -97,7 +97,7 @@ void ViewerAR::Run() {
   pangolin::OpenGlMatrixSpec P
     = pangolin::ProjectionMatrixRDF_TopLeft(w, h, fx, fy, cx, cy, 0.001, 1000);
 
-  vector<Plane*> vpPlane;
+  std::vector<Plane*> vpPlane;
 
   while (1) {
     if (menu_LocalizationMode && !bLocalizationMode) {
@@ -144,21 +144,21 @@ void ViewerAR::Run() {
     if (status == 2) {
       if (menu_clear) {
         if (!vpPlane.empty()) {
-          for (size_t i = 0; i < vpPlane.size(); i++) {
+          for (std::size_t i = 0; i < vpPlane.size(); i++) {
             delete vpPlane[i];
           }
           vpPlane.clear();
-          cout << "All cubes erased!" << endl;
+          std::cout << "All cubes erased!" << std::endl;
         }
         menu_clear = false;
       }
       if (menu_detectplane) {
         Plane* pPlane = DetectPlane(Tcw, vMPs, 50);
         if (pPlane) {
-          cout << "New virtual cube inserted!" << endl;
+          std::cout << "New virtual cube inserted!" << std::endl;
           vpPlane.push_back(pPlane);
         } else {
-          cout << "No plane detected. Point the camera to a planar region." << endl;
+          std::cout << "No plane detected. Point the camera to a planar region." << std::endl;
         }
         menu_detectplane = false;
       }
@@ -169,12 +169,12 @@ void ViewerAR::Run() {
         bool bRecompute = false;
         if (!bLocalizationMode) {
           if (mpSystem->MapChanged()) {
-            cout << "Map changed. All virtual elements are recomputed!" << endl;
+            std::cout << "Map changed. All virtual elements are recomputed!" << std::endl;
             bRecompute = true;
           }
         }
 
-        for (size_t i = 0; i < vpPlane.size(); i++) {
+        for (std::size_t i = 0; i < vpPlane.size(); i++) {
           Plane* pPlane = vpPlane[i];
 
           if (pPlane) {
@@ -206,13 +206,13 @@ void ViewerAR::Run() {
 }
 
 void ViewerAR::SetImagePose(
-  const cv::Mat&                      im,
-  const cv::Mat&                      Tcw,
-  const int&                          status,
-  const vector<cv::KeyPoint>&         vKeys,
-  const vector<ORB_SLAM3::MapPoint*>& vMPs
+  const cv::Mat&                           im,
+  const cv::Mat&                           Tcw,
+  const int&                               status,
+  const std::vector<cv::KeyPoint>&         vKeys,
+  const std::vector<ORB_SLAM3::MapPoint*>& vMPs
 ) {
-  unique_lock<mutex> lock(mMutexPoseImage);
+  std::unique_lock<std::mutex> lock(mMutexPoseImage);
   mImage  = im.clone();
   mTcw    = Tcw.clone();
   mStatus = status;
@@ -227,7 +227,7 @@ void ViewerAR::GetImagePose(
   std::vector<cv::KeyPoint>& vKeys,
   std::vector<MapPoint*>&    vMPs
 ) {
-  unique_lock<mutex> lock(mMutexPoseImage);
+  std::unique_lock<std::mutex> lock(mMutexPoseImage);
   im     = mImage.clone();
   Tcw    = mTcw.clone();
   status = mStatus;
@@ -297,7 +297,9 @@ void ViewerAR::PrintStatus(const int& status, const bool& bLocMode, cv::Mat& im)
   }
 }
 
-void ViewerAR::AddTextToImage(const string& s, cv::Mat& im, const int r, const int g, const int b) {
+void ViewerAR::AddTextToImage(
+  const std::string& s, cv::Mat& im, const int r, const int g, const int b
+) {
   int l = 10;
   // imText.rowRange(im.rows-imText.rows,imText.rows) =
   // cv::Mat::zeros(textSize.height+10,im.cols,im.type());
@@ -463,12 +465,12 @@ Plane* ViewerAR::DetectPlane(
   const cv::Mat Tcw, const std::vector<MapPoint*>& vMPs, const int iterations
 ) {
   // Retrieve 3D points
-  vector<cv::Mat> vPoints;
+  std::vector<cv::Mat> vPoints;
   vPoints.reserve(vMPs.size());
-  vector<MapPoint*> vPointMP;
+  std::vector<MapPoint*> vPointMP;
   vPointMP.reserve(vMPs.size());
 
-  for (size_t i = 0; i < vMPs.size(); i++) {
+  for (std::size_t i = 0; i < vMPs.size(); i++) {
     MapPoint* pMP = vMPs[i];
     if (pMP) {
       if (pMP->Observations() > 5) {
@@ -485,16 +487,16 @@ Plane* ViewerAR::DetectPlane(
   }
 
   // Indices for minimum set selection
-  vector<size_t> vAllIndices;
+  std::vector<std::size_t> vAllIndices;
   vAllIndices.reserve(N);
-  vector<size_t> vAvailableIndices;
+  std::vector<std::size_t> vAvailableIndices;
 
   for (int i = 0; i < N; i++) {
     vAllIndices.push_back(i);
   }
 
-  float         bestDist = 1e10;
-  vector<float> bestvDist;
+  float              bestDist = 1e10;
+  std::vector<float> bestvDist;
 
   // RANSAC
   for (int n = 0; n < iterations; n++) {
@@ -523,22 +525,22 @@ Plane* ViewerAR::DetectPlane(
     const float c = vt.at<float>(3, 2);
     const float d = vt.at<float>(3, 3);
 
-    vector<float> vDistances(N, 0);
+    std::vector<float> vDistances(N, 0);
 
-    const float f = 1.0f / sqrt(a * a + b * b + c * c + d * d);
+    const float f = 1.0f / std::sqrt(a * a + b * b + c * c + d * d);
 
     for (int i = 0; i < N; i++) {
-      vDistances[i] = fabs(
+      vDistances[i] = std::fabs(
                         vPoints[i].at<float>(0) * a + vPoints[i].at<float>(1) * b
                         + vPoints[i].at<float>(2) * c + d
                       )
                     * f;
     }
 
-    vector<float> vSorted = vDistances;
-    sort(vSorted.begin(), vSorted.end());
+    std::vector<float> vSorted = vDistances;
+    std::sort(vSorted.begin(), vSorted.end());
 
-    int         nth        = max((int)(0.2 * N), 20);
+    int         nth        = std::max((int)(0.2 * N), 20);
     const float medianDist = vSorted[nth];
 
     if (medianDist < bestDist) {
@@ -548,9 +550,9 @@ Plane* ViewerAR::DetectPlane(
   }
 
   // Compute threshold inlier/outlier
-  const float  th = 1.4 * bestDist;
-  vector<bool> vbInliers(N, false);
-  int          nInliers = 0;
+  const float       th = 1.4 * bestDist;
+  std::vector<bool> vbInliers(N, false);
+  int               nInliers = 0;
   for (int i = 0; i < N; i++) {
     if (bestvDist[i] < th) {
       nInliers++;
@@ -558,8 +560,8 @@ Plane* ViewerAR::DetectPlane(
     }
   }
 
-  vector<MapPoint*> vInlierMPs(nInliers, NULL);
-  int               nin = 0;
+  std::vector<MapPoint*> vInlierMPs(nInliers, NULL);
+  int                    nin = 0;
   for (int i = 0; i < N; i++) {
     if (vbInliers[i]) {
       vInlierMPs[nin] = vPointMP[i];
@@ -572,7 +574,7 @@ Plane* ViewerAR::DetectPlane(
 
 Plane::Plane(const std::vector<MapPoint*>& vMPs, const cv::Mat& Tcw)
   : mvMPs(vMPs), mTcw(Tcw.clone()) {
-  rang = -3.14f / 2 + ((float)rand() / RAND_MAX) * 3.14f;
+  rang = -3.14f / 2 + ((float)std::rand() / RAND_MAX) * 3.14f;
   Recompute();
 }
 
@@ -605,7 +607,7 @@ void Plane::Recompute() {
   float c = vt.at<float>(3, 2);
 
   o             = o * (1.0f / nPoints);
-  const float f = 1.0f / sqrt(a * a + b * b + c * c);
+  const float f = 1.0f / std::sqrt(a * a + b * b + c * c);
 
   // Compute XC just the first time
   if (XC.empty()) {
@@ -630,7 +632,7 @@ void Plane::Recompute() {
   cv::Mat     v   = up.cross(n);
   const float sa  = cv::norm(v);
   const float ca  = up.dot(n);
-  const float ang = atan2(sa, ca);
+  const float ang = std::atan2(sa, ca);
   Tpw             = cv::Mat::eye(4, 4, CV_32F);
 
   Tpw.rowRange(0, 3).colRange(0, 3) = ExpSO3(v * ang / sa) * ExpSO3(up * rang);
@@ -673,10 +675,10 @@ Plane::Plane(
   cv::Mat     v    = up.cross(n);
   const float s    = cv::norm(v);
   const float c    = up.dot(n);
-  const float a    = atan2(s, c);
+  const float a    = std::atan2(s, c);
   Tpw              = cv::Mat::eye(4, 4, CV_32F);
-  const float rang = -3.14f / 2 + ((float)rand() / RAND_MAX) * 3.14f;
-  cout << rang;
+  const float rang = -3.14f / 2 + ((float)std::rand() / RAND_MAX) * 3.14f;
+  std::cout << rang;
   Tpw.rowRange(0, 3).colRange(0, 3) = ExpSO3(v * a / s) * ExpSO3(up * rang);
   o.copyTo(Tpw.col(3).rowRange(0, 3));
 

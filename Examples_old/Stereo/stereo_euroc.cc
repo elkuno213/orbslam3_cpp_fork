@@ -17,54 +17,48 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <chrono>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include "System.h"
 
-using namespace std;
-
 void LoadImages(
-  const string&   strPathLeft,
-  const string&   strPathRight,
-  const string&   strPathTimes,
-  vector<string>& vstrImageLeft,
-  vector<string>& vstrImageRight,
-  vector<double>& vTimeStamps
+  const std::string&        strPathLeft,
+  const std::string&        strPathRight,
+  const std::string&        strPathTimes,
+  std::vector<std::string>& vstrImageLeft,
+  std::vector<std::string>& vstrImageRight,
+  std::vector<double>&      vTimeStamps
 );
 
 int main(int argc, char** argv) {
   if (argc < 5) {
-    cerr << endl
-         << "Usage: ./stereo_euroc path_to_vocabulary path_to_settings path_to_sequence_folder_1 "
-            "path_to_times_file_1 (path_to_image_folder_2 path_to_times_file_2 ... "
-            "path_to_image_folder_N path_to_times_file_N) (trajectory_file_name)"
-         << endl;
+    std::cerr
+      << std::endl
+      << "Usage: ./stereo_euroc path_to_vocabulary path_to_settings path_to_sequence_folder_1 "
+         "path_to_times_file_1 (path_to_image_folder_2 path_to_times_file_2 ... "
+         "path_to_image_folder_N path_to_times_file_N) (trajectory_file_name)"
+      << std::endl;
 
     return 1;
   }
 
   const int num_seq = (argc - 3) / 2;
-  cout << "num_seq = " << num_seq << endl;
-  bool   bFileName = (((argc - 3) % 2) == 1);
-  string file_name;
+  std::cout << "num_seq = " << num_seq << std::endl;
+  bool        bFileName = (((argc - 3) % 2) == 1);
+  std::string file_name;
   if (bFileName) {
-    file_name = string(argv[argc - 1]);
-    cout << "file name: " << file_name << endl;
+    file_name = std::string(argv[argc - 1]);
+    std::cout << "file name: " << file_name << std::endl;
   }
 
   // Load all sequences:
-  int                     seq;
-  vector<vector<string> > vstrImageLeft;
-  vector<vector<string> > vstrImageRight;
-  vector<vector<double> > vTimestampsCam;
-  vector<int>             nImages;
+  int                               seq;
+  std::vector<vector<std::string> > vstrImageLeft;
+  std::vector<vector<std::string> > vstrImageRight;
+  std::vector<vector<double> >      vTimestampsCam;
+  std::vector<int>                  nImages;
 
   vstrImageLeft.resize(num_seq);
   vstrImageRight.resize(num_seq);
@@ -73,13 +67,13 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    cout << "Loading images for sequence " << seq << "...";
+    std::cout << "Loading images for sequence " << seq << "...";
 
-    string pathSeq(argv[(2 * seq) + 3]);
-    string pathTimeStamps(argv[(2 * seq) + 4]);
+    std::string pathSeq(argv[(2 * seq) + 3]);
+    std::string pathTimeStamps(argv[(2 * seq) + 4]);
 
-    string pathCam0 = pathSeq + "/mav0/cam0/data";
-    string pathCam1 = pathSeq + "/mav0/cam1/data";
+    std::string pathCam0 = pathSeq + "/mav0/cam0/data";
+    std::string pathCam1 = pathSeq + "/mav0/cam1/data";
 
     LoadImages(
       pathCam0,
@@ -89,7 +83,7 @@ int main(int argc, char** argv) {
       vstrImageRight[seq],
       vTimestampsCam[seq]
     );
-    cout << "LOADED!" << endl;
+    std::cout << "LOADED!" << std::endl;
 
     nImages[seq] = vstrImageLeft[seq].size();
     tot_images   += nImages[seq];
@@ -98,7 +92,7 @@ int main(int argc, char** argv) {
   // Read rectification parameters
   cv::FileStorage fsSettings(argv[2], cv::FileStorage::READ);
   if (!fsSettings.isOpened()) {
-    cerr << "ERROR: Wrong path to settings" << endl;
+    std::cerr << "ERROR: Wrong path to settings" << std::endl;
     return -1;
   }
 
@@ -123,7 +117,7 @@ int main(int argc, char** argv) {
   if(K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() || R_r.empty() || D_l.empty() || D_r.empty() ||
             rows_l==0 || rows_r==0 || cols_l==0 || cols_r==0)
     {
-    cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << endl;
+    std::cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << std::endl;
     return -1;
   }
 
@@ -150,11 +144,11 @@ int main(int argc, char** argv) {
   );
 
   // Vector for tracking time statistics
-  vector<float> vTimesTrack;
+  std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
 
-  cout << endl << "-------" << endl;
-  cout.precision(17);
+  std::cout << std::endl << "-------" << std::endl;
+  std::cout.precision(17);
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::STEREO, false);
@@ -174,12 +168,16 @@ int main(int argc, char** argv) {
       imRight = cv::imread(vstrImageRight[seq][ni], cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
 
       if (imLeft.empty()) {
-        cerr << endl << "Failed to load image at: " << string(vstrImageLeft[seq][ni]) << endl;
+        std::cerr << std::endl
+                  << "Failed to load image at: " << std::string(vstrImageLeft[seq][ni])
+                  << std::endl;
         return 1;
       }
 
       if (imRight.empty()) {
-        cerr << endl << "Failed to load image at: " << string(vstrImageRight[seq][ni]) << endl;
+        std::cerr << std::endl
+                  << "Failed to load image at: " << std::string(vstrImageRight[seq][ni])
+                  << std::endl;
         return 1;
       }
 
@@ -245,7 +243,7 @@ int main(int argc, char** argv) {
         imLeftRect,
         imRightRect,
         tframe,
-        vector<ORB_SLAM3::IMU::Point>(),
+        std::vector<ORB_SLAM3::IMU::Point>(),
         vstrImageLeft[seq][ni]
       );
 
@@ -280,12 +278,12 @@ int main(int argc, char** argv) {
     }
 
     if (seq < num_seq - 1) {
-      string kf_file_submap = "./SubMaps/kf_SubMap_" + std::to_string(seq) + ".txt";
-      string f_file_submap  = "./SubMaps/f_SubMap_" + std::to_string(seq) + ".txt";
+      std::string kf_file_submap = "./SubMaps/kf_SubMap_" + std::to_string(seq) + ".txt";
+      std::string f_file_submap  = "./SubMaps/f_SubMap_" + std::to_string(seq) + ".txt";
       SLAM.SaveTrajectoryEuRoC(f_file_submap);
       SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file_submap);
 
-      cout << "Changing the dataset" << endl;
+      std::cout << "Changing the dataset" << std::endl;
 
       SLAM.ChangeDataset();
     }
@@ -295,8 +293,8 @@ int main(int argc, char** argv) {
 
   // Save camera trajectory
   if (bFileName) {
-    const string kf_file = "kf_" + string(argv[argc - 1]) + ".txt";
-    const string f_file  = "f_" + string(argv[argc - 1]) + ".txt";
+    const std::string kf_file = "kf_" + std::string(argv[argc - 1]) + ".txt";
+    const std::string f_file  = "f_" + std::string(argv[argc - 1]) + ".txt";
     SLAM.SaveTrajectoryEuRoC(f_file);
     SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file);
   } else {
@@ -308,23 +306,23 @@ int main(int argc, char** argv) {
 }
 
 void LoadImages(
-  const string&   strPathLeft,
-  const string&   strPathRight,
-  const string&   strPathTimes,
-  vector<string>& vstrImageLeft,
-  vector<string>& vstrImageRight,
-  vector<double>& vTimeStamps
+  const std::string&        strPathLeft,
+  const std::string&        strPathRight,
+  const std::string&        strPathTimes,
+  std::vector<std::string>& vstrImageLeft,
+  std::vector<std::string>& vstrImageRight,
+  std::vector<double>&      vTimeStamps
 ) {
-  ifstream fTimes;
+  std::ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);
   vstrImageLeft.reserve(5000);
   vstrImageRight.reserve(5000);
   while (!fTimes.eof()) {
-    string s;
-    getline(fTimes, s);
+    std::string s;
+    std::getline(fTimes, s);
     if (!s.empty()) {
-      stringstream ss;
+      std::stringstream ss;
       ss << s;
       vstrImageLeft.push_back(strPathLeft + "/" + ss.str() + ".png");
       vstrImageRight.push_back(strPathRight + "/" + ss.str() + ".png");
