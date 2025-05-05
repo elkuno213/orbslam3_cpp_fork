@@ -78,6 +78,8 @@ apt-get install -y             \
   libboost-serialization-dev   \
   libboost-program-options-dev \
   libssl-dev                   \
+  libspdlog-dev                \
+  libgtest-dev                 \
   lsb-release
 
 # Install librealsense2.
