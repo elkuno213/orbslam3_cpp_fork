@@ -29,6 +29,8 @@ MESSAGE(${OpenCV_VERSION})
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(realsense2)
+find_package(spdlog REQUIRED)
+find_package(GTest REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -70,6 +72,7 @@ src/GeometricTools.cc
 src/TwoViewReconstruction.cc
 src/Config.cc
 src/Settings.cc
+src/LoggingUtils.cc
 include/System.h
 include/Tracking.h
 include/LocalMapping.h
@@ -99,7 +102,9 @@ include/GeometricTools.h
 include/TwoViewReconstruction.h
 include/SerializationUtils.h
 include/Config.h
-include/Settings.h)
+include/Settings.h
+include/LoggingUtils.h
+)
 
 add_subdirectory(Thirdparty/g2o)
 
@@ -111,6 +116,7 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 -lboost_serialization
 -lcrypto
+spdlog::spdlog
 )
 
 # If RealSense SDK is found the library is added and its examples compiled
@@ -123,6 +129,13 @@ if(realsense2_FOUND)
     )
 endif()
 
+# Build tests
+enable_testing()
+include(GoogleTest)
+
+add_executable(LoggingUtils_test test/LoggingUtils_test.cc)
+target_link_libraries(LoggingUtils_test PRIVATE ${PROJECT_NAME} GTest::GTest GTest::Main)
+gtest_discover_tests(LoggingUtils_test)
 
 # Build examples
 
