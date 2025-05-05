@@ -77,6 +77,8 @@ apt-get install -y           \
   libopencv-dev              \
   libboost-serialization-dev \
   libssl-dev                 \
+  libspdlog-dev              \
+  libgtest-dev               \
   lsb-release
 
 # Install librealsense2.
