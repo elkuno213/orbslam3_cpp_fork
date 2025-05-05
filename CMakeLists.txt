@@ -30,6 +30,8 @@ find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(realsense2)
 find_package(Boost COMPONENTS program_options serialization REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(GTest REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -71,6 +73,7 @@ src/GeometricTools.cc
 src/TwoViewReconstruction.cc
 src/Config.cc
 src/Settings.cc
+src/LoggingUtils.cc
 src/Common/Common.cc
 src/Common/EuRoC.cc
 src/Common/KITTI.cc
@@ -107,6 +110,7 @@ include/TwoViewReconstruction.h
 include/SerializationUtils.h
 include/Config.h
 include/Settings.h
+include/LoggingUtils.h
 include/Common/Common.h
 include/Common/EuRoC.h
 include/Common/KITTI.h
@@ -126,6 +130,7 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 Boost::serialization
 Boost::program_options
 -lcrypto
+spdlog::spdlog
 )
 
 # If RealSense SDK is found the library is added and its examples compiled
@@ -138,6 +143,13 @@ if(realsense2_FOUND)
     )
 endif()
 
+# Build tests
+enable_testing()
+include(GoogleTest)
+
+add_executable(LoggingUtils_test test/LoggingUtils_test.cc)
+target_link_libraries(LoggingUtils_test PRIVATE ${PROJECT_NAME} GTest::GTest GTest::Main)
+gtest_discover_tests(LoggingUtils_test)
 
 # Build examples
 
