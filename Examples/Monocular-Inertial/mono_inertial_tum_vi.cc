@@ -21,8 +21,13 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/TUMVI.h"
 #include "ImuTypes.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 namespace fs = std::filesystem;
@@ -30,6 +35,17 @@ namespace fs = std::filesystem;
 double ttrack_tot = 0;
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string              vocabulary_file, settings_file, output_dir;
   std::vector<std::string> sequences;
@@ -69,30 +85,34 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    std::cout << "Loading images for sequence " << seq << "...";
-
     std::string pathSeq        = sequences[3 * seq];
     std::string pathTimeStamps = sequences[3 * seq + 1];
     std::string pathIMU        = sequences[3 * seq + 2];
 
+    spdlog::info("Loading images for sequence {}...", seq);
     ORB_SLAM3::TUMVI::LoadMonocularImages(
       pathSeq,
       pathTimeStamps,
       vstrImageFilenames[seq],
       vTimestampsCam[seq]
     );
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("Images loaded!");
 
-    std::cout << "Loading IMU for sequence " << seq << "...";
+    spdlog::info("Loading IMU for sequence {}...", seq);
     ORB_SLAM3::TUMVI::LoadIMU(pathIMU, vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("IMU data loaded!");
 
     nImages[seq] = vstrImageFilenames[seq].size();
     tot_images   += nImages[seq];
     nImu[seq]    = vTimestampsImu[seq].size();
 
     if ((nImages[seq] <= 0) || (nImu[seq] <= 0)) {
-      std::cerr << "ERROR: Failed to load images or IMU for sequence" << seq << std::endl;
+      spdlog::error(
+        "Failed to load images or IMU for sequence {}. Images: {}, IMU: {}",
+        seq,
+        nImages[seq],
+        nImu[seq]
+      );
       return 1;
     }
 
@@ -107,13 +127,6 @@ int main(int argc, char** argv) {
   // Vector for tracking time statistics
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
-
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
-
-  /*cout << "Start processing sequence ..." << std::endl;
-  std::cout << "Images in the sequence: " << nImages << std::endl;
-  std::cout << "IMU data in the sequence: " << nImu << std::endl << std::endl;*/
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System
@@ -137,12 +150,15 @@ int main(int argc, char** argv) {
       // clahe
       clahe->apply(im, im);
 
-      // std::cout << "mat type: " << im.type() << std::endl;
       double tframe = vTimestampsCam[seq][ni];
 
       if (im.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << vstrImageFilenames[seq][ni] << std::endl;
+        spdlog::error(
+          "Failed to load image at: {}. Sequence: {}, Image: {}",
+          vstrImageFilenames[seq][ni],
+          seq,
+          ni
+        );
         return 1;
       }
 
@@ -150,8 +166,6 @@ int main(int argc, char** argv) {
       vImuMeas.clear();
 
       if (ni > 0) {
-        // std::cout << "t_cam " << tframe << std::endl;
-
         while (vTimestampsImu[seq][first_imu[seq]] <= vTimestampsCam[seq][ni]) {
           vImuMeas.push_back(ORB_SLAM3::IMU::Point(
             vAcc[seq][first_imu[seq]].x,
@@ -162,7 +176,6 @@ int main(int argc, char** argv) {
             vGyro[seq][first_imu[seq]].z,
             vTimestampsImu[seq][first_imu[seq]]
           ));
-          // std::cout << "t_imu = " << std::fixed << vImuMeas.back().t << std::endl;
           first_imu[seq]++;
         }
       }
@@ -184,13 +197,9 @@ int main(int argc, char** argv) {
 #endif
       }
 
-      // std::cout << "first imu: " << first_imu[seq] << std::endl;
-      /*cout << "first imu time: " << std::fixed << vTimestampsImu[first_imu] << std::endl;
-      std::cout << "size vImu: " << vImuMeas.size() << std::endl;*/
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
-      // std::cout << "tframe = " << tframe << std::endl;
       SLAM.TrackMonocular(im, tframe, vImuMeas); // TODO change to monocular_inertial
 
       std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -204,7 +213,6 @@ int main(int argc, char** argv) {
 
       double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
       ttrack_tot    += ttrack;
-      // std::cout << "ttrack: " << ttrack << std::endl;
 
       vTimesTrack[ni] = ttrack;
 
@@ -221,13 +229,11 @@ int main(int argc, char** argv) {
       }
     }
     if (seq < num_seq - 1) {
-      std::cout << "Changing the dataset" << std::endl;
-
+      spdlog::info("Changing the dataset...");
       SLAM.ChangeDataset();
     }
   }
 
-  // std::cout << "ttrack_tot = " << ttrack_tot << std::endl;
   // Stop all threads
   SLAM.Shutdown();
 
@@ -245,9 +251,8 @@ int main(int argc, char** argv) {
   for (int ni = 0; ni < nImages[0]; ni++) {
     totaltime += vTimesTrack[ni];
   }
-  std::cout << "-------" << std::endl << std::endl;
-  std::cout << "median tracking time: " << vTimesTrack[nImages[0] / 2] << std::endl;
-  std::cout << "mean tracking time: " << totaltime / proccIm << std::endl;
+  spdlog::info("median tracking time: {}", vTimesTrack[nImages[0] / 2]);
+  spdlog::info("mean tracking time: {}", totaltime / proccIm);
 
   return 0;
 }

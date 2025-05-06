@@ -22,12 +22,28 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/KITTI.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string vocabulary_file, settings_file, sequence_dir, output_dir;
 
@@ -59,9 +75,8 @@ int main(int argc, char** argv) {
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(nImages);
 
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout << "Start processing sequence ..." << std::endl;
-  std::cout << "Images in the sequence: " << nImages << std::endl << std::endl;
+  spdlog::info("Start processing sequence ...");
+  spdlog::info("Images in the sequence: {}", nImages);
 
   double t_track  = 0.f;
   double t_resize = 0.f;
@@ -75,8 +90,7 @@ int main(int argc, char** argv) {
     double tframe = vTimestamps[ni];
 
     if (imLeft.empty()) {
-      std::cerr << std::endl
-                << "Failed to load image at: " << std::string(vstrImageLeft[ni]) << std::endl;
+      spdlog::error("Failed to load image at: {}", vstrImageLeft[ni]);
       return 1;
     }
 
@@ -138,9 +152,8 @@ int main(int argc, char** argv) {
   for (int ni = 0; ni < nImages; ni++) {
     totaltime += vTimesTrack[ni];
   }
-  std::cout << "-------" << std::endl << std::endl;
-  std::cout << "median tracking time: " << vTimesTrack[nImages / 2] << std::endl;
-  std::cout << "mean tracking time: " << totaltime / nImages << std::endl;
+  spdlog::info("median tracking time: {}", vTimesTrack[nImages / 2]);
+  spdlog::info("mean tracking time: {}", totaltime / nImages);
 
   // Save camera trajectory
   const fs::path output_file_path = fs::path(output_dir) / "CameraTrajectory.txt";

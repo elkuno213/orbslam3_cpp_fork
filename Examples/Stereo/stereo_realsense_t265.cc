@@ -18,20 +18,39 @@
  */
 
 #include <csignal>
+#include <filesystem>
 #include <librealsense2/rs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/RealSense.h"
+#include "LoggingUtils.h"
 #include "System.h"
+
+namespace fs = std::filesystem;
 
 bool b_continue_session;
 
 void exit_loop_handler(int s) {
-  std::cout << "Finishing session" << std::endl;
+  spdlog::info("Finishing session");
   b_continue_session = false;
 }
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string vocabulary_file, settings_file, output_dir;
 
@@ -60,13 +79,6 @@ int main(int argc, char** argv) {
   cfg.enable_stream(RS2_STREAM_FISHEYE, 2, RS2_FORMAT_Y8);
 
   rs2::pipeline_profile pipe_profile = pipe.start(cfg);
-
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
-
-  /*cout << "Start processing sequence ..." << std::endl;
-  std::cout << "Images in the sequence: " << nImages << std::endl;
-  std::cout << "IMU data in the sequence: " << nImu << std::endl << std::endl;*/
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System

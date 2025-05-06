@@ -21,7 +21,12 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/TUMVI.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 namespace fs = std::filesystem;
@@ -29,6 +34,17 @@ namespace fs = std::filesystem;
 double ttrack_tot = 0;
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string              vocabulary_file, settings_file, output_dir;
   std::vector<std::string> sequences;
@@ -62,12 +78,11 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    std::cout << "Loading images for sequence " << seq << "...";
-
     std::string pathSeqLeft    = sequences[3 * seq];
     std::string pathSeqRight   = sequences[3 * seq + 1];
     std::string pathTimeStamps = sequences[3 * seq + 2];
 
+    spdlog::info("Loading images for sequence {}...", seq);
     ORB_SLAM3::TUMVI::LoadStereoImages(
       pathSeqLeft,
       pathSeqRight,
@@ -76,17 +91,16 @@ int main(int argc, char** argv) {
       vstrImageRightFilenames[seq],
       vTimestampsCam[seq]
     );
-    std::cout << "Total images: " << vstrImageLeftFilenames[seq].size() << std::endl;
-    std::cout << "Total cam ts: " << vTimestampsCam[seq].size() << std::endl;
-    std::cout << "first cam ts: " << vTimestampsCam[seq][0] << std::endl;
-
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("Total images: {}", vstrImageLeftFilenames[seq].size());
+    spdlog::info("Total cam ts: {}", vTimestampsCam[seq].size());
+    spdlog::info("first cam ts: {}", vTimestampsCam[seq][0]);
+    spdlog::info("Images loaded!");
 
     nImages[seq] = vstrImageLeftFilenames[seq].size();
     tot_images   += nImages[seq];
 
     if ((nImages[seq] <= 0)) {
-      std::cerr << "ERROR: Failed to load images for sequence" << seq << std::endl;
+      spdlog::error("Failed to load images for sequence {}", seq);
       return 1;
     }
   }
@@ -95,15 +109,9 @@ int main(int argc, char** argv) {
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
 
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
-
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::STEREO, true);
   float             imageScale = SLAM.GetImageScale();
-
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
 
   cv::Mat            imLeft, imRight;
   cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
@@ -145,8 +153,7 @@ int main(int argc, char** argv) {
       double tframe = vTimestampsCam[seq][ni];
 
       if (imLeft.empty() || imRight.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << vstrImageLeftFilenames[seq][ni] << std::endl;
+        spdlog::error("Failed to load image at: {}", vstrImageLeftFilenames[seq][ni]);
         return 1;
       }
 
@@ -166,7 +173,6 @@ int main(int argc, char** argv) {
 
       double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
       ttrack_tot    += ttrack;
-      // std::cout << "ttrack: " << ttrack << std::endl;
 
       vTimesTrack[ni] = ttrack;
 
@@ -183,8 +189,7 @@ int main(int argc, char** argv) {
       }
     }
     if (seq < num_seq - 1) {
-      std::cout << "Changing the dataset" << std::endl;
-
+      spdlog::info("Changing the dataset...");
       SLAM.ChangeDataset();
     }
   }
@@ -211,9 +216,8 @@ int main(int argc, char** argv) {
   for (int ni = 0; ni < nImages[0]; ni++) {
     totaltime += vTimesTrack[ni];
   }
-  std::cout << "-------" << std::endl << std::endl;
-  std::cout << "median tracking time: " << vTimesTrack[nImages[0] / 2] << std::endl;
-  std::cout << "mean tracking time: " << totaltime / proccIm << std::endl;
+  spdlog::info("median tracking time: {}", vTimesTrack[nImages[0] / 2]);
+  spdlog::info("mean tracking time: {}", totaltime / proccIm);
 
   return 0;
 }

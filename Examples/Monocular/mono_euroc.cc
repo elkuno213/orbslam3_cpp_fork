@@ -21,12 +21,28 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/EuRoC.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string              vocabulary_file, settings_file, output_dir;
   std::vector<std::string> sequences;
@@ -46,10 +62,10 @@ int main(int argc, char** argv) {
   const int num_seq = sequences.size() / 2;
 
   // Load all sequences:
-  int                               seq;
+  int                              seq;
   std::vector<vector<std::string>> vstrImageFilenames;
   std::vector<vector<double>>      vTimestampsCam;
-  std::vector<int>                  nImages;
+  std::vector<int>                 nImages;
 
   vstrImageFilenames.resize(num_seq);
   vTimestampsCam.resize(num_seq);
@@ -57,20 +73,19 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    std::cout << "Loading images for sequence " << seq << "...";
-
     std::string pathSeq        = sequences[2 * seq];
     std::string pathTimeStamps = sequences[2 * seq + 1];
 
     std::string pathCam0 = pathSeq + "/mav0/cam0/data";
 
+    spdlog::info("Loading images for sequence {}...", seq);
     ORB_SLAM3::EuRoC::LoadMonocularImages(
       pathCam0,
       pathTimeStamps,
       vstrImageFilenames[seq],
       vTimestampsCam[seq]
     );
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("Images loaded!");
 
     nImages[seq] = vstrImageFilenames[seq].size();
     tot_images   += nImages[seq];
@@ -79,9 +94,6 @@ int main(int argc, char** argv) {
   // Vector for tracking time statistics
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
-
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
 
   int   fps = 20;
   float dT  = 1.f / fps;
@@ -105,8 +117,7 @@ int main(int argc, char** argv) {
       double tframe = vTimestampsCam[seq][ni];
 
       if (im.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << vstrImageFilenames[seq][ni] << std::endl;
+        spdlog::error("Failed to load image at: {}", vstrImageFilenames[seq][ni]);
         return 1;
       }
 
@@ -130,7 +141,6 @@ int main(int argc, char** argv) {
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
-      // std::cout << "tframe = " << tframe << std::endl;
       SLAM.TrackMonocular(im, tframe); // TODO change to monocular_inertial
 
       std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -154,23 +164,19 @@ int main(int argc, char** argv) {
         T = tframe - vTimestampsCam[seq][ni - 1];
       }
 
-      // std::cout << "T: " << T << std::endl;
-      // std::cout << "ttrack: " << ttrack << std::endl;
-
       if (ttrack < T) {
-        // std::cout << "usleep: " << (dT-ttrack) << std::endl;
         usleep((T - ttrack) * 1e6); // 1e6
       }
     }
 
+    // TODO(VuHoi): save to output_dir
     if (seq < num_seq - 1) {
       std::string kf_file_submap = "./SubMaps/kf_SubMap_" + std::to_string(seq) + ".txt";
       std::string f_file_submap  = "./SubMaps/f_SubMap_" + std::to_string(seq) + ".txt";
       SLAM.SaveTrajectoryEuRoC(f_file_submap);
       SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file_submap);
 
-      std::cout << "Changing the dataset" << std::endl;
-
+      spdlog::info("Changing the dataset...");
       SLAM.ChangeDataset();
     }
   }

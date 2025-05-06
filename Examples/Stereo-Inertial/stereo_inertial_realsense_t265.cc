@@ -19,21 +19,40 @@
 
 #include <condition_variable>
 #include <csignal>
+#include <filesystem>
 #include <librealsense2/rs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/RealSense.h"
 #include "ImuTypes.h"
+#include "LoggingUtils.h"
 #include "System.h"
+
+namespace fs = std::filesystem;
 
 bool b_continue_session;
 
 void exit_loop_handler(int s) {
-  std::cout << "Finishing session" << std::endl;
+  spdlog::info("Finishing session");
   b_continue_session = false;
 }
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string vocabulary_file, settings_file, output_dir;
 
@@ -100,7 +119,6 @@ int main(int argc, char** argv) {
 
       double new_timestamp_image = fs.get_timestamp() * 1e-3;
       if (std::abs(timestamp_image - new_timestamp_image) < 0.001) {
-        // std::cout << "Two frames with the same timeStamp!!!\n";
         count_im_buffer--;
         return;
       }
@@ -180,13 +198,6 @@ int main(int argc, char** argv) {
   rs2::stream_profile imu_stream = pipe_profile.get_stream(RS2_STREAM_GYRO);
   float*              Rbc        = cam_stream.get_extrinsics_to(imu_stream).rotation;
   float*              tbc        = cam_stream.get_extrinsics_to(imu_stream).translation;
-  std::cout << "Tbc = " << std::endl;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      std::cout << Rbc[i * 3 + j] << ", ";
-    }
-    std::cout << tbc[i] << "\n";
-  }
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   std::vector<ORB_SLAM3::IMU::Point> vImuMeas;
@@ -218,7 +229,7 @@ int main(int argc, char** argv) {
       }
 
       if (count_im_buffer > 1) {
-        std::cout << count_im_buffer - 1 << " dropped frames\n";
+        spdlog::warn("Dropped frames: {}", count_im_buffer - 1);
       }
       count_im_buffer = 0;
 

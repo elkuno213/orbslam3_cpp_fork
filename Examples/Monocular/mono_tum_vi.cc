@@ -21,8 +21,13 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/TUMVI.h"
 #include "Converter.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 namespace fs = std::filesystem;
@@ -30,6 +35,17 @@ namespace fs = std::filesystem;
 double ttrack_tot = 0;
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string              vocabulary_file, settings_file, output_dir;
   std::vector<std::string> sequences;
@@ -61,33 +77,29 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    std::cout << "Loading images for sequence " << seq << "...";
-
     std::string pathSeq        = sequences[2 * seq];
     std::string pathTimeStamps = sequences[2 * seq + 1];
 
+    spdlog::info("Loading images for sequence {}...", seq);
     ORB_SLAM3::TUMVI::LoadMonocularImages(
       pathSeq,
       pathTimeStamps,
       vstrImageFilenames[seq],
       vTimestampsCam[seq]
     );
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("Images loaded!");
 
     nImages[seq] = vstrImageFilenames[seq].size();
     tot_images   += nImages[seq];
 
     if ((nImages[seq] <= 0)) {
-      std::cerr << "ERROR: Failed to load images for sequence" << seq << std::endl;
+      spdlog::error("Failed to load images for sequence {}", seq);
       return 1;
     }
   }
   // Vector for tracking time statistics
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
-
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System
@@ -127,12 +139,10 @@ int main(int argc, char** argv) {
       // clahe
       clahe->apply(im, im);
 
-      // std::cout << "mat type: " << im.type() << std::endl;
       double tframe = vTimestampsCam[seq][ni];
 
       if (im.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << vstrImageFilenames[seq][ni] << std::endl;
+        spdlog::error("Failed to load image at: {}", vstrImageFilenames[seq][ni]);
         return 1;
       }
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
@@ -167,13 +177,11 @@ int main(int argc, char** argv) {
       }
     }
     if (seq < num_seq - 1) {
-      std::cout << "Changing the dataset" << std::endl;
-
+      spdlog::info("Changing the dataset...");
       SLAM.ChangeDataset();
     }
   }
 
-  // std::cout << "ttrack_tot = " << ttrack_tot << std::endl;
   // Stop all threads
   SLAM.Shutdown();
 
@@ -191,9 +199,8 @@ int main(int argc, char** argv) {
   for (int ni = 0; ni < nImages[0]; ni++) {
     totaltime += vTimesTrack[ni];
   }
-  std::cout << "-------" << std::endl << std::endl;
-  std::cout << "median tracking time: " << vTimesTrack[nImages[0] / 2] << std::endl;
-  std::cout << "mean tracking time: " << totaltime / proccIm << std::endl;
+  spdlog::info("median tracking time: {}", vTimesTrack[nImages[0] / 2]);
+  spdlog::info("mean tracking time: {}", totaltime / proccIm);
 
   return 0;
 }

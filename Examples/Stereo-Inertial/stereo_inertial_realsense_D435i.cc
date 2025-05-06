@@ -19,21 +19,40 @@
 
 #include <condition_variable>
 #include <csignal>
+#include <filesystem>
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rsutil.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/RealSense.h"
+#include "LoggingUtils.h"
 #include "System.h"
+
+namespace fs = std::filesystem;
 
 bool b_continue_session;
 
 void exit_loop_handler(int s) {
-  std::cout << "Finishing session" << std::endl;
+  spdlog::info("Finishing session");
   b_continue_session = false;
 }
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string vocabulary_file, settings_file, output_dir;
 
@@ -75,7 +94,6 @@ int main(int argc, char** argv) {
         sensor.set_option(RS2_OPTION_AUTO_EXPOSURE_LIMIT, 5000);
         sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0); // switch off emitter
       }
-      // std::cout << "  " << index << " : " << sensor.get_info(RS2_CAMERA_INFO_NAME) << std::endl;
       ORB_SLAM3::RealSense::get_sensor_option(sensor);
       if (index == 2) {
         // RGB camera (not used here...)
@@ -127,7 +145,6 @@ int main(int argc, char** argv) {
 
       double new_timestamp_image = fs.get_timestamp() * 1e-3;
       if (std::abs(timestamp_image - new_timestamp_image) < 0.001) {
-        // std::cout << "Two frames with the same timeStamp!!!\n";
         count_im_buffer--;
         return;
       }
@@ -167,8 +184,6 @@ int main(int argc, char** argv) {
         v_gyro_data.push_back(m_frame.get_motion_data());
         v_gyro_timestamp.push_back((m_frame.get_timestamp() + offset) * 1e-3);
         // rs2_vector gyro_sample = m_frame.get_motion_data();
-        // std::cout << "Gyro:" << gyro_sample.x << ", " << gyro_sample.y << ", " << gyro_sample.z
-        // << std::endl;
       } else if (m_frame.get_profile().stream_name() == "Accel") {
         // It runs at 60Hz
         prev_accel_timestamp = current_accel_timestamp;
@@ -192,8 +207,6 @@ int main(int argc, char** argv) {
           v_accel_data_sync.push_back(interp_data);
           v_accel_timestamp_sync.push_back(target_time);
         }
-        // std::cout << "Accel:" << current_accel_data.x << ", " << current_accel_data.y << ", " <<
-        // current_accel_data.z << std::endl;
       }
     }
   };
@@ -207,53 +220,68 @@ int main(int argc, char** argv) {
   rs2::stream_profile imu_stream = pipe_profile.get_stream(RS2_STREAM_GYRO);
   float*              Rbc        = cam_left.get_extrinsics_to(imu_stream).rotation;
   float*              tbc        = cam_left.get_extrinsics_to(imu_stream).translation;
-  std::cout << "Tbc (left) = " << std::endl;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      std::cout << Rbc[i * 3 + j] << ", ";
-    }
-    std::cout << tbc[i] << "\n";
-  }
-
-  float* Rlr = cam_right.get_extrinsics_to(cam_left).rotation;
-  float* tlr = cam_right.get_extrinsics_to(cam_left).translation;
-  std::cout << "Tlr  = " << std::endl;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      std::cout << Rlr[i * 3 + j] << ", ";
-    }
-    std::cout << tlr[i] << "\n";
-  }
+  float*              Rlr        = cam_right.get_extrinsics_to(cam_left).rotation;
+  float*              tlr        = cam_right.get_extrinsics_to(cam_left).translation;
 
   rs2_intrinsics intrinsics_left = cam_left.as<rs2::video_stream_profile>().get_intrinsics();
   width_img                      = intrinsics_left.width;
   height_img                     = intrinsics_left.height;
-  std::cout << "Left camera: \n";
-  std::cout << " fx = " << intrinsics_left.fx << std::endl;
-  std::cout << " fy = " << intrinsics_left.fy << std::endl;
-  std::cout << " cx = " << intrinsics_left.ppx << std::endl;
-  std::cout << " cy = " << intrinsics_left.ppy << std::endl;
-  std::cout << " height = " << intrinsics_left.height << std::endl;
-  std::cout << " width = " << intrinsics_left.width << std::endl;
-  std::cout << " Coeff = " << intrinsics_left.coeffs[0] << ", " << intrinsics_left.coeffs[1] << ", "
-            << intrinsics_left.coeffs[2] << ", " << intrinsics_left.coeffs[3] << ", "
-            << intrinsics_left.coeffs[4] << ", " << std::endl;
-  std::cout << " Model = " << intrinsics_left.model << std::endl;
+
+  spdlog::info(
+    R"(
+      Left camera parameters:
+        Intrinsics:
+          fx: {:.6f}
+          fy: {:.6f}
+          cx: {:.6f}
+          cy: {:.6f}
+        Resolution: {}x{}
+        Distortion coefficients: [{:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}]
+        Model: {}
+    )",
+    intrinsics_left.fx,
+    intrinsics_left.fy,
+    intrinsics_left.ppx,
+    intrinsics_left.ppy,
+    intrinsics_left.width,
+    intrinsics_left.height,
+    intrinsics_left.coeffs[0],
+    intrinsics_left.coeffs[1],
+    intrinsics_left.coeffs[2],
+    intrinsics_left.coeffs[3],
+    intrinsics_left.coeffs[4],
+    intrinsics_left.model
+  );
 
   rs2_intrinsics intrinsics_right = cam_right.as<rs2::video_stream_profile>().get_intrinsics();
   width_img                       = intrinsics_right.width;
   height_img                      = intrinsics_right.height;
-  std::cout << "Right camera: \n";
-  std::cout << " fx = " << intrinsics_right.fx << std::endl;
-  std::cout << " fy = " << intrinsics_right.fy << std::endl;
-  std::cout << " cx = " << intrinsics_right.ppx << std::endl;
-  std::cout << " cy = " << intrinsics_right.ppy << std::endl;
-  std::cout << " height = " << intrinsics_right.height << std::endl;
-  std::cout << " width = " << intrinsics_right.width << std::endl;
-  std::cout << " Coeff = " << intrinsics_right.coeffs[0] << ", " << intrinsics_right.coeffs[1]
-            << ", " << intrinsics_right.coeffs[2] << ", " << intrinsics_right.coeffs[3] << ", "
-            << intrinsics_right.coeffs[4] << ", " << std::endl;
-  std::cout << " Model = " << intrinsics_right.model << std::endl;
+
+  spdlog::info(
+    R"(
+      Right camera parameters:
+        Intrinsics:
+          fx: {:.6f}
+          fy: {:.6f}
+          cx: {:.6f}
+          cy: {:.6f}
+        Resolution: {}x{}
+        Distortion coefficients: [{:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}]
+        Model: {}
+    )",
+    intrinsics_right.fx,
+    intrinsics_right.fy,
+    intrinsics_right.ppx,
+    intrinsics_right.ppy,
+    intrinsics_right.width,
+    intrinsics_right.height,
+    intrinsics_right.coeffs[0],
+    intrinsics_right.coeffs[1],
+    intrinsics_right.coeffs[2],
+    intrinsics_right.coeffs[3],
+    intrinsics_right.coeffs[4],
+    intrinsics_right.model
+  );
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System
@@ -287,7 +315,7 @@ int main(int argc, char** argv) {
       std::chrono::steady_clock::time_point time_Start_Process = std::chrono::steady_clock::now();
 
       if (count_im_buffer > 1) {
-        std::cout << count_im_buffer - 1 << " dropped frs\n";
+        spdlog::warn("Dropped frames: {}", count_im_buffer - 1);
       }
       count_im_buffer = 0;
 
@@ -376,5 +404,4 @@ int main(int argc, char** argv) {
     // Clear the previous IMU measurements to load the new ones
     vImuMeas.clear();
   }
-  std::cout << "System shutdown!\n";
 }

@@ -19,21 +19,40 @@
 
 #include <condition_variable>
 #include <csignal>
+#include <filesystem>
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rsutil.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/RealSense.h"
+#include "LoggingUtils.h"
 #include "System.h"
+
+namespace fs = std::filesystem;
 
 bool b_continue_session;
 
 void exit_loop_handler(int s) {
-  std::cout << "Finishing session" << std::endl;
+  spdlog::info("Finishing session");
   b_continue_session = false;
 }
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string vocabulary_file, settings_file, output_dir;
 
@@ -75,7 +94,6 @@ int main(int argc, char** argv) {
         // sensor.set_option(RS2_OPTION_AUTO_EXPOSURE_LIMIT,50000);
         sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 1); // emitter on for depth information
       }
-      // std::cout << "  " << index << " : " << sensor.get_info(RS2_CAMERA_INFO_NAME) << std::endl;
       ORB_SLAM3::RealSense::get_sensor_option(sensor);
       if (index == 2) {
         // RGB camera
@@ -224,27 +242,36 @@ int main(int argc, char** argv) {
   rs2::stream_profile imu_stream = pipe_profile.get_stream(RS2_STREAM_GYRO);
   float*              Rbc        = cam_stream.get_extrinsics_to(imu_stream).rotation;
   float*              tbc        = cam_stream.get_extrinsics_to(imu_stream).translation;
-  std::cout << "Tbc = " << std::endl;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      std::cout << Rbc[i * 3 + j] << ", ";
-    }
-    std::cout << tbc[i] << "\n";
-  }
 
   rs2_intrinsics intrinsics_cam = cam_stream.as<rs2::video_stream_profile>().get_intrinsics();
   width_img                     = intrinsics_cam.width;
   height_img                    = intrinsics_cam.height;
-  std::cout << " fx = " << intrinsics_cam.fx << std::endl;
-  std::cout << " fy = " << intrinsics_cam.fy << std::endl;
-  std::cout << " cx = " << intrinsics_cam.ppx << std::endl;
-  std::cout << " cy = " << intrinsics_cam.ppy << std::endl;
-  std::cout << " height = " << intrinsics_cam.height << std::endl;
-  std::cout << " width = " << intrinsics_cam.width << std::endl;
-  std::cout << " Coeff = " << intrinsics_cam.coeffs[0] << ", " << intrinsics_cam.coeffs[1] << ", "
-            << intrinsics_cam.coeffs[2] << ", " << intrinsics_cam.coeffs[3] << ", "
-            << intrinsics_cam.coeffs[4] << ", " << std::endl;
-  std::cout << " Model = " << intrinsics_cam.model << std::endl;
+
+  spdlog::info(
+    R"(
+      Camera parameters:
+        Intrinsics:
+          fx: {:.6f}
+          fy: {:.6f}
+          cx: {:.6f}
+          cy: {:.6f}
+        Resolution: {}x{}
+        Distortion coefficients: [{:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}]
+        Model: {}
+    )",
+    intrinsics_cam.fx,
+    intrinsics_cam.fy,
+    intrinsics_cam.ppx,
+    intrinsics_cam.ppy,
+    intrinsics_cam.width,
+    intrinsics_cam.height,
+    intrinsics_cam.coeffs[0],
+    intrinsics_cam.coeffs[1],
+    intrinsics_cam.coeffs[2],
+    intrinsics_cam.coeffs[3],
+    intrinsics_cam.coeffs[4],
+    intrinsics_cam.model
+  );
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System
@@ -280,7 +307,7 @@ int main(int argc, char** argv) {
       fs = fsSLAM;
 
       if (count_im_buffer > 1) {
-        std::cout << count_im_buffer - 1 << " dropped frs\n";
+        spdlog::warn("Dropped frames: {}", count_im_buffer - 1);
       }
       count_im_buffer = 0;
 
@@ -393,5 +420,4 @@ int main(int argc, char** argv) {
     // Clear the previous IMU measurements to load the new ones
     vImuMeas.clear();
   }
-  std::cout << "System shutdown!\n";
 }

@@ -20,12 +20,28 @@
 #include <filesystem>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "Common/EuRoC.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   // Parse arguments.
   std::string              vocabulary_file, settings_file, output_dir;
   std::vector<std::string> sequences;
@@ -58,14 +74,13 @@ int main(int argc, char** argv) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    std::cout << "Loading images for sequence " << seq << "...";
-
     std::string pathSeq        = sequences[2 * seq];
     std::string pathTimeStamps = sequences[2 * seq + 1];
 
     std::string pathCam0 = pathSeq + "/mav0/cam0/data";
     std::string pathCam1 = pathSeq + "/mav0/cam1/data";
 
+    spdlog::info("Loading images for sequence {}...", seq);
     ORB_SLAM3::EuRoC::LoadStereoImages(
       pathCam0,
       pathCam1,
@@ -74,7 +89,7 @@ int main(int argc, char** argv) {
       vstrImageRight[seq],
       vTimestampsCam[seq]
     );
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("Images loaded!");
 
     nImages[seq] = vstrImageLeft[seq].size();
     tot_images   += nImages[seq];
@@ -83,9 +98,6 @@ int main(int argc, char** argv) {
   // Vector for tracking time statistics
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
-
-  std::cout << std::endl << "-------" << std::endl;
-  std::cout.precision(17);
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::STEREO, true);
@@ -104,16 +116,12 @@ int main(int argc, char** argv) {
       imRight = cv::imread(vstrImageRight[seq][ni], cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
 
       if (imLeft.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << std::string(vstrImageLeft[seq][ni])
-                  << std::endl;
+        spdlog::error("Failed to load image at: {}", vstrImageLeft[seq][ni]);
         return 1;
       }
 
       if (imRight.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << std::string(vstrImageRight[seq][ni])
-                  << std::endl;
+        spdlog::error("Failed to load image at: {}", vstrImageRight[seq][ni]);
         return 1;
       }
 
@@ -157,8 +165,7 @@ int main(int argc, char** argv) {
     }
 
     if (seq < num_seq - 1) {
-      std::cout << "Changing the dataset" << std::endl;
-
+      spdlog::info("Changing the dataset...");
       SLAM.ChangeDataset();
     }
   }

@@ -19,6 +19,7 @@
 
 #include <condition_variable>
 #include <csignal>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -27,6 +28,13 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
+#include "LoggingUtils.h"
+
+namespace fs = std::filesystem;
 
 bool b_continue_session;
 
@@ -35,11 +43,23 @@ const int   colsRedIm       = reductionFactor * 848;
 const int   rowsRedIm       = reductionFactor * 800;
 
 void exit_loop_handler(int s) {
-  std::cout << "Finishing session" << std::endl;
+  spdlog::info("Finishing session");
   b_continue_session = false;
 }
 
 int main(int argc, char** argv) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = fs::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
+  // Parse arguments.
   if (argc != 2) {
     std::cerr << std::endl
               << "Usage: ./recorder_realsense_D435i path_to_saving_folder" << std::endl;
