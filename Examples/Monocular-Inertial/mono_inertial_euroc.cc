@@ -17,10 +17,18 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <string>
+#include <fmt/core.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <spdlog/cfg/argv.h>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "ImuTypes.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 void LoadImages(
@@ -40,22 +48,46 @@ void LoadIMU(
 double ttrack_tot = 0;
 
 int main(int argc, char* argv[]) {
+  // Load env vars and args.
+  spdlog::cfg::load_env_levels();
+  spdlog::cfg::load_argv_levels(argc, argv);
+  // Initialize application logger.
+  ORB_SLAM3::logging::InitializeAppLogger("ORB-SLAM3", false);
+  // Add file sink to the application logger.
+  const std::string basename  = std::filesystem::path(argv[0]).stem().string();
+  const std::string logfile   = fmt::format("/tmp/{}.log", basename);
+  auto              file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile);
+  spdlog::default_logger()->sinks().push_back(file_sink);
+
   if (argc < 5) {
-    std::cerr << std::endl
-              << "Usage: ./mono_inertial_euroc path_to_vocabulary path_to_settings "
-                 "path_to_sequence_folder_1 path_to_times_file_1 (path_to_image_folder_2 "
-                 "path_to_times_file_2 ... path_to_image_folder_N path_to_times_file_N) "
-              << std::endl;
+    spdlog::critical("Invalid arguments provided.");
+    spdlog::info(R"(
+    Usage:
+    ./mono_inertial_euroc <path-to-vocabulary-txt>
+                          <path-to-settings-yaml>
+                          <path-to-sequence-folder-1> <path-to-times-file-1>
+                          [<path-to-sequence-folder-2> <path-to-times-file-2> ...]
+
+    Arguments:
+      <path-to-vocabulary-txt>    Path to the ORB vocabulary file (e.g., ORBvoc.txt).
+      <path-to-settings-yaml>     Path to the settings file (e.g., EuRoC.yaml).
+      <path-to-sequence-folder-N> Path to the sequence folder for dataset N.
+      <path-to-times-file-N>      Path to the timestamps file for dataset N.
+
+    Example:
+      ./mono_inertial_euroc ORBvoc.txt EuRoC.yaml MH_01_easy mav0/cam0/times.txt
+    )");
     return 1;
   }
 
   const int num_seq = (argc - 3) / 2;
-  std::cout << "num_seq = " << num_seq << std::endl;
+  spdlog::info("Number of sequences: {}", num_seq);
+
   bool        bFileName = (((argc - 3) % 2) == 1);
   std::string file_name;
   if (bFileName) {
     file_name = std::string(argv[argc - 1]);
-    std::cout << "file name: " << file_name << std::endl;
+    spdlog::info("filename = {}", file_name);
   }
 
   // Load all sequences:
@@ -78,7 +110,7 @@ int main(int argc, char* argv[]) {
 
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
-    std::cout << "Loading images for sequence " << seq << "...";
+    spdlog::info("Loading images for sequence {}...", seq);
 
     std::string pathSeq(argv[(2 * seq) + 3]);
     std::string pathTimeStamps(argv[(2 * seq) + 4]);
@@ -87,23 +119,22 @@ int main(int argc, char* argv[]) {
     std::string pathImu  = pathSeq + "/mav0/imu0/data.csv";
 
     LoadImages(pathCam0, pathTimeStamps, vstrImageFilenames[seq], vTimestampsCam[seq]);
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("Images loaded!");
 
-    std::cout << "Loading IMU for sequence " << seq << "...";
+    spdlog::info("Loading IMU for sequence {}...", seq);
     LoadIMU(pathImu, vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
-    std::cout << "LOADED!" << std::endl;
+    spdlog::info("IMU data loaded!");
 
     nImages[seq] = vstrImageFilenames[seq].size();
     tot_images   += nImages[seq];
     nImu[seq]    = vTimestampsImu[seq].size();
 
     if ((nImages[seq] <= 0) || (nImu[seq] <= 0)) {
-      std::cerr << "ERROR: Failed to load images or IMU for sequence" << seq << std::endl;
+      spdlog::critical("Failed to load images or IMU for sequence {}", seq);
       return 1;
     }
 
     // Find first imu to be considered, supposing imu measurements start first
-
     while (vTimestampsImu[seq][first_imu[seq]] <= vTimestampsCam[seq][0]) {
       first_imu[seq]++;
     }
@@ -113,8 +144,6 @@ int main(int argc, char* argv[]) {
   // Vector for tracking time statistics
   std::vector<float> vTimesTrack;
   vTimesTrack.resize(tot_images);
-
-  std::cout.precision(17);
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
   ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::IMU_MONOCULAR, true);
@@ -139,8 +168,7 @@ int main(int argc, char* argv[]) {
       double tframe = vTimestampsCam[seq][ni];
 
       if (im.empty()) {
-        std::cerr << std::endl
-                  << "Failed to load image at: " << vstrImageFilenames[seq][ni] << std::endl;
+        spdlog::critical("Failed to load image at: {}", vstrImageFilenames[seq][ni]);
         return 1;
       }
 
@@ -165,8 +193,6 @@ int main(int argc, char* argv[]) {
       vImuMeas.clear();
 
       if (ni > 0) {
-        // std::cout << "t_cam " << tframe << std::endl;
-
         while (vTimestampsImu[seq][first_imu[seq]] <= vTimestampsCam[seq][ni]) {
           vImuMeas.push_back(ORB_SLAM3::IMU::Point(
             vAcc[seq][first_imu[seq]].x,
@@ -184,7 +210,6 @@ int main(int argc, char* argv[]) {
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
-      // std::cout << "tframe = " << tframe << std::endl;
       SLAM.TrackMonocular(im, tframe, vImuMeas); // TODO change to monocular_inertial
 
       std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -198,7 +223,6 @@ int main(int argc, char* argv[]) {
 
       double ttrack = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
       ttrack_tot    += ttrack;
-      // std::cout << "ttrack: " << ttrack << std::endl;
 
       vTimesTrack[ni] = ttrack;
 
@@ -215,8 +239,7 @@ int main(int argc, char* argv[]) {
       }
     }
     if (seq < num_seq - 1) {
-      std::cout << "Changing the dataset" << std::endl;
-
+      spdlog::info("Changing the dataset...");
       SLAM.ChangeDataset();
     }
   }
@@ -235,6 +258,7 @@ int main(int argc, char* argv[]) {
     SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
   }
 
+  spdlog::drop_all();
   return 0;
 }
 
