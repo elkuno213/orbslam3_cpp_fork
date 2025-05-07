@@ -23,10 +23,12 @@
 // Flag to activate the measurement of time in each process (track,localmap, place recognition).
 // #define REGISTER_TIMES
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
+#include <spdlog/logger.h>
 
 namespace ORB_SLAM3 {
 
@@ -317,6 +319,8 @@ private:
    * Other stuff
    */
   float thFarPoints_;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 }; // namespace ORB_SLAM3
 

@@ -18,7 +18,6 @@
  */
 
 #include "Settings.h"
-#include <iostream>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <opencv2/calib3d.hpp>
@@ -26,6 +25,7 @@
 #include "CameraModels/KannalaBrandt8.h"
 #include "CameraModels/Pinhole.h"
 #include "Converter.h"
+#include "LoggingUtils.h"
 #include "System.h"
 
 using namespace std;
@@ -39,15 +39,15 @@ float Settings::readParameter<float>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
+      _logger->critical("{} required parameter does not exist", name);
       std::exit(-1);
     } else {
-      std::cerr << name << " optional parameter does not exist..." << std::endl;
+      _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return 0.0f;
     }
   } else if (!node.isReal()) {
-    std::cerr << name << " parameter must be a real number, aborting..." << std::endl;
+    _logger->critical("{} parameter must be a real number", name);
     std::exit(-1);
   } else {
     found = true;
@@ -62,15 +62,15 @@ int Settings::readParameter<int>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
+      _logger->critical("{} required parameter does not exist", name);
       std::exit(-1);
     } else {
-      std::cerr << name << " optional parameter does not exist..." << std::endl;
+      _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return 0;
     }
   } else if (!node.isInt()) {
-    std::cerr << name << " parameter must be an integer number, aborting..." << std::endl;
+    _logger->critical("{} parameter must be an integer number", name);
     std::exit(-1);
   } else {
     found = true;
@@ -85,15 +85,15 @@ std::string Settings::readParameter<std::string>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
+      _logger->critical("{} required parameter does not exist", name);
       std::exit(-1);
     } else {
-      std::cerr << name << " optional parameter does not exist..." << std::endl;
+      _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return std::string();
     }
   } else if (!node.isString()) {
-    std::cerr << name << " parameter must be a string, aborting..." << std::endl;
+    _logger->critical("{} parameter must be a string", name);
     std::exit(-1);
   } else {
     found = true;
@@ -108,10 +108,10 @@ cv::Mat Settings::readParameter<cv::Mat>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
+      _logger->critical("{} required parameter does not exist", name);
       std::exit(-1);
     } else {
-      std::cerr << name << " optional parameter does not exist..." << std::endl;
+      _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return cv::Mat();
     }
@@ -125,59 +125,56 @@ Settings::Settings(const std::string& configFile, const int& sensor)
   : bNeedToUndistort_(false)
   , bNeedToRectify_(false)
   , bNeedToResize1_(false)
-  , bNeedToResize2_(false) {
+  , bNeedToResize2_(false)
+  , _logger(logging::CreateModuleLogger("Settings")) {
   sensor_ = sensor;
 
   // Open settings file
   cv::FileStorage fSettings(configFile, cv::FileStorage::READ);
   if (!fSettings.isOpened()) {
-    std::cerr << "[ERROR]: could not open configuration file at: " << configFile << std::endl;
-    std::cerr << "Aborting..." << std::endl;
-
+    _logger->critical("Failed to open configuration file at {}", configFile);
     std::exit(-1);
   } else {
-    std::cout << "Loading settings from " << configFile << std::endl;
+    _logger->info("Loading settings from {}...", configFile);
   }
 
   // Read first camera
   readCamera1(fSettings);
-  std::cout << "\t-Loaded camera 1" << std::endl;
+  _logger->info("Camera 1 loaded");
 
   // Read second camera if stereo (not rectified)
   if (sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) {
     readCamera2(fSettings);
-    std::cout << "\t-Loaded camera 2" << std::endl;
+    _logger->info("Camera 2 loaded");
   }
 
   // Read image info
   readImageInfo(fSettings);
-  std::cout << "\t-Loaded image info" << std::endl;
+  _logger->info("Camera info loaded");
 
   if (sensor_ == System::IMU_MONOCULAR || sensor_ == System::IMU_STEREO || sensor_ == System::IMU_RGBD) {
     readIMU(fSettings);
-    std::cout << "\t-Loaded IMU calibration" << std::endl;
+    _logger->info("IMU calibration loaded");
   }
 
   if (sensor_ == System::RGBD || sensor_ == System::IMU_RGBD) {
     readRGBD(fSettings);
-    std::cout << "\t-Loaded RGB-D calibration" << std::endl;
+    _logger->info("RGB-D calibration loaded");
   }
 
   readORB(fSettings);
-  std::cout << "\t-Loaded ORB settings" << std::endl;
+  _logger->info("ORB settings loaded");
   readViewer(fSettings);
-  std::cout << "\t-Loaded viewer settings" << std::endl;
+  _logger->info("Viewer settings loaded");
   readLoadAndSave(fSettings);
-  std::cout << "\t-Loaded Atlas settings" << std::endl;
+  _logger->info("Atlas settings loaded");
   readOtherParameters(fSettings);
-  std::cout << "\t-Loaded misc parameters" << std::endl;
+  _logger->info("Misc parameters loaded");
 
   if (bNeedToRectify_) {
     precomputeRectificationMaps();
-    std::cout << "\t-Computed rectification maps" << std::endl;
+    _logger->info("Rectification maps computed");
   }
-
-  std::cout << "----------------------------------" << std::endl;
 }
 
 void Settings::readCamera1(cv::FileStorage& fSettings) {
@@ -263,7 +260,7 @@ void Settings::readCamera1(cv::FileStorage& fSettings) {
       static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea = vOverlapping;
     }
   } else {
-    std::cerr << "Error: " << cameraModel << " not known" << std::endl;
+    _logger->critical("{} not known", cameraModel);
     std::exit(-1);
   }
 }
