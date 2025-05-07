@@ -91,6 +91,10 @@ public:
     return mvParameters.size();
   }
 
+  std::vector<float> parameters() const {
+    return mvParameters;
+  }
+
   virtual bool matchAndtriangulate(
     const cv::KeyPoint& kp1,
     const cv::KeyPoint& kp2,

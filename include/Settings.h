@@ -56,9 +56,9 @@ public:
   Settings(const std::string& configFile, const int& sensor);
 
   /*
-   * Ostream operator overloading to dump settings to the terminal
+   * Return string of settings
    */
-  friend std::ostream& operator<<(std::ostream& output, const Settings& s);
+  std::string Str() const;
 
   /*
    * Getter methods

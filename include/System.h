@@ -20,6 +20,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -27,6 +28,7 @@
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
+#include <spdlog/spdlog.h>
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
 
@@ -263,6 +265,8 @@ private:
   std::string mStrVocabularyFilePath;
 
   Settings* settings_;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3

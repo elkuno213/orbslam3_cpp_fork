@@ -19,6 +19,8 @@
 
 #include "Settings.h"
 #include <iostream>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
 #include "CameraModels/KannalaBrandt8.h"
@@ -540,115 +542,115 @@ void Settings::precomputeRectificationMaps() {
   }
 }
 
-std::ostream& operator<<(std::ostream& output, const Settings& settings) {
-  output << "SLAM settings: " << std::endl;
+std::string Settings::Str() const {
+  std::string output;
 
-  output << "\t-Camera 1 parameters (";
-  if (settings.cameraType_ == Settings::PinHole || settings.cameraType_ == Settings::Rectified) {
-    output << "Pinhole";
-  } else {
-    output << "Kannala-Brandt";
-  }
-  output << ")"
-         << ": [";
-  for (std::size_t i = 0; i < settings.originalCalib1_->size(); i++) {
-    output << " " << settings.originalCalib1_->getParameter(i);
-  }
-  output << " ]" << std::endl;
+  output += fmt::format("SLAM settings:\n");
 
-  if (!settings.vPinHoleDistorsion1_.empty()) {
-    output << "\t-Camera 1 distortion parameters: [ ";
-    for (float d : settings.vPinHoleDistorsion1_) {
-      output << " " << d;
-    }
-    output << " ]" << std::endl;
+  output += fmt::format(
+    "- Camera 1 parameters ({}): [ {:.6f} ]\n",
+    (cameraType_ == PinHole || cameraType_ == Rectified) ? "Pinhole" : "Kannala-Brandt",
+    fmt::join(originalCalib1_->parameters(), " ")
+  );
+
+  if (!vPinHoleDistorsion1_.empty()) {
+    output += fmt::format(
+      "- Camera 1 distortion parameters: [ {:.6f} ]\n",
+      fmt::join(vPinHoleDistorsion1_, " ")
+    );
   }
 
-  if (settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO) {
-    output << "\t-Camera 2 parameters (";
-    if (settings.cameraType_ == Settings::PinHole || settings.cameraType_ == Settings::Rectified) {
-      output << "Pinhole";
-    } else {
-      output << "Kannala-Brandt";
-    }
-    output << ""
-           << ": [";
-    for (std::size_t i = 0; i < settings.originalCalib2_->size(); i++) {
-      output << " " << settings.originalCalib2_->getParameter(i);
-    }
-    output << " ]" << std::endl;
+  if (sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) {
+    output += fmt::format(
+      "- Camera 2 parameters ({}): [ {:.6f} ]\n",
+      (cameraType_ == PinHole || cameraType_ == Rectified) ? "Pinhole" : "Kannala-Brandt",
+      fmt::join(originalCalib2_->parameters(), " ")
+    );
 
-    if (!settings.vPinHoleDistorsion2_.empty()) {
-      output << "\t-Camera 1 distortion parameters: [ ";
-      for (float d : settings.vPinHoleDistorsion2_) {
-        output << " " << d;
-      }
-      output << " ]" << std::endl;
+    if (!vPinHoleDistorsion2_.empty()) {
+      output += fmt::format(
+        "- Camera 2 distortion parameters: [ {:.6f} ]\n",
+        fmt::join(vPinHoleDistorsion2_, " ")
+      );
     }
   }
 
-  output << "\t-Original image size: [ " << settings.originalImSize_.width << " , "
-         << settings.originalImSize_.height << " ]" << std::endl;
-  output << "\t-Current image size: [ " << settings.newImSize_.width << " , "
-         << settings.newImSize_.height << " ]" << std::endl;
+  output += fmt::format(
+    "- Original image size: [ {}, {} ]\n",
+    originalImSize_.width,
+    originalImSize_.height
+  );
+  output += fmt::format( // clang-format off
+    "- Current image size: [ {}, {} ]\n",
+    newImSize_.width,
+    newImSize_.height
+  ); // clang-format on
 
-  if (settings.bNeedToRectify_) {
-    output << "\t-Camera 1 parameters after rectification: [ ";
-    for (std::size_t i = 0; i < settings.calibration1_->size(); i++) {
-      output << " " << settings.calibration1_->getParameter(i);
-    }
-    output << " ]" << std::endl;
-  } else if (settings.bNeedToResize1_) {
-    output << "\t-Camera 1 parameters after resize: [ ";
-    for (std::size_t i = 0; i < settings.calibration1_->size(); i++) {
-      output << " " << settings.calibration1_->getParameter(i);
-    }
-    output << " ]" << std::endl;
+  if (bNeedToRectify_) {
+    output += fmt::format(
+      "- Camera 1 parameters after rectification: [ {:.6f} ]\n",
+      fmt::join(calibration1_->parameters(), " ")
+    );
+  } else if (bNeedToResize1_) {
+    output += fmt::format(
+      "- Camera 1 parameters after resize: [ {:.6f} ]\n",
+      fmt::join(calibration1_->parameters(), " ")
+    );
 
-    if ((settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO) && settings.cameraType_ == Settings::KannalaBrandt) {
-      output << "\t-Camera 2 parameters after resize: [ ";
-      for (std::size_t i = 0; i < settings.calibration2_->size(); i++) {
-        output << " " << settings.calibration2_->getParameter(i);
-      }
-      output << " ]" << std::endl;
-    }
-  }
-
-  output << "\t-Sequence FPS: " << settings.fps_ << std::endl;
-
-  // Stereo stuff
-  if (settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO) {
-    output << "\t-Stereo baseline: " << settings.b_ << std::endl;
-    output << "\t-Stereo depth threshold : " << settings.thDepth_ << std::endl;
-
-    if (settings.cameraType_ == Settings::KannalaBrandt) {
-      auto vOverlapping1 = static_cast<KannalaBrandt8*>(settings.calibration1_)->mvLappingArea;
-      auto vOverlapping2 = static_cast<KannalaBrandt8*>(settings.calibration2_)->mvLappingArea;
-      output << "\t-Camera 1 overlapping area: [ " << vOverlapping1[0] << " , " << vOverlapping1[1]
-             << " ]" << std::endl;
-      output << "\t-Camera 2 overlapping area: [ " << vOverlapping2[0] << " , " << vOverlapping2[1]
-             << " ]" << std::endl;
+    if ((sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) && cameraType_ == KannalaBrandt) {
+      output += fmt::format(
+        "- Camera 2 parameters after resize: [ {:.6f} ]\n",
+        fmt::join(calibration2_->parameters(), " ")
+      );
     }
   }
 
-  if(settings.sensor_ == System::IMU_MONOCULAR || settings.sensor_ == System::IMU_STEREO || settings.sensor_ == System::IMU_RGBD) {
-    output << "\t-Gyro noise: " << settings.noiseGyro_ << std::endl;
-    output << "\t-Accelerometer noise: " << settings.noiseAcc_ << std::endl;
-    output << "\t-Gyro walk: " << settings.gyroWalk_ << std::endl;
-    output << "\t-Accelerometer walk: " << settings.accWalk_ << std::endl;
-    output << "\t-IMU frequency: " << settings.imuFrequency_ << std::endl;
+  output += fmt::format("- Sequence FPS: {}\n", fps_);
+
+  if (sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) {
+    output += fmt::format("- Stereo baseline: {:.6f}\n", b_);
+    output += fmt::format("- Stereo depth threshold: {:.6f}\n", thDepth_);
+
+    if (cameraType_ == KannalaBrandt) {
+      auto vOverlapping1 = static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea;
+      auto vOverlapping2 = static_cast<KannalaBrandt8*>(calibration2_)->mvLappingArea;
+
+      output += fmt::format(
+        "- Camera 1 overlapping area: [ {}, {} ]\n",
+        vOverlapping1[0],
+        vOverlapping1[1]
+      );
+      output += fmt::format(
+        "- Camera 2 overlapping area: [ {}, {} ]\n",
+        vOverlapping2[0],
+        vOverlapping2[1]
+      );
+    }
   }
 
-  if (settings.sensor_ == System::RGBD || settings.sensor_ == System::IMU_RGBD) {
-    output << "\t-RGB-D depth map factor: " << settings.depthMapFactor_ << std::endl;
+  if (sensor_ == System::IMU_MONOCULAR || sensor_ == System::IMU_STEREO || sensor_ == System::IMU_RGBD) {
+    // clang-format off
+    output += fmt::format("- Gyro noise: {:.6f}\n"         , noiseGyro_   );
+    output += fmt::format("- Accelerometer noise: {:.6f}\n", noiseAcc_    );
+    output += fmt::format("- Gyro walk: {:.6f}\n"          , gyroWalk_    );
+    output += fmt::format("- Accelerometer walk: {:.6f}\n" , accWalk_     );
+    output += fmt::format("- IMU frequency: {:.6f}\n"      , imuFrequency_);
+    // clang-format on
   }
 
-  output << "\t-Features per image: " << settings.nFeatures_ << std::endl;
-  output << "\t-ORB scale factor: " << settings.scaleFactor_ << std::endl;
-  output << "\t-ORB number of scales: " << settings.nLevels_ << std::endl;
-  output << "\t-Initial FAST threshold: " << settings.initThFAST_ << std::endl;
-  output << "\t-Min FAST threshold: " << settings.minThFAST_ << std::endl;
+  if (sensor_ == System::RGBD || sensor_ == System::IMU_RGBD) {
+    output += fmt::format("- RGB-D depth map factor: {}\n", depthMapFactor_);
+  }
+
+  // clang-format off
+  output += fmt::format("- Features per image: {}\n"    , nFeatures_  );
+  output += fmt::format("- ORB scale factor: {:.6f}\n"  , scaleFactor_);
+  output += fmt::format("- ORB number of scales: {}\n"  , nLevels_    );
+  output += fmt::format("- Initial FAST threshold: {}\n", initThFAST_ );
+  output += fmt::format("- Min FAST threshold: {}\n"    , minThFAST_  );
+  // clang-format on
 
   return output;
 }
+
 }; // namespace ORB_SLAM3
