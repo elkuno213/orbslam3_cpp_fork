@@ -176,22 +176,13 @@ int main(int argc, char** argv) {
 
       if (imageScale != 1.f) {
 #ifdef REGISTER_TIMES
-#ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t_Start_Resize = std::chrono::steady_clock::now();
-#else
-        std::chrono::monotonic_clock::time_point t_Start_Resize
-          = std::chrono::monotonic_clock::now();
-#endif
 #endif
         int width  = im.cols * imageScale;
         int height = im.rows * imageScale;
         cv::resize(im, im, cv::Size(width, height));
 #ifdef REGISTER_TIMES
-#ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-#else
-        std::chrono::monotonic_clock::time_point t_End_Resize = std::chrono::monotonic_clock::now();
-#endif
         t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
                      t_End_Resize - t_Start_Resize
         )
@@ -203,21 +194,13 @@ int main(int argc, char** argv) {
       // std::cout << "first imu: " << first_imu[seq] << std::endl;
       /*cout << "first imu time: " << std::fixed << vTimestampsImu[first_imu] << std::endl;
       std::cout << "size vImu: " << vImuMeas.size() << std::endl;*/
-#ifdef COMPILEDWITHC11
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-#else
-      std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
-#endif
 
       // Pass the image to the SLAM system
       // std::cout << "tframe = " << tframe << std::endl;
       SLAM.TrackMonocular(im, tframe, vImuMeas); // TODO change to monocular_inertial
 
-#ifdef COMPILEDWITHC11
       std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-#else
-      std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
-#endif
 
 #ifdef REGISTER_TIMES
       t_track

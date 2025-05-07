@@ -256,23 +256,14 @@ int main(int argc, char** argv) {
         im_right = imCV_right.clone();
       } else {
 #ifdef REGISTER_TIMES
-#ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t_Start_Resize = std::chrono::steady_clock::now();
-#else
-        std::chrono::monotonic_clock::time_point t_Start_Resize
-          = std::chrono::monotonic_clock::now();
-#endif
 #endif
         int width  = imCV.cols * imageScale;
         int height = imCV.rows * imageScale;
         cv::resize(imCV, im_left, cv::Size(width, height));
         cv::resize(imCV_right, im_right, cv::Size(width, height));
 #ifdef REGISTER_TIMES
-#ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-#else
-        std::chrono::monotonic_clock::time_point t_End_Resize = std::chrono::monotonic_clock::now();
-#endif
         t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
                      t_End_Resize - t_Start_Resize
         )
@@ -316,21 +307,13 @@ int main(int argc, char** argv) {
     }
 
 #ifdef REGISTER_TIMES
-#ifdef COMPILEDWITHC11
     std::chrono::steady_clock::time_point t_Start_Track = std::chrono::steady_clock::now();
-#else
-    std::chrono::monotonic_clock::time_point t_Start_Track = std::chrono::monotonic_clock::now();
-#endif
 #endif
     // Pass the image to the SLAM system
     SLAM.TrackStereo(im_left, im_right, timestamp, vImuMeas);
 #ifdef REGISTER_TIMES
-#ifdef COMPILEDWITHC11
     std::chrono::steady_clock::time_point t_End_Track = std::chrono::steady_clock::now();
-#else
-    std::chrono::monotonic_clock::time_point t_End_Track = std::chrono::monotonic_clock::now();
-#endif
-    t_track = t_resize
+    t_track                                           = t_resize
             + std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
                 t_End_Track - t_Start_Track
             )
