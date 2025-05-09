@@ -19,16 +19,18 @@
 
 #include "Atlas.h"
 #include "KeyFrameDatabase.h"
+#include "LoggingUtils.h"
 #include "MapPoint.h"
 #include "Viewer.h"
 
 namespace ORB_SLAM3 {
 
-Atlas::Atlas() {
+Atlas::Atlas() : _logger(logging::CreateModuleLogger("Atlas")) {
   mpCurrentMap = static_cast<Map*>(NULL);
 }
 
-Atlas::Atlas(int initKFid) : mnLastInitKFidMap(initKFid), mHasViewer(false) {
+Atlas::Atlas(int initKFid)
+  : mnLastInitKFidMap(initKFid), mHasViewer(false), _logger(logging::CreateModuleLogger("Atlas")) {
   mpCurrentMap = static_cast<Map*>(NULL);
   CreateNewMap();
 }
@@ -50,7 +52,7 @@ Atlas::~Atlas() {
 
 void Atlas::CreateNewMap() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
-  std::cout << "Creation of new map with id: " << Map::nNextId << std::endl;
+  _logger->info("New map created with ID {}", Map::nNextId);
   if (mpCurrentMap) {
     if (!mspMaps.empty() && mnLastInitKFidMap < mpCurrentMap->GetMaxKFid()) {
       mnLastInitKFidMap
@@ -58,12 +60,12 @@ void Atlas::CreateNewMap() {
     }
 
     mpCurrentMap->SetStoredMap();
-    std::cout << "Stored map with ID: " << mpCurrentMap->GetId() << std::endl;
+    _logger->info("Map stored with ID {}", mpCurrentMap->GetId());
 
     // if(mHasViewer)
     //     mpViewer->AddMapToCreateThumbnail(mpCurrentMap);
   }
-  std::cout << "Creation of new map with last KF id: " << mnLastInitKFidMap << std::endl;
+  _logger->info("New map created with last KeyFrame ID: {}", mnLastInitKFidMap);
 
   mpCurrentMap = new Map(mnLastInitKFidMap);
   mpCurrentMap->SetCurrentMap();
@@ -72,7 +74,7 @@ void Atlas::CreateNewMap() {
 
 void Atlas::ChangeMap(Map* pMap) {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
-  std::cout << "Change to map with id: " << pMap->GetId() << std::endl;
+  _logger->info("Change to map with ID {}", pMap->GetId());
   if (mpCurrentMap) {
     mpCurrentMap->SetStoredMap();
   }
@@ -108,11 +110,13 @@ GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam) {
   for (std::size_t i = 0; i < mvpCameras.size(); ++i) {
     GeometricCamera* pCam_i = mvpCameras[i];
     if (!pCam) {
-      std::cout << "Not pCam" << std::endl;
+      _logger->warn("Camera not existing");
     }
     if (!pCam_i) {
-      std::cout << "Not pCam_i" << std::endl;
+      _logger->warn("Camera (i) not existing");
     }
+
+    // Skips comparison if cameras are different types
     if (pCam->GetType() != pCam_i->GetType()) {
       continue;
     }

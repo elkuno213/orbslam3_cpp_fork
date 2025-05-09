@@ -21,12 +21,14 @@
 #define ATLAS_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <vector>
 #include <Eigen/Core>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
+#include <spdlog/spdlog.h>
 #include "Frame.h"
 #include "GeometricCamera.h"
 #include "KannalaBrandt8.h"
@@ -159,6 +161,7 @@ protected:
   // Mutex
   std::mutex mMutexAtlas;
 
+  std::shared_ptr<spdlog::logger> _logger;
 }; // class Atlas
 
 } // namespace ORB_SLAM3
