@@ -20,12 +20,14 @@
 #ifndef MAPDRAWER_H
 #define MAPDRAWER_H
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <pangolin/pangolin.h>
 #include <sophus/se3.hpp>
+#include <spdlog/logger.h>
 
 namespace ORB_SLAM3 {
 
@@ -74,6 +76,8 @@ private:
     {1.0f, 1.0f, 0.0f},
     {0.0f, 1.0f, 1.0f}
   };
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3
