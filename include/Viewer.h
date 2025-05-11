@@ -20,10 +20,12 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
+#include <spdlog/logger.h>
 
 namespace ORB_SLAM3 {
 
@@ -95,6 +97,8 @@ private:
   std::mutex mMutexStop;
 
   bool mbStopTrack;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3
