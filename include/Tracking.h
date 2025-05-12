@@ -22,12 +22,14 @@
 
 #include <fstream>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
+#include <spdlog/logger.h>
 #include "Frame.h"
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
@@ -362,6 +364,8 @@ protected:
   int initID, lastID;
 
   Sophus::SE3f mTlr;
+
+  std::shared_ptr<spdlog::logger> _logger;
 
   void newParameterLoader(Settings* settings);
 
