@@ -22,10 +22,12 @@
 
 #include <fstream>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
 #include <Eigen/Core>
+#include <spdlog/logger.h>
 
 namespace ORB_SLAM3 {
 
@@ -196,6 +198,8 @@ protected:
 
   // DEBUG
   std::ofstream f_lm;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3
