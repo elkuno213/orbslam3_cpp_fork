@@ -23,6 +23,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
@@ -31,6 +32,7 @@
 #include <vector>
 #include <Thirdparty/g2o/g2o/types/sim3.h>
 #include <opencv2/core.hpp>
+#include <spdlog/logger.h>
 #include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
@@ -271,6 +273,8 @@ protected:
 #ifdef REGISTER_LOOP
   std::string mstrFolderLoop;
 #endif
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3
