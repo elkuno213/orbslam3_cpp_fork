@@ -206,8 +206,6 @@ public:
   Bias GetOriginalBias();
   Bias GetUpdatedBias();
 
-  void printMeasurements() const;
-
 public:
   float                           dT;
   Eigen::Matrix<float, 15, 15>    C;

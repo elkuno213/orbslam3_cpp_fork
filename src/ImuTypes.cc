@@ -18,7 +18,6 @@
  */
 
 #include "ImuTypes.h"
-#include <iostream>
 #include "Converter.h"
 #include "GeometricTools.h"
 
@@ -377,14 +376,6 @@ Bias Preintegrated::GetUpdatedBias() {
 Eigen::Matrix<float, 6, 1> Preintegrated::GetDeltaBias() {
   std::unique_lock<std::mutex> lock(mMutex);
   return db;
-}
-
-void Preintegrated::printMeasurements() const {
-  std::cout << "pint meas:\n";
-  for (int i = 0; i < mvMeasurements.size(); i++) {
-    std::cout << "meas " << mvMeasurements[i].t << std::endl;
-  }
-  std::cout << "end pint meas:\n";
 }
 
 Bias::Bias() : bax(0), bay(0), baz(0), bwx(0), bwy(0), bwz(0) {
