@@ -21,12 +21,14 @@
 #define FRAME_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <vector>
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 #include <sophus/se3.hpp>
+#include <spdlog/logger.h>
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
 
@@ -405,9 +407,9 @@ public:
 
   cv::Mat imgLeft, imgRight;
 
-  void PrintPointDistribution();
-
   Sophus::SE3<double> T_test;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3
