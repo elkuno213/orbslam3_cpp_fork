@@ -46,18 +46,6 @@
 
 namespace ORB_SLAM3 {
 
-Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
-
-void Verbose::PrintMess(std::string str, eLevel lev) {
-  if (lev <= th) {
-    std::cout << str << std::endl;
-  }
-}
-
-void Verbose::SetTh(eLevel _th) {
-  th = _th;
-}
-
 System::System(
   const std::string& strVocFile,
   const std::string& strSettingsFile,
@@ -279,9 +267,6 @@ System::System(
     mpLoopCloser->mpViewer = mpViewer;
     mpViewer->both         = mpFrameDrawer->both;
   }
-
-  // Fix verbosity
-  Verbose::SetTh(Verbose::VERBOSITY_QUIET);
 }
 
 Sophus::SE3f System::TrackStereo(
