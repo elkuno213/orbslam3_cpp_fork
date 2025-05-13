@@ -21,6 +21,7 @@
 #define MAPPOINT_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <tuple>
@@ -29,6 +30,7 @@
 #include <boost/serialization/array_wrapper.hpp>
 #include <boost/serialization/map.hpp>
 #include <opencv2/core.hpp>
+#include <spdlog/logger.h>
 #include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {
@@ -148,8 +150,6 @@ public:
   Map* GetMap();
   void UpdateMap(Map* pMap);
 
-  void PrintObservations();
-
   void PreSave(std::set<KeyFrame*>& spKF, std::set<MapPoint*>& spMP);
   void PostLoad(
     std::map<long unsigned int, KeyFrame*>& mpKFid, std::map<long unsigned int, MapPoint*>& mpMPid
@@ -241,6 +241,8 @@ protected:
   std::mutex mMutexPos;
   std::mutex mMutexFeatures;
   std::mutex mMutexMap;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3

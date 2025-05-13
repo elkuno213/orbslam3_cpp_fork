@@ -21,6 +21,7 @@
 #include <mutex>
 #include "Frame.h"
 #include "KeyFrame.h"
+#include "LoggingUtils.h"
 #include "Map.h"
 #include "ORBmatcher.h"
 
@@ -44,7 +45,8 @@ MapPoint::MapPoint()
   , mnVisible(1)
   , mnFound(1)
   , mbBad(false)
-  , mpReplaced(static_cast<MapPoint*>(NULL)) {
+  , mpReplaced(static_cast<MapPoint*>(NULL))
+  , _logger(logging::CreateModuleLogger("MapPoint")) {
   mpReplaced = static_cast<MapPoint*>(NULL);
 }
 
@@ -68,7 +70,8 @@ MapPoint::MapPoint(const Eigen::Vector3f& Pos, KeyFrame* pRefKF, Map* pMap)
   , mfMinDistance(0)
   , mfMaxDistance(0)
   , mpMap(pMap)
-  , mnOriginMapId(pMap->GetId()) {
+  , mnOriginMapId(pMap->GetId())
+  , _logger(logging::CreateModuleLogger("MapPoint")) {
   SetWorldPos(Pos);
 
   mNormalVector.setZero();
@@ -103,7 +106,8 @@ MapPoint::MapPoint(
   , mfMinDistance(0)
   , mfMaxDistance(0)
   , mpMap(pMap)
-  , mnOriginMapId(pMap->GetId()) {
+  , mnOriginMapId(pMap->GetId())
+  , _logger(logging::CreateModuleLogger("MapPoint")) {
   mInvDepth = invDepth;
   mInitU    = (double)uv_init.x;
   mInitV    = (double)uv_init.y;
@@ -135,7 +139,8 @@ MapPoint::MapPoint(const Eigen::Vector3f& Pos, Map* pMap, Frame* pFrame, const i
   , mbBad(false)
   , mpReplaced(NULL)
   , mpMap(pMap)
-  , mnOriginMapId(pMap->GetId()) {
+  , mnOriginMapId(pMap->GetId())
+  , _logger(logging::CreateModuleLogger("MapPoint")) {
   SetWorldPos(Pos);
 
   Eigen::Vector3f Ow;
@@ -583,19 +588,6 @@ int MapPoint::PredictScale(const float& currentDist, Frame* pF) {
   return nScale;
 }
 
-void MapPoint::PrintObservations() {
-  std::cout << "MP_OBS: MP " << mnId << std::endl;
-  for (std::map<KeyFrame*, std::tuple<int, int>>::iterator mit  = mObservations.begin(),
-                                                           mend = mObservations.end();
-       mit != mend;
-       mit++) {
-    KeyFrame*            pKFi      = mit->first;
-    std::tuple<int, int> indexes   = mit->second;
-    int                  leftIndex = std::get<0>(indexes), rightIndex = std::get<1>(indexes);
-    std::cout << "--OBS in KF " << pKFi->mnId << " in map " << pKFi->GetMap()->GetId() << std::endl;
-  }
-}
-
 Map* MapPoint::GetMap() {
   std::unique_lock<std::mutex> lock(mMutexMap);
   return mpMap;
@@ -639,8 +631,7 @@ void MapPoint::PostLoad(
 ) {
   mpRefKF = mpKFid[mBackupRefKFId];
   if (!mpRefKF) {
-    std::cout << "ERROR: MP without KF reference " << mBackupRefKFId << "; Num obs: " << nObs
-              << std::endl;
+    _logger->error("Map point {} observations has no reference key frame", nObs);
   }
   mpReplaced = static_cast<MapPoint*>(NULL);
   if (mBackupReplacedId >= 0) {
