@@ -20,15 +20,9 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/TUMVI.h"
 #include "Converter.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strImagePath,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImages,
-  std::vector<double>&      vTimeStamps
-);
 
 double ttrack_tot = 0;
 
@@ -65,7 +59,7 @@ int main(int argc, char** argv) {
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
     std::cout << "Loading images for sequence " << seq << "...";
-    LoadImages(
+    ORB_SLAM3::TUMVI::LoadMonocularImages(
       std::string(argv[(2 * seq) + 3]),
       std::string(argv[(2 * seq) + 4]),
       vstrImageFilenames[seq],
@@ -199,33 +193,4 @@ int main(int argc, char** argv) {
   std::cout << "mean tracking time: " << totaltime / proccIm << std::endl;
 
   return 0;
-}
-
-void LoadImages(
-  const std::string&        strImagePath,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImages,
-  std::vector<double>&      vTimeStamps
-) {
-  std::ifstream fTimes;
-  fTimes.open(strPathTimes.c_str());
-  vTimeStamps.reserve(5000);
-  vstrImages.reserve(5000);
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-
-    if (!s.empty()) {
-      if (s[0] == '#') {
-        continue;
-      }
-
-      int         pos  = s.find(' ');
-      std::string item = s.substr(0, pos);
-
-      vstrImages.push_back(strImagePath + "/" + item + ".png");
-      double t = std::stod(item);
-      vTimeStamps.push_back(t / 1e9);
-    }
-  }
 }

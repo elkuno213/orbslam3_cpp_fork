@@ -20,13 +20,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/TUM.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strFile,
-  std::vector<std::string>& vstrImageFilenames,
-  std::vector<double>&      vTimestamps
-);
 
 int main(int argc, char** argv) {
   if (argc != 4) {
@@ -40,7 +35,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> vstrImageFilenames;
   std::vector<double>      vTimestamps;
   std::string              strFile = std::string(argv[3]) + "/rgb.txt";
-  LoadImages(strFile, vstrImageFilenames, vTimestamps);
+  ORB_SLAM3::TUM::LoadMonocularImages(strFile, vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
 
@@ -141,34 +136,4 @@ int main(int argc, char** argv) {
   SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
   return 0;
-}
-
-void LoadImages(
-  const std::string&        strFile,
-  std::vector<std::string>& vstrImageFilenames,
-  std::vector<double>&      vTimestamps
-) {
-  std::ifstream f;
-  f.open(strFile.c_str());
-
-  // skip first three lines
-  std::string s0;
-  std::getline(f, s0);
-  std::getline(f, s0);
-  std::getline(f, s0);
-
-  while (!f.eof()) {
-    std::string s;
-    std::getline(f, s);
-    if (!s.empty()) {
-      std::stringstream ss;
-      ss << s;
-      double      t;
-      std::string sRGB;
-      ss >> t;
-      vTimestamps.push_back(t);
-      ss >> sRGB;
-      vstrImageFilenames.push_back(sRGB);
-    }
-  }
 }

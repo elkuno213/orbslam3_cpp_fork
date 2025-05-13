@@ -23,6 +23,7 @@
 #include <librealsense2/rsutil.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/RealSense.h"
 #include "System.h"
 
 bool b_continue_session;
@@ -30,64 +31,6 @@ bool b_continue_session;
 void exit_loop_handler(int s) {
   std::cout << "Finishing session" << std::endl;
   b_continue_session = false;
-}
-
-rs2_stream find_stream_to_align(const std::vector<rs2::stream_profile>& streams);
-bool       profile_changed(
-        const std::vector<rs2::stream_profile>& current, const std::vector<rs2::stream_profile>& prev
-      );
-
-void interpolateData(
-  const std::vector<double>& vBase_times,
-  std::vector<rs2_vector>&   vInterp_data,
-  std::vector<double>&       vInterp_times,
-  const rs2_vector&          prev_data,
-  const double&              prev_time
-);
-
-rs2_vector interpolateMeasure(
-  const double     target_time,
-  const rs2_vector current_data,
-  const double     current_time,
-  const rs2_vector prev_data,
-  const double     prev_time
-);
-
-static rs2_option get_sensor_option(const rs2::sensor& sensor) {
-  // Sensors usually have several options to control their properties
-  //  such as Exposure, Brightness etc.
-
-  std::cout << "Sensor supports the following options:\n" << std::endl;
-
-  // The following loop shows how to iterate over all available options
-  // Starting from 0 until RS2_OPTION_COUNT (exclusive)
-  for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); i++) {
-    rs2_option option_type = static_cast<rs2_option>(i);
-    // SDK enum types can be streamed to get a std::string that represents them
-    std::cout << "  " << i << ": " << option_type;
-
-    // To control an option, use the following api:
-
-    // First, verify that the sensor actually supports this option
-    if (sensor.supports(option_type)) {
-      std::cout << std::endl;
-
-      // Get a human readable description of the option
-      const char* description = sensor.get_option_description(option_type);
-      std::cout << "       Description   : " << description << std::endl;
-
-      // Get the current value of the option
-      float current_value = sensor.get_option(option_type);
-      std::cout << "       Current Value : " << current_value << std::endl;
-
-      // To change the value of an option, please follow the change_sensor_option() function
-    } else {
-      std::cout << " is not supported" << std::endl;
-    }
-  }
-
-  uint32_t selected_sensor_option = 0;
-  return static_cast<rs2_option>(selected_sensor_option);
 }
 
 int main(int argc, char** argv) {
@@ -140,7 +83,7 @@ int main(int argc, char** argv) {
         sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 1); // emitter on for depth information
       }
       // std::cout << "  " << index << " : " << sensor.get_info(RS2_CAMERA_INFO_NAME) << std::endl;
-      get_sensor_option(sensor);
+      ORB_SLAM3::RealSense::get_sensor_option(sensor);
       if (index == 2) {
         // RGB camera
         sensor.set_option(RS2_OPTION_EXPOSURE, 80.f);
@@ -198,7 +141,7 @@ int main(int argc, char** argv) {
   // Align depth and RGB frames
   // Pipeline could choose a device that does not have a color stream
   // If there is no color stream, choose to align depth to another stream
-  rs2_stream align_to = find_stream_to_align(pipe_profile.get_streams());
+  rs2_stream align_to = ORB_SLAM3::RealSense::find_stream_to_align(pipe_profile.get_streams());
 
   // Create a rs2::align object.
   // rs2::align allows us to perform alignment of depth frames to others frames
@@ -218,11 +161,14 @@ int main(int argc, char** argv) {
         return;
       }
 
-      if (profile_changed(pipe.get_active_profile().get_streams(), pipe_profile.get_streams())) {
+      if (ORB_SLAM3::RealSense::profile_changed(
+            pipe.get_active_profile().get_streams(),
+            pipe_profile.get_streams()
+          )) {
         // If the profile was changed, update the align object, and also get the new device's depth
         // scale
         pipe_profile = pipe.get_active_profile();
-        align_to     = find_stream_to_align(pipe_profile.get_streams());
+        align_to     = ORB_SLAM3::RealSense::find_stream_to_align(pipe_profile.get_streams());
         align        = rs2::align(align_to);
       }
 
@@ -381,57 +327,4 @@ int main(int argc, char** argv) {
 #endif
   }
   std::cout << "System shutdown!\n";
-}
-
-rs2_stream find_stream_to_align(const std::vector<rs2::stream_profile>& streams) {
-  // Given a vector of streams, we try to find a depth stream and another stream to align depth
-  // with. We prioritize color streams to make the view look better. If color is not available, we
-  // take another stream that (other than depth)
-  rs2_stream align_to           = RS2_STREAM_ANY;
-  bool       depth_stream_found = false;
-  bool       color_stream_found = false;
-  for (rs2::stream_profile sp : streams) {
-    rs2_stream profile_stream = sp.stream_type();
-    if (profile_stream != RS2_STREAM_DEPTH) {
-      if (!color_stream_found) { // Prefer color
-        align_to = profile_stream;
-      }
-
-      if (profile_stream == RS2_STREAM_COLOR) {
-        color_stream_found = true;
-      }
-    } else {
-      depth_stream_found = true;
-    }
-  }
-
-  if (!depth_stream_found) {
-    throw std::runtime_error("No Depth stream available");
-  }
-
-  if (align_to == RS2_STREAM_ANY) {
-    throw std::runtime_error("No stream found to align with Depth");
-  }
-
-  return align_to;
-}
-
-bool profile_changed(
-  const std::vector<rs2::stream_profile>& current, const std::vector<rs2::stream_profile>& prev
-) {
-  for (auto&& sp : prev) {
-    // If previous profile is in current (maybe just added another)
-    auto itr = std::find_if(
-      std::begin(current),
-      std::end(current),
-      [&sp](const rs2::stream_profile& current_sp) {
-        return sp.unique_id() == current_sp.unique_id();
-      }
-    );
-    if (itr == std::end(current)) // If it previous stream wasn't found in current
-    {
-      return true;
-    }
-  }
-  return false;
 }

@@ -20,24 +20,9 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/TUMVI.h"
 #include "ImuTypes.h"
 #include "System.h"
-
-void LoadImagesTUMVI(
-  const std::string&        strPathLeft,
-  const std::string&        strPathRight,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimeStamps
-);
-
-void LoadIMU(
-  const std::string&        strImuPath,
-  std::vector<double>&      vTimeStamps,
-  std::vector<cv::Point3f>& vAcc,
-  std::vector<cv::Point3f>& vGyro
-);
 
 double ttrack_tot = 0;
 
@@ -83,7 +68,7 @@ int main(int argc, char** argv) {
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
     std::cout << "Loading images for sequence " << seq << "...";
-    LoadImagesTUMVI(
+    ORB_SLAM3::TUMVI::LoadStereoImages(
       std::string(argv[4 * (seq + 1) - 1]),
       std::string(argv[4 * (seq + 1)]),
       std::string(argv[4 * (seq + 1) + 1]),
@@ -98,7 +83,12 @@ int main(int argc, char** argv) {
     std::cout << "LOADED!" << std::endl;
 
     std::cout << "Loading IMU for sequence " << seq << "...";
-    LoadIMU(string(argv[4 * (seq + 1) + 2]), vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
+    ORB_SLAM3::TUMVI::LoadIMU(
+      string(argv[4 * (seq + 1) + 2]),
+      vTimestampsImu[seq],
+      vAcc[seq],
+      vGyro[seq]
+    );
     std::cout << "Total IMU meas: " << vTimestampsImu[seq].size() << std::endl;
     std::cout << "first IMU ts: " << vTimestampsImu[seq][0] << std::endl;
     std::cout << "LOADED!" << std::endl;
@@ -276,80 +266,4 @@ int main(int argc, char** argv) {
   std::cout << "mean tracking time: " << totaltime / proccIm << std::endl;
 
   return 0;
-}
-
-void LoadImagesTUMVI(
-  const std::string&        strPathLeft,
-  const std::string&        strPathRight,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimeStamps
-) {
-  std::ifstream fTimes;
-  std::cout << strPathLeft << std::endl;
-  std::cout << strPathRight << std::endl;
-  std::cout << strPathTimes << std::endl;
-  fTimes.open(strPathTimes.c_str());
-  vTimeStamps.reserve(5000);
-  vstrImageLeft.reserve(5000);
-  vstrImageRight.reserve(5000);
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-
-    if (!s.empty()) {
-      if (s[0] == '#') {
-        continue;
-      }
-
-      int         pos  = s.find(' ');
-      std::string item = s.substr(0, pos);
-
-      vstrImageLeft.push_back(strPathLeft + "/" + item + ".png");
-      vstrImageRight.push_back(strPathRight + "/" + item + ".png");
-
-      double t = std::stod(item);
-      vTimeStamps.push_back(t / 1e9);
-    }
-  }
-}
-
-void LoadIMU(
-  const std::string&        strImuPath,
-  std::vector<double>&      vTimeStamps,
-  std::vector<cv::Point3f>& vAcc,
-  std::vector<cv::Point3f>& vGyro
-) {
-  std::ifstream fImu;
-  fImu.open(strImuPath.c_str());
-  vTimeStamps.reserve(5000);
-  vAcc.reserve(5000);
-  vGyro.reserve(5000);
-
-  while (!fImu.eof()) {
-    std::string s;
-    std::getline(fImu, s);
-    if (s[0] == '#') {
-      continue;
-    }
-
-    if (!s.empty()) {
-      std::string item;
-      std::size_t pos = 0;
-      double      data[7];
-      int         count = 0;
-      while ((pos = s.find(',')) != std::string::npos) {
-        item          = s.substr(0, pos);
-        data[count++] = std::stod(item);
-        s.erase(0, pos + 1);
-      }
-      item    = s.substr(0, pos);
-      data[6] = std::stod(item);
-
-      vTimeStamps.push_back(data[0] / 1e9);
-      vAcc.push_back(cv::Point3f(data[4], data[5], data[6]));
-      vGyro.push_back(cv::Point3f(data[1], data[2], data[3]));
-    }
-  }
 }

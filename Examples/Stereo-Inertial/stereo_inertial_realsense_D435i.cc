@@ -23,6 +23,7 @@
 #include <librealsense2/rsutil.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/RealSense.h"
 #include "System.h"
 
 bool b_continue_session;
@@ -30,59 +31,6 @@ bool b_continue_session;
 void exit_loop_handler(int s) {
   std::cout << "Finishing session" << std::endl;
   b_continue_session = false;
-}
-
-void interpolateData(
-  const std::vector<double>& vBase_times,
-  std::vector<rs2_vector>&   vInterp_data,
-  std::vector<double>&       vInterp_times,
-  const rs2_vector&          prev_data,
-  const double&              prev_time
-);
-
-rs2_vector interpolateMeasure(
-  const double     target_time,
-  const rs2_vector current_data,
-  const double     current_time,
-  const rs2_vector prev_data,
-  const double     prev_time
-);
-
-static rs2_option get_sensor_option(const rs2::sensor& sensor) {
-  // Sensors usually have several options to control their properties
-  //  such as Exposure, Brightness etc.
-
-  std::cout << "Sensor supports the following options:\n" << std::endl;
-
-  // The following loop shows how to iterate over all available options
-  // Starting from 0 until RS2_OPTION_COUNT (exclusive)
-  for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); i++) {
-    rs2_option option_type = static_cast<rs2_option>(i);
-    // SDK enum types can be streamed to get a std::string that represents them
-    std::cout << "  " << i << ": " << option_type;
-
-    // To control an option, use the following api:
-
-    // First, verify that the sensor actually supports this option
-    if (sensor.supports(option_type)) {
-      std::cout << std::endl;
-
-      // Get a human readable description of the option
-      const char* description = sensor.get_option_description(option_type);
-      std::cout << "       Description   : " << description << std::endl;
-
-      // Get the current value of the option
-      float current_value = sensor.get_option(option_type);
-      std::cout << "       Current Value : " << current_value << std::endl;
-
-      // To change the value of an option, please follow the change_sensor_option() function
-    } else {
-      std::cout << " is not supported" << std::endl;
-    }
-  }
-
-  uint32_t selected_sensor_option = 0;
-  return static_cast<rs2_option>(selected_sensor_option);
 }
 
 int main(int argc, char** argv) {
@@ -133,7 +81,7 @@ int main(int argc, char** argv) {
         sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0); // switch off emitter
       }
       // std::cout << "  " << index << " : " << sensor.get_info(RS2_CAMERA_INFO_NAME) << std::endl;
-      get_sensor_option(sensor);
+      ORB_SLAM3::RealSense::get_sensor_option(sensor);
       if (index == 2) {
         // RGB camera (not used here...)
         sensor.set_option(RS2_OPTION_EXPOSURE, 100.f);
@@ -238,7 +186,7 @@ int main(int argc, char** argv) {
           int    index       = v_accel_timestamp_sync.size();
           double target_time = v_gyro_timestamp[index];
 
-          rs2_vector interp_data = interpolateMeasure(
+          rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
             target_time,
             current_accel_data,
             current_accel_timestamp,
@@ -351,7 +299,7 @@ int main(int argc, char** argv) {
         int    index       = v_accel_timestamp_sync.size();
         double target_time = v_gyro_timestamp[index];
 
-        rs2_vector interp_data = interpolateMeasure(
+        rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
           target_time,
           current_accel_data,
           current_accel_timestamp,
@@ -433,41 +381,4 @@ int main(int argc, char** argv) {
     vImuMeas.clear();
   }
   std::cout << "System shutdown!\n";
-}
-
-rs2_vector interpolateMeasure(
-  const double     target_time,
-  const rs2_vector current_data,
-  const double     current_time,
-  const rs2_vector prev_data,
-  const double     prev_time
-) {
-  // If there are not previous information, the current data is propagated
-  if (prev_time == 0) {
-    return current_data;
-  }
-
-  rs2_vector increment;
-  rs2_vector value_interp;
-
-  if (target_time > current_time) {
-    value_interp = current_data;
-  } else if (target_time > prev_time) {
-    increment.x = current_data.x - prev_data.x;
-    increment.y = current_data.y - prev_data.y;
-    increment.z = current_data.z - prev_data.z;
-
-    double factor = (target_time - prev_time) / (current_time - prev_time);
-
-    value_interp.x = prev_data.x + increment.x * factor;
-    value_interp.y = prev_data.y + increment.y * factor;
-    value_interp.z = prev_data.z + increment.z * factor;
-
-    // zero interpolation
-    value_interp = current_data;
-  } else {
-    value_interp = prev_data;
-  }
-
-  return value_interp;
 }

@@ -21,13 +21,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/KITTI.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strSequence,
-  std::vector<std::string>& vstrImageFilenames,
-  std::vector<double>&      vTimestamps
-);
 
 int main(int argc, char** argv) {
   if (argc != 4) {
@@ -40,7 +35,7 @@ int main(int argc, char** argv) {
   // Retrieve paths to images
   std::vector<std::string> vstrImageFilenames;
   std::vector<double>      vTimestamps;
-  LoadImages(string(argv[3]), vstrImageFilenames, vTimestamps);
+  ORB_SLAM3::KITTI::LoadMonocularImages(string(argv[3]), vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
 
@@ -136,36 +131,4 @@ int main(int argc, char** argv) {
   SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
   return 0;
-}
-
-void LoadImages(
-  const std::string&        strPathToSequence,
-  std::vector<std::string>& vstrImageFilenames,
-  std::vector<double>&      vTimestamps
-) {
-  std::ifstream fTimes;
-  std::string   strPathTimeFile = strPathToSequence + "/times.txt";
-  fTimes.open(strPathTimeFile.c_str());
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-    if (!s.empty()) {
-      std::stringstream ss;
-      ss << s;
-      double t;
-      ss >> t;
-      vTimestamps.push_back(t);
-    }
-  }
-
-  std::string strPrefixLeft = strPathToSequence + "/image_0/";
-
-  const int nTimes = vTimestamps.size();
-  vstrImageFilenames.resize(nTimes);
-
-  for (int i = 0; i < nTimes; i++) {
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(6) << i;
-    vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
-  }
 }

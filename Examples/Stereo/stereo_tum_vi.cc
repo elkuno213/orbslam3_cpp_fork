@@ -20,16 +20,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/TUMVI.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strPathLeft,
-  const std::string&        strPathRight,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimeStamps
-);
 
 double ttrack_tot = 0;
 
@@ -68,7 +60,7 @@ int main(int argc, char** argv) {
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
     std::cout << "Loading images for sequence " << seq << "...";
-    LoadImages(
+    ORB_SLAM3::TUMVI::LoadStereoImages(
       std::string(argv[(3 * seq) + 3]),
       std::string(argv[(2 * seq) + 4]),
       std::string(argv[(2 * seq) + 5]),
@@ -250,40 +242,3 @@ std::vector<double> &vTimeStamps)
         }
     }
 }*/
-
-void LoadImages(
-  const std::string&        strPathLeft,
-  const std::string&        strPathRight,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimeStamps
-) {
-  std::ifstream fTimes;
-  std::cout << strPathLeft << std::endl;
-  std::cout << strPathRight << std::endl;
-  std::cout << strPathTimes << std::endl;
-  fTimes.open(strPathTimes.c_str());
-  vTimeStamps.reserve(5000);
-  vstrImageLeft.reserve(5000);
-  vstrImageRight.reserve(5000);
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-
-    if (!s.empty()) {
-      if (s[0] == '#') {
-        continue;
-      }
-
-      int         pos  = s.find(' ');
-      std::string item = s.substr(0, pos);
-
-      vstrImageLeft.push_back(strPathLeft + "/" + item + ".png");
-      vstrImageRight.push_back(strPathRight + "/" + item + ".png");
-
-      double t = std::stod(item);
-      vTimeStamps.push_back(t / 1e9);
-    }
-  }
-}

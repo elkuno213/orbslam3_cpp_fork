@@ -19,16 +19,8 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include "Common/EuRoC.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strPathLeft,
-  const std::string&        strPathRight,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimeStamps
-);
 
 int main(int argc, char** argv) {
   if (argc < 5) {
@@ -73,7 +65,7 @@ int main(int argc, char** argv) {
     std::string pathCam0 = pathSeq + "/mav0/cam0/data";
     std::string pathCam1 = pathSeq + "/mav0/cam1/data";
 
-    LoadImages(
+    ORB_SLAM3::EuRoC::LoadStereoImages(
       pathCam0,
       pathCam1,
       pathTimeStamps,
@@ -184,32 +176,4 @@ int main(int argc, char** argv) {
   }
 
   return 0;
-}
-
-void LoadImages(
-  const std::string&        strPathLeft,
-  const std::string&        strPathRight,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimeStamps
-) {
-  std::ifstream fTimes;
-  fTimes.open(strPathTimes.c_str());
-  vTimeStamps.reserve(5000);
-  vstrImageLeft.reserve(5000);
-  vstrImageRight.reserve(5000);
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-    if (!s.empty()) {
-      std::stringstream ss;
-      ss << s;
-      vstrImageLeft.push_back(strPathLeft + "/" + ss.str() + ".png");
-      vstrImageRight.push_back(strPathRight + "/" + ss.str() + ".png");
-      double t;
-      ss >> t;
-      vTimeStamps.push_back(t / 1e9);
-    }
-  }
 }

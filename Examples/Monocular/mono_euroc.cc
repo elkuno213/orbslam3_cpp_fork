@@ -20,14 +20,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/EuRoC.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strImagePath,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImages,
-  std::vector<double>&      vTimeStamps
-);
 
 int main(int argc, char** argv) {
   if (argc < 5) {
@@ -62,7 +56,7 @@ int main(int argc, char** argv) {
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
     std::cout << "Loading images for sequence " << seq << "...";
-    LoadImages(
+    ORB_SLAM3::EuRoC::LoadMonocularImages(
       std::string(argv[(2 * seq) + 3]) + "/mav0/cam0/data",
       std::string(argv[(2 * seq) + 4]),
       vstrImageFilenames[seq],
@@ -187,28 +181,4 @@ int main(int argc, char** argv) {
   }
 
   return 0;
-}
-
-void LoadImages(
-  const std::string&        strImagePath,
-  const std::string&        strPathTimes,
-  std::vector<std::string>& vstrImages,
-  std::vector<double>&      vTimeStamps
-) {
-  std::ifstream fTimes;
-  fTimes.open(strPathTimes.c_str());
-  vTimeStamps.reserve(5000);
-  vstrImages.reserve(5000);
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-    if (!s.empty()) {
-      std::stringstream ss;
-      ss << s;
-      vstrImages.push_back(strImagePath + "/" + ss.str() + ".png");
-      double t;
-      ss >> t;
-      vTimeStamps.push_back(t * 1e-9);
-    }
-  }
 }

@@ -39,43 +39,6 @@ void exit_loop_handler(int s) {
   b_continue_session = false;
 }
 
-static rs2_option get_sensor_option(const rs2::sensor& sensor) {
-  // Sensors usually have several options to control their properties
-  //  such as Exposure, Brightness etc.
-
-  std::cout << "Sensor supports the following options:\n" << std::endl;
-
-  // The following loop shows how to iterate over all available options
-  // Starting from 0 until RS2_OPTION_COUNT (exclusive)
-  for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); i++) {
-    rs2_option option_type = static_cast<rs2_option>(i);
-    // SDK enum types can be streamed to get a std::string that represents them
-    std::cout << "  " << i << ": " << option_type;
-
-    // To control an option, use the following api:
-
-    // First, verify that the sensor actually supports this option
-    if (sensor.supports(option_type)) {
-      std::cout << std::endl;
-
-      // Get a human readable description of the option
-      const char* description = sensor.get_option_description(option_type);
-      std::cout << "       Description   : " << description << std::endl;
-
-      // Get the current value of the option
-      float current_value = sensor.get_option(option_type);
-      std::cout << "       Current Value : " << current_value << std::endl;
-
-      // To change the value of an option, please follow the change_sensor_option() function
-    } else {
-      std::cout << " is not supported" << std::endl;
-    }
-  }
-
-  uint32_t selected_sensor_option = 0;
-  return static_cast<rs2_option>(selected_sensor_option);
-}
-
 int main(int argc, char** argv) {
   if (argc != 2) {
     std::cerr << std::endl

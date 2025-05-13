@@ -21,14 +21,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/KITTI.h"
 #include "System.h"
-
-void LoadImages(
-  const std::string&        strPathToSequence,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimestamps
-);
 
 int main(int argc, char** argv) {
   if (argc != 4) {
@@ -42,7 +36,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> vstrImageLeft;
   std::vector<std::string> vstrImageRight;
   std::vector<double>      vTimestamps;
-  LoadImages(string(argv[3]), vstrImageLeft, vstrImageRight, vTimestamps);
+  ORB_SLAM3::KITTI::LoadStereoImages(string(argv[3]), vstrImageLeft, vstrImageRight, vTimestamps);
 
   const int nImages = vstrImageLeft.size();
 
@@ -141,40 +135,4 @@ int main(int argc, char** argv) {
   SLAM.SaveTrajectoryKITTI("CameraTrajectory.txt");
 
   return 0;
-}
-
-void LoadImages(
-  const std::string&        strPathToSequence,
-  std::vector<std::string>& vstrImageLeft,
-  std::vector<std::string>& vstrImageRight,
-  std::vector<double>&      vTimestamps
-) {
-  std::ifstream fTimes;
-  std::string   strPathTimeFile = strPathToSequence + "/times.txt";
-  fTimes.open(strPathTimeFile.c_str());
-  while (!fTimes.eof()) {
-    std::string s;
-    std::getline(fTimes, s);
-    if (!s.empty()) {
-      std::stringstream ss;
-      ss << s;
-      double t;
-      ss >> t;
-      vTimestamps.push_back(t);
-    }
-  }
-
-  std::string strPrefixLeft  = strPathToSequence + "/image_0/";
-  std::string strPrefixRight = strPathToSequence + "/image_1/";
-
-  const int nTimes = vTimestamps.size();
-  vstrImageLeft.resize(nTimes);
-  vstrImageRight.resize(nTimes);
-
-  for (int i = 0; i < nTimes; i++) {
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(6) << i;
-    vstrImageLeft[i]  = strPrefixLeft + ss.str() + ".png";
-    vstrImageRight[i] = strPrefixRight + ss.str() + ".png";
-  }
 }

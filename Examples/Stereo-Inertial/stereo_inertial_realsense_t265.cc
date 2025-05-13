@@ -22,6 +22,7 @@
 #include <librealsense2/rs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/RealSense.h"
 #include "ImuTypes.h"
 #include "System.h"
 
@@ -31,14 +32,6 @@ void exit_loop_handler(int s) {
   std::cout << "Finishing session" << std::endl;
   b_continue_session = false;
 }
-
-rs2_vector interpolateMeasure(
-  const double     target_time,
-  const rs2_vector current_data,
-  const double     current_time,
-  const rs2_vector prev_data,
-  const double     prev_time
-);
 
 int main(int argc, char** argv) {
   if (argc < 3 || argc > 4) {
@@ -142,7 +135,7 @@ int main(int argc, char** argv) {
         int    index       = v_accel_timestamp_sync.size();
         double target_time = v_gyro_timestamp[index];
 
-        rs2_vector interp_data = interpolateMeasure(
+        rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
           target_time,
           current_accel_data,
           current_accel_timestamp,
@@ -172,7 +165,7 @@ int main(int argc, char** argv) {
           int    index       = v_accel_timestamp_sync.size();
           double target_time = v_gyro_timestamp[index];
 
-          rs2_vector interp_data = interpolateMeasure(
+          rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
             target_time,
             current_accel_data,
             current_accel_timestamp,
@@ -239,7 +232,7 @@ int main(int argc, char** argv) {
         int    index       = v_accel_timestamp_sync.size();
         double target_time = v_gyro_timestamp[index];
 
-        rs2_vector interp_data = interpolateMeasure(
+        rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
           target_time,
           current_accel_data,
           current_accel_timestamp,
@@ -328,41 +321,4 @@ int main(int argc, char** argv) {
   SLAM.Shutdown();
 
   return 0;
-}
-
-rs2_vector interpolateMeasure(
-  const double     target_time,
-  const rs2_vector current_data,
-  const double     current_time,
-  const rs2_vector prev_data,
-  const double     prev_time
-) {
-  // If there are not previous information, the current data is propagated
-  if (prev_time == 0) {
-    return current_data;
-  }
-
-  rs2_vector increment;
-  rs2_vector value_interp;
-
-  if (target_time > current_time) {
-    value_interp = current_data;
-  } else if (target_time > prev_time) {
-    increment.x = current_data.x - prev_data.x;
-    increment.y = current_data.y - prev_data.y;
-    increment.z = current_data.z - prev_data.z;
-
-    double factor = (target_time - prev_time) / (current_time - prev_time);
-
-    value_interp.x = prev_data.x + increment.x * factor;
-    value_interp.y = prev_data.y + increment.y * factor;
-    value_interp.z = prev_data.z + increment.z * factor;
-
-    // zero interpolation
-    value_interp = current_data;
-  } else {
-    value_interp = prev_data;
-  }
-
-  return value_interp;
 }
