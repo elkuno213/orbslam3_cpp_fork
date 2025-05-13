@@ -22,6 +22,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
@@ -30,6 +31,7 @@
 #include <boost/serialization/vector.hpp>
 #include <pangolin/pangolin.h>
 #include <sophus/se3.hpp>
+#include <spdlog/logger.h>
 #include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
@@ -209,6 +211,8 @@ protected:
 
   // Mutex
   std::mutex mMutexMap;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3

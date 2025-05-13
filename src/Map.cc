@@ -18,9 +18,9 @@
  */
 
 #include "Map.h"
-#include <iostream>
 #include "KeyFrame.h"
 #include "KeyFrameDatabase.h"
+#include "LoggingUtils.h"
 #include "MapPoint.h"
 
 namespace ORB_SLAM3 {
@@ -40,7 +40,8 @@ Map::Map()
   , mnMapChangeNotified(0)
   , mbIsInertial(false)
   , mbIMU_BA1(false)
-  , mbIMU_BA2(false) {
+  , mbIMU_BA2(false)
+  , _logger(logging::CreateModuleLogger("Map")) {
   mnId       = nNextId++;
   mThumbnail = static_cast<GLubyte*>(NULL);
 }
@@ -59,12 +60,15 @@ Map::Map(int initKFid)
   , mnMapChangeNotified(0)
   , mbIsInertial(false)
   , mbIMU_BA1(false)
-  , mbIMU_BA2(false) {
+  , mbIMU_BA2(false)
+  , _logger(logging::CreateModuleLogger("Map")) {
   mnId       = nNextId++;
   mThumbnail = static_cast<GLubyte*>(NULL);
 }
 
 Map::~Map() {
+  _logger->info("Destructing by releasing all resources (map points, keyframes, thumbnail, etc.)");
+
   // TODO: erase all points from memory
   mspMapPoints.clear();
 
@@ -83,12 +87,13 @@ Map::~Map() {
 void Map::AddKeyFrame(KeyFrame* pKF) {
   std::unique_lock<std::mutex> lock(mMutexMap);
   if (mspKeyFrames.empty()) {
-    std::cout << "First KF:" << pKF->mnId << "; Map init KF:" << mnInitKFid << std::endl;
+    _logger->info("First key frame {} | Initial key frame of map {}", pKF->mnId, mnInitKFid);
     mnInitKFid  = pKF->mnId;
     mpKFinitial = pKF;
     mpKFlowerID = pKF;
   }
   mspKeyFrames.insert(pKF);
+  _logger->debug("Key frame {} added to map", pKF->mnId);
   if (pKF->mnId > mnMaxKFid) {
     mnMaxKFid = pKF->mnId;
   }
@@ -99,6 +104,7 @@ void Map::AddKeyFrame(KeyFrame* pKF) {
 
 void Map::AddMapPoint(MapPoint* pMP) {
   std::unique_lock<std::mutex> lock(mMutexMap);
+  _logger->debug("Map point {} added to map", pMP->mnId);
   mspMapPoints.insert(pMP);
 }
 
@@ -114,6 +120,7 @@ bool Map::isImuInitialized() {
 
 void Map::EraseMapPoint(MapPoint* pMP) {
   std::unique_lock<std::mutex> lock(mMutexMap);
+  _logger->debug("Erasing map point {}...", pMP->mnId);
   mspMapPoints.erase(pMP);
 
   // TODO: This only erase the pointer.
@@ -122,6 +129,7 @@ void Map::EraseMapPoint(MapPoint* pMP) {
 
 void Map::EraseKeyFrame(KeyFrame* pKF) {
   std::unique_lock<std::mutex> lock(mMutexMap);
+  _logger->debug("Erasing key frame {}...", pKF->mnId);
   mspKeyFrames.erase(pKF);
   if (mspKeyFrames.size() > 0) {
     if (pKF->mnId == mpKFlowerID->mnId) {
@@ -181,6 +189,7 @@ std::vector<MapPoint*> Map::GetReferenceMapPoints() {
 long unsigned int Map::GetId() {
   return mnId;
 }
+
 long unsigned int Map::GetInitKFid() {
   std::unique_lock<std::mutex> lock(mMutexMap);
   return mnInitKFid;
@@ -209,6 +218,8 @@ void Map::SetStoredMap() {
 }
 
 void Map::clear() {
+  _logger->info("Clearing map: releasing all keyframes, map points, and resetting state");
+
   //    for(std::set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end();
   //    sit!=send; sit++)
   //        delete *sit;
@@ -245,6 +256,8 @@ bool Map::IsBad() {
 
 void Map::ApplyScaledRotation(const Sophus::SE3f& T, const float s, const bool bScaledVel) {
   std::unique_lock<std::mutex> lock(mMutexMap);
+
+  _logger->info("Applying scale of {:.6f} to rotation{}...", s, bScaledVel ? " and velocity" : "");
 
   // Body position (IMU) of first keyframe is fixed to (0,0,0)
   Sophus::SE3f    Tyw = T;
@@ -336,6 +349,8 @@ void Map::SetLastMapChange(int currentChangeId) {
 }
 
 void Map::PreSave(std::set<GeometricCamera*>& spCams) {
+  _logger->info("PreSave: cleaning up observations and backing up map data.");
+
   int nMPWithoutObs = 0;
   for (MapPoint* pMPi : mspMapPoints) {
     if (!pMPi || pMPi->isBad()) {
@@ -400,6 +415,12 @@ void Map::PostLoad(
   ORBVocabulary*    pORBVoc /*, std::map<long unsigned int, KeyFrame*>& mpKeyFrameId*/,
   std::map<unsigned int, GeometricCamera*>& mpCams
 ) {
+  _logger->info(
+    "PostLoad: restoring map from backup (key frames: {}, map points: {})",
+    mvpBackupKeyFrames.size(),
+    mvpBackupMapPoints.size()
+  );
+
   std::copy(
     mvpBackupMapPoints.begin(),
     mvpBackupMapPoints.end(),
