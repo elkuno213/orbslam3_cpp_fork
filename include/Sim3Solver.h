@@ -20,8 +20,10 @@
 #ifndef SIM3SOLVER_H
 #define SIM3SOLVER_H
 
+#include <memory>
 #include <vector>
 #include <Eigen/Core>
+#include <spdlog/logger.h>
 
 namespace ORB_SLAM3 {
 
@@ -140,6 +142,8 @@ protected:
   // cv::Mat mK2;
 
   GeometricCamera *pCamera1, *pCamera2;
+
+  std::shared_ptr<spdlog::logger> _logger;
 };
 
 } // namespace ORB_SLAM3

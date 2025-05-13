@@ -23,6 +23,7 @@
 #include "Converter.h"
 #include "GeometricCamera.h"
 #include "KeyFrame.h"
+#include "LoggingUtils.h"
 #include "MapPoint.h"
 
 namespace ORB_SLAM3 {
@@ -38,7 +39,8 @@ Sim3Solver::Sim3Solver(
   , mnBestInliers(0)
   , mbFixScale(bFixScale)
   , pCamera1(pKF1->mpCamera)
-  , pCamera2(pKF2->mpCamera) {
+  , pCamera2(pKF2->mpCamera)
+  , _logger(logging::CreateModuleLogger("Sim3Solver")) {
   bool bDifferentKFs = false;
   if (vpKeyFrameMatchedMP.empty()) {
     bDifferentKFs       = true;
@@ -310,7 +312,6 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f& P1, Eigen::Matrix3f& P2) {
   // Horn 1987, Closed-form solution of absolute orientataion using unit quaternions
 
   // Step 1: Centroid and relative coordinates
-
   Eigen::Matrix3f Pr1; // Relative coordinates to centroid (set 1)
   Eigen::Matrix3f Pr2; // Relative coordinates to centroid (set 2)
   Eigen::Vector3f O1;  // Centroid of P1
@@ -320,7 +321,6 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f& P1, Eigen::Matrix3f& P2) {
   ComputeCentroid(P2, Pr2, O2);
 
   // Step 2: Compute M matrix
-
   Eigen::Matrix3f M = Pr2 * Pr1.transpose();
 
   // Step 3: Compute N matrix
@@ -365,12 +365,15 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f& P1, Eigen::Matrix3f& P2) {
   Eigen::Matrix3f P3 = mR12i * Pr2;
 
   // Step 6: Scale
-
   if (!mbFixScale) {
     double cvnom = Converter::toCvMat(Pr1).dot(Converter::toCvMat(P3));
     double nom   = (Pr1.array() * P3.array()).sum();
     if (std::abs(nom - cvnom) > 1e-3) {
-      std::cout << "sim3 solver: " << std::abs(nom - cvnom) << std::endl << nom << std::endl;
+      _logger->warn(
+        "Large scale calculation discrepancy: matrix-based: {:.6f} vs ppenCV-based: {:.6f}",
+        nom,
+        cvnom
+      );
     }
     Eigen::Array<float, 3, 3> aux_P3;
     aux_P3     = P3.array() * P3.array();
