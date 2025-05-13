@@ -24,6 +24,7 @@
 #include "Frame.h"
 #include "GeometricCamera.h"
 #include "KeyFrameDatabase.h"
+#include "LoggingUtils.h"
 #include "Map.h"
 #include "MapPoint.h"
 
@@ -93,7 +94,8 @@ KeyFrame::KeyFrame()
   , NLeft(0)
   , NRight(0)
   , mnNumberOfOpt(0)
-  , mbHasVelocity(false) {
+  , mbHasVelocity(false)
+  , _logger(logging::CreateModuleLogger("KeyFrame")) {
 }
 
 KeyFrame::KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* pKFDB)
@@ -174,7 +176,8 @@ KeyFrame::KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* pKFDB)
   , NRight(F.Nright)
   , mTrl(F.GetRelativePoseTrl())
   , mnNumberOfOpt(0)
-  , mbHasVelocity(false) {
+  , mbHasVelocity(false)
+  , _logger(logging::CreateModuleLogger("KeyFrame")) {
   mnId = nNextId++;
 
   mGrid.resize(mnGridCols);
@@ -520,14 +523,17 @@ void KeyFrame::UpdateConnections(bool upParent) {
   std::vector<std::pair<int, KeyFrame*>> vPairs;
   vPairs.reserve(KFcounter.size());
   if (!upParent) {
-    std::cout << "UPDATE_CONN: current KF " << mnId << std::endl;
+    _logger->debug("UpdateConnections: current key frame {}", mnId);
   }
   for (std::map<KeyFrame*, int>::iterator mit = KFcounter.begin(), mend = KFcounter.end();
        mit != mend;
        mit++) {
     if (!upParent) {
-      std::cout << "  UPDATE_CONN: KF " << mit->first->mnId << " ; num matches: " << mit->second
-                << std::endl;
+      _logger->debug(
+        "UpdateConnections: candidate key frame {} has {} matches",
+        mit->first->mnId,
+        mit->second
+      );
     }
     if (mit->second > nmax) {
       nmax   = mit->second;
@@ -580,8 +586,8 @@ void KeyFrame::EraseChild(KeyFrame* pKF) {
 void KeyFrame::ChangeParent(KeyFrame* pKF) {
   std::unique_lock<std::mutex> lockCon(mMutexConnections);
   if (pKF == this) {
-    std::cout << "ERROR: Change parent KF, the parent and child are the same KF" << std::endl;
-    throw std::invalid_argument("The parent and child can not be the same");
+    _logger->error("Key frame {} and its own parent {} are the same", mnId, pKF->mnId);
+    throw std::invalid_argument("Key frame cannot be its own parent");
   }
 
   mpParent = pKF;
@@ -1070,7 +1076,7 @@ void KeyFrame::PostLoad(
   if (mnBackupIdCamera >= 0) {
     mpCamera = mpCamId[mnBackupIdCamera];
   } else {
-    std::cout << "ERROR: There is not a main camera in KF " << mnId << std::endl;
+    _logger->error("No main camera found in key frame {}", mnId);
   }
   if (mnBackupIdCamera2 >= 0) {
     mpCamera2 = mpCamId[mnBackupIdCamera2];
@@ -1106,7 +1112,7 @@ bool KeyFrame::ProjectPointDistort(MapPoint* pMP, cv::Point2f& kp, float& u, flo
 
   // Check positive depth
   if (PcZ < 0.0f) {
-    std::cout << "Negative depth: " << PcZ << std::endl;
+    _logger->error("Aborted point projection due to negative error {}", PcZ);
     return false;
   }
 
@@ -1114,8 +1120,6 @@ bool KeyFrame::ProjectPointDistort(MapPoint* pMP, cv::Point2f& kp, float& u, flo
   float invz = 1.0f / PcZ;
   u          = fx * PcX * invz + cx;
   v          = fy * PcY * invz + cy;
-
-  // std::cout << "c";
 
   if (u < mnMinX || u > mnMaxX) {
     return false;
@@ -1167,7 +1171,7 @@ bool KeyFrame::ProjectPointUnDistort(MapPoint* pMP, cv::Point2f& kp, float& u, f
 
   // Check positive depth
   if (PcZ < 0.0f) {
-    std::cout << "Negative depth: " << PcZ << std::endl;
+    _logger->error("Aborted point projection due to negative error {}", PcZ);
     return false;
   }
 
@@ -1225,22 +1229,6 @@ Eigen::Matrix<float, 3, 3> KeyFrame::GetRightRotation() {
 Eigen::Vector3f KeyFrame::GetRightTranslation() {
   std::unique_lock<std::mutex> lock(mMutexPose);
   return (mTrl * mTcw).translation();
-}
-
-void KeyFrame::PrintPointDistribution() {
-  int left = 0, right = 0;
-  int Nlim = (NLeft != -1) ? NLeft : N;
-  for (int i = 0; i < N; i++) {
-    if (mvpMapPoints[i]) {
-      if (i < Nlim) {
-        left++;
-      } else {
-        right++;
-      }
-    }
-  }
-  std::cout << "Point distribution in KeyFrame: left-> " << left << " --- right-> " << right
-            << std::endl;
 }
 
 void KeyFrame::SetORBVocabulary(ORBVocabulary* pORBVoc) {

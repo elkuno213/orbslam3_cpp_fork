@@ -21,6 +21,7 @@
 #define KEYFRAME_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <vector>
@@ -33,6 +34,7 @@
 #include <boost/serialization/vector.hpp>
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
+#include <spdlog/logger.h>
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
 #include "SerializationUtils.h"
@@ -500,6 +502,8 @@ protected:
   std::mutex mMutexFeatures;
   std::mutex mMutexMap;
 
+  std::shared_ptr<spdlog::logger> _logger;
+
 public:
   GeometricCamera *mpCamera, *mpCamera2;
 
@@ -522,8 +526,6 @@ public:
   Eigen::Vector3f            GetRightCameraCenter();
   Eigen::Matrix<float, 3, 3> GetRightRotation();
   Eigen::Vector3f            GetRightTranslation();
-
-  void PrintPointDistribution();
 };
 
 } // namespace ORB_SLAM3
