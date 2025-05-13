@@ -34,24 +34,18 @@ void exit_loop_handler(int s) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 4) {
-    std::cerr << std::endl
-              << "Usage: ./mono_inertial_realsense_t265 path_to_vocabulary path_to_settings "
-                 "(trajectory_file_name)"
-              << std::endl;
+  // Parse arguments.
+  std::string vocabulary_file, settings_file, output_dir;
+
+  const bool args_ok
+    = ORB_SLAM3::RealSense::ParseArguments(argc, argv, vocabulary_file, settings_file, output_dir);
+  if (!args_ok) {
     return 1;
   }
 
-  std::string file_name;
-  bool        bFileName = false;
-
-  if (argc == 4) {
-    file_name = std::string(argv[argc - 1]);
-    bFileName = true;
-  }
-
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::IMU_MONOCULAR, true, 0, file_name);
-  float             imageScale = SLAM.GetImageScale();
+  ORB_SLAM3::System
+        SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::IMU_MONOCULAR, true, 0, output_dir);
+  float imageScale = SLAM.GetImageScale();
 
   struct sigaction sigIntHandler;
 
@@ -263,7 +257,7 @@ int main(int argc, char** argv) {
         cv::resize(imCV, im, cv::Size(width, height));
 #ifdef REGISTER_TIMES
         std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                      t_End_Resize - t_Start_Resize
         )
                      .count();
@@ -315,18 +309,18 @@ int main(int argc, char** argv) {
 
 #ifdef REGISTER_TIMES
     t_track = t_resize
-            + std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+            + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                 t_End_Track - t_Start_Track
             )
                 .count();
     SLAM.InsertTrackTime(t_track);
 #endif
 
-    double timeProcess = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+    double timeProcess = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                            t_Start_Track - time_Start_Process
     )
                            .count();
-    double timeSLAM = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+    double timeSLAM = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                         t_End_Track - t_Start_Track
     )
                         .count();

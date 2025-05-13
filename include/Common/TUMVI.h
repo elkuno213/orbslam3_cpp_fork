@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <opencv2/core.hpp>
+#include "Common.h"
 
 namespace ORB_SLAM3::TUMVI {
 
@@ -27,6 +28,16 @@ void LoadIMU(
   std::vector<double>&      vTimeStamps,
   std::vector<cv::Point3f>& vAcc,
   std::vector<cv::Point3f>& vGyro
+);
+
+bool ParseArguments(
+  int                       argc,
+  char**                    argv,
+  std::string&              vocabulary_filename,
+  std::string&              settings_filename,
+  std::vector<std::string>& sequences,
+  std::string&              output_dir,
+  Sensor                    sensor
 );
 
 } // namespace ORB_SLAM3::TUMVI

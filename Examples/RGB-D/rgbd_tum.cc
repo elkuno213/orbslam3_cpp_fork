@@ -17,18 +17,29 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include "Common/TUM.h"
 #include "System.h"
 
+namespace fs = std::filesystem;
+
 int main(int argc, char** argv) {
-  if (argc != 5) {
-    std::cerr << std::endl
-              << "Usage: ./rgbd_tum path_to_vocabulary path_to_settings path_to_sequence "
-                 "path_to_association"
-              << std::endl;
+  // Parse arguments.
+  std::string vocabulary_file, settings_file, sequence_dir, association_file, output_dir;
+
+  const bool args_ok = ORB_SLAM3::TUM::ParseArguments(
+    argc,
+    argv,
+    vocabulary_file,
+    settings_file,
+    sequence_dir,
+    association_file,
+    output_dir
+  );
+  if (!args_ok) {
     return 1;
   }
 
@@ -36,9 +47,8 @@ int main(int argc, char** argv) {
   std::vector<std::string> vstrImageFilenamesRGB;
   std::vector<std::string> vstrImageFilenamesD;
   std::vector<double>      vTimestamps;
-  std::string              strAssociationFilename = std::string(argv[4]);
   ORB_SLAM3::TUM::LoadRGBDImages(
-    strAssociationFilename,
+    association_file,
     vstrImageFilenamesRGB,
     vstrImageFilenamesD,
     vTimestamps
@@ -55,7 +65,7 @@ int main(int argc, char** argv) {
   }
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::RGBD, true);
+  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::RGBD, true);
   float             imageScale = SLAM.GetImageScale();
 
   // Vector for tracking time statistics
@@ -71,19 +81,19 @@ int main(int argc, char** argv) {
   for (int ni = 0; ni < nImages; ni++) {
     // Read image and depthmap from file
     imRGB = cv::imread(
-      std::string(argv[3]) + "/" + vstrImageFilenamesRGB[ni],
+      sequence_dir + "/" + vstrImageFilenamesRGB[ni],
       cv::IMREAD_UNCHANGED
     ); //,cv::IMREAD_UNCHANGED);
     imD = cv::imread(
-      std::string(argv[3]) + "/" + vstrImageFilenamesD[ni],
+      sequence_dir + "/" + vstrImageFilenamesD[ni],
       cv::IMREAD_UNCHANGED
     ); //,cv::IMREAD_UNCHANGED);
     double tframe = vTimestamps[ni];
 
     if (imRGB.empty()) {
       std::cerr << std::endl
-                << "Failed to load image at: " << std::string(argv[3]) << "/"
-                << vstrImageFilenamesRGB[ni] << std::endl;
+                << "Failed to load image at: " << sequence_dir << "/" << vstrImageFilenamesRGB[ni]
+                << std::endl;
       return 1;
     }
 
@@ -101,7 +111,7 @@ int main(int argc, char** argv) {
 
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
-    double ttrack = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+    double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
 
     vTimesTrack[ni] = ttrack;
 
@@ -132,8 +142,11 @@ int main(int argc, char** argv) {
   std::cout << "mean tracking time: " << totaltime / nImages << std::endl;
 
   // Save camera trajectory
-  SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
-  SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+  fs::path output_file_path;
+  output_file_path = fs::path(output_dir) / "CameraTrajectory.txt";
+  SLAM.SaveTrajectoryTUM(output_file_path.string());
+  output_file_path = fs::path(output_dir) / "KeyFrameTrajectory.txt";
+  SLAM.SaveKeyFrameTrajectoryTUM(output_file_path.string());
 
   return 0;
 }

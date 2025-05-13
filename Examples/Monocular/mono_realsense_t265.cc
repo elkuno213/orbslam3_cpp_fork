@@ -21,6 +21,7 @@
 #include <librealsense2/rs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include "Common/RealSense.h"
 #include "System.h"
 
 bool b_continue_session;
@@ -31,20 +32,13 @@ void exit_loop_handler(int s) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 4) {
-    std::cerr
-      << std::endl
-      << "Usage: ./mono_realsense_t265 path_to_vocabulary path_to_settings (trajectory_file_name)"
-      << std::endl;
+  // Parse arguments.
+  std::string vocabulary_file, settings_file, output_dir;
+
+  const bool args_ok
+    = ORB_SLAM3::RealSense::ParseArguments(argc, argv, vocabulary_file, settings_file, output_dir);
+  if (!args_ok) {
     return 1;
-  }
-
-  std::string file_name;
-  bool        bFileName = false;
-
-  if (argc == 4) {
-    file_name = std::string(argv[argc - 1]);
-    bFileName = true;
   }
 
   struct sigaction sigIntHandler;
@@ -74,7 +68,7 @@ int main(int argc, char** argv) {
   std::cout << "IMU data in the sequence: " << nImu << std::endl << std::endl;*/
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::MONOCULAR, true);
+  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::MONOCULAR, true);
   float             imageScale = SLAM.GetImageScale();
 
   cv::Mat imCV;
@@ -112,7 +106,7 @@ int main(int argc, char** argv) {
         cv::resize(imCV, imCV, cv::Size(width, height));
 #ifdef REGISTER_TIMES
         std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                      t_End_Resize - t_Start_Resize
         )
                      .count();
@@ -135,7 +129,7 @@ int main(int argc, char** argv) {
       std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
       t_track
         = t_resize
-        + std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(t2 - t1).count();
+        + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(t2 - t1).count();
       SLAM.InsertTrackTime(t_track);
 #endif
     }

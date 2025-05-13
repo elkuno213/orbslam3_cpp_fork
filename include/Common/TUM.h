@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <opencv2/core.hpp>
 
 namespace ORB_SLAM3::TUM {
 
@@ -17,6 +16,25 @@ void LoadRGBDImages(
   std::vector<std::string>& vstrImageFilenamesRGB,
   std::vector<std::string>& vstrImageFilenamesD,
   std::vector<double>&      vTimestamps
+);
+
+bool ParseArguments(
+  int          argc,
+  char**       argv,
+  std::string& vocabulary_file,
+  std::string& settings_file,
+  std::string& sequence_dir,
+  std::string& output_dir
+);
+
+bool ParseArguments(
+  int          argc,
+  char**       argv,
+  std::string& vocabulary_file,
+  std::string& settings_file,
+  std::string& sequence_dir,
+  std::string& association_file,
+  std::string& output_dir
 );
 
 } // namespace ORB_SLAM3::TUM

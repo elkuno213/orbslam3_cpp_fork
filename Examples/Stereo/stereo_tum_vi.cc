@@ -17,40 +17,43 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include "Common/TUMVI.h"
 #include "System.h"
 
+namespace fs = std::filesystem;
+
 double ttrack_tot = 0;
 
 int main(int argc, char** argv) {
-  const int num_seq = (argc - 3) / 3;
-  std::cout << "num_seq = " << num_seq << std::endl;
-  bool        bFileName = (((argc - 3) % 3) == 1);
-  std::string file_name;
-  if (bFileName) {
-    file_name = std::string(argv[argc - 1]);
-  }
+  // Parse arguments.
+  std::string              vocabulary_file, settings_file, output_dir;
+  std::vector<std::string> sequences;
 
-  if (argc < 6) {
-    std::cerr
-      << std::endl
-      << "Usage: ./stereo_tum_vi path_to_vocabulary path_to_settings path_to_image_folder1_1 "
-         "path_to_image_folder2_1 path_to_times_file_1 (path_to_image_folder1_2 "
-         "path_to_image_folder2_2 path_to_times_file_2 ... path_to_image_folder1_N "
-         "path_to_image_folder2_N path_to_times_file_N) (trajectory_file_name)"
-      << std::endl;
+  const bool args_ok = ORB_SLAM3::TUMVI::ParseArguments(
+    argc,
+    argv,
+    vocabulary_file,
+    settings_file,
+    sequences,
+    output_dir,
+    ORB_SLAM3::Sensor::Stereo
+  );
+  if (!args_ok) {
     return 1;
   }
 
+  const int num_seq = sequences.size() / 3;
+
   // Load all sequences:
-  int                               seq;
-  std::vector<vector<std::string> > vstrImageLeftFilenames;
-  std::vector<vector<std::string> > vstrImageRightFilenames;
-  std::vector<vector<double> >      vTimestampsCam;
-  std::vector<int>                  nImages;
+  int                              seq;
+  std::vector<vector<std::string>> vstrImageLeftFilenames;
+  std::vector<vector<std::string>> vstrImageRightFilenames;
+  std::vector<vector<double>>      vTimestampsCam;
+  std::vector<int>                 nImages;
 
   vstrImageLeftFilenames.resize(num_seq);
   vstrImageRightFilenames.resize(num_seq);
@@ -60,10 +63,15 @@ int main(int argc, char** argv) {
   int tot_images = 0;
   for (seq = 0; seq < num_seq; seq++) {
     std::cout << "Loading images for sequence " << seq << "...";
+
+    std::string pathSeqLeft    = sequences[3 * seq];
+    std::string pathSeqRight   = sequences[3 * seq + 1];
+    std::string pathTimeStamps = sequences[3 * seq + 2];
+
     ORB_SLAM3::TUMVI::LoadStereoImages(
-      std::string(argv[(3 * seq) + 3]),
-      std::string(argv[(2 * seq) + 4]),
-      std::string(argv[(2 * seq) + 5]),
+      pathSeqLeft,
+      pathSeqRight,
+      pathTimeStamps,
       vstrImageLeftFilenames[seq],
       vstrImageRightFilenames[seq],
       vTimestampsCam[seq]
@@ -91,7 +99,7 @@ int main(int argc, char** argv) {
   std::cout.precision(17);
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::STEREO, true);
+  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::STEREO, true);
   float             imageScale = SLAM.GetImageScale();
 
   std::cout << std::endl << "-------" << std::endl;
@@ -122,7 +130,7 @@ int main(int argc, char** argv) {
         cv::resize(imRight, imRight, cv::Size(width, height));
 #ifdef REGISTER_TIMES
         std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                      t_End_Resize - t_Start_Resize
         )
                      .count();
@@ -152,11 +160,11 @@ int main(int argc, char** argv) {
 #ifdef REGISTER_TIMES
       t_track
         = t_resize
-        + std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(t2 - t1).count();
+        + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(t2 - t1).count();
       SLAM.InsertTrackTime(t_track);
 #endif
 
-      double ttrack = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+      double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
       ttrack_tot    += ttrack;
       // std::cout << "ttrack: " << ttrack << std::endl;
 
@@ -192,15 +200,11 @@ int main(int argc, char** argv) {
   std::stringstream                     ss;
   ss << now;
 
-  if (bFileName) {
-    const std::string kf_file = "kf_" + std::string(argv[argc - 1]) + ".txt";
-    const std::string f_file  = "f_" + std::string(argv[argc - 1]) + ".txt";
-    SLAM.SaveTrajectoryEuRoC(f_file);
-    SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file);
-  } else {
-    SLAM.SaveTrajectoryEuRoC("CameraTrajectory.txt");
-    SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
-  }
+  fs::path output_file_path;
+  output_file_path = fs::path(output_dir) / "CameraTrajectory.txt";
+  SLAM.SaveTrajectoryEuRoC(output_file_path.string());
+  output_file_path = fs::path(output_dir) / "KeyFrameTrajectory.txt";
+  SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
 
   std::sort(vTimesTrack.begin(), vTimesTrack.end());
   float totaltime = 0;
@@ -213,32 +217,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-
-/*void LoadImages(const std::string &strPathLeft, const std::string &strPathRight, const std::string
-&strPathTimes, std::vector<std::string> &vstrImageLeft, std::vector<std::string> &vstrImageRight,
-std::vector<double> &vTimeStamps)
-{
-    std::ifstream fTimes;
-    std::cout << strPathLeft << std::endl;
-    std::cout << strPathRight << std::endl;
-    std::cout << strPathTimes << std::endl;
-    fTimes.open(strPathTimes.c_str());
-    vTimeStamps.reserve(5000);
-    vstrImageLeft.reserve(5000);
-    vstrImageRight.reserve(5000);
-    while(!fTimes.eof())
-    {
-        std::string s;
-        std::getline(fTimes,s);
-        if(!s.empty())
-        {
-            std::stringstream ss;
-            ss << s;
-            vstrImageLeft.push_back(strPathLeft + "/" + ss.str() + ".png");
-            vstrImageRight.push_back(strPathRight + "/" + ss.str() + ".png");
-            double t;
-            ss >> t;
-            vTimeStamps.push_back(t/1e9);
-        }
-    }
-}*/

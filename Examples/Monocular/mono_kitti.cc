@@ -17,6 +17,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
 #include <iomanip>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -24,23 +25,33 @@
 #include "Common/KITTI.h"
 #include "System.h"
 
+namespace fs = std::filesystem;
+
 int main(int argc, char** argv) {
-  if (argc != 4) {
-    std::cerr << std::endl
-              << "Usage: ./mono_kitti path_to_vocabulary path_to_settings path_to_sequence"
-              << std::endl;
+  // Parse arguments.
+  std::string vocabulary_file, settings_file, sequence_dir, output_dir;
+
+  const bool args_ok = ORB_SLAM3::KITTI::ParseArguments(
+    argc,
+    argv,
+    vocabulary_file,
+    settings_file,
+    sequence_dir,
+    output_dir
+  );
+  if (!args_ok) {
     return 1;
   }
 
   // Retrieve paths to images
   std::vector<std::string> vstrImageFilenames;
   std::vector<double>      vTimestamps;
-  ORB_SLAM3::KITTI::LoadMonocularImages(string(argv[3]), vstrImageFilenames, vTimestamps);
+  ORB_SLAM3::KITTI::LoadMonocularImages(sequence_dir, vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::MONOCULAR, true);
+  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::MONOCULAR, true);
   float             imageScale = SLAM.GetImageScale();
 
   // Vector for tracking time statistics
@@ -75,7 +86,7 @@ int main(int argc, char** argv) {
       cv::resize(im, im, cv::Size(width, height));
 #ifdef REGISTER_TIMES
       std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-      t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
+      t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
                    t_End_Resize - t_Start_Resize
       )
                    .count();
@@ -93,11 +104,11 @@ int main(int argc, char** argv) {
 #ifdef REGISTER_TIMES
     t_track
       = t_resize
-      + std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(t2 - t1).count();
+      + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(t2 - t1).count();
     SLAM.InsertTrackTime(t_track);
 #endif
 
-    double ttrack = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+    double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
 
     vTimesTrack[ni] = ttrack;
 
@@ -128,7 +139,8 @@ int main(int argc, char** argv) {
   std::cout << "mean tracking time: " << totaltime / nImages << std::endl;
 
   // Save camera trajectory
-  SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+  const fs::path output_file_path = fs::path(output_dir) / "KeyFrameTrajectory.txt";
+  SLAM.SaveKeyFrameTrajectoryTUM(output_file_path.string());
 
   return 0;
 }

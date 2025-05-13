@@ -22,4 +22,12 @@ rs2_stream find_stream_to_align(const std::vector<rs2::stream_profile>& streams)
 
 rs2_option get_sensor_option(const rs2::sensor& sensor);
 
+bool ParseArguments(
+  int                       argc,
+  char**                    argv,
+  std::string&              vocabulary_filename,
+  std::string&              settings_filename,
+  std::string&              output_dir
+);
+
 } // namespace ORB_SLAM3::RealSense

@@ -29,6 +29,7 @@ MESSAGE(${OpenCV_VERSION})
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(realsense2)
+find_package(Boost COMPONENTS program_options serialization REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -70,6 +71,7 @@ src/GeometricTools.cc
 src/TwoViewReconstruction.cc
 src/Config.cc
 src/Settings.cc
+src/Common/Common.cc
 src/Common/EuRoC.cc
 src/Common/KITTI.cc
 src/Common/TUM.cc
@@ -105,6 +107,7 @@ include/TwoViewReconstruction.h
 include/SerializationUtils.h
 include/Config.h
 include/Settings.h
+include/Common/Common.h
 include/Common/EuRoC.h
 include/Common/KITTI.h
 include/Common/TUM.h
@@ -120,7 +123,8 @@ ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
--lboost_serialization
+Boost::serialization
+Boost::program_options
 -lcrypto
 )
 

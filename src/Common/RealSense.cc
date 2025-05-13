@@ -1,6 +1,12 @@
 #include "Common/RealSense.h"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <boost/program_options.hpp>
+
+namespace fs = std::filesystem;
+namespace po = boost::program_options;
 
 namespace ORB_SLAM3::RealSense {
 
@@ -128,6 +134,53 @@ rs2_option get_sensor_option(const rs2::sensor& sensor) {
 
   uint32_t selected_sensor_option = 0;
   return static_cast<rs2_option>(selected_sensor_option);
+}
+
+bool ParseArguments(
+  int          argc,
+  char**       argv,
+  std::string& vocabulary_file,
+  std::string& settings_file,
+  std::string& output_dir
+) {
+  po::options_description desc("Allowed options");
+  // clang-format off
+  desc.add_options()
+    ("help,h", "Show help message")
+    ("vocabulary-file", po::value<std::string>(&vocabulary_file)->required(), "Path to vocabulary text file")
+    ("settings-file", po::value<std::string>(&settings_file)->required(), "Path to settings yaml file")
+    ("output-dir", po::value<std::string>(&output_dir)->default_value("/tmp"), "Path to output directory");
+  // clang-format on
+
+  try {
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+
+    if (vm.count("help")) {
+      std::cout << desc << "\n";
+      return false;
+    }
+
+    po::notify(vm);
+
+    // Check if vocabulary file exists.
+    if (!fs::is_regular_file(vocabulary_file)) {
+      throw po::error("Vocabulary path is not a file: " + vocabulary_file);
+    }
+    // Check if settings file exists.
+    if (!fs::is_regular_file(settings_file)) {
+      throw po::error("Settings path is not a file: " + settings_file);
+    }
+    // Check if output directory can be created.
+    if (!fs::is_directory(output_dir)) {
+      throw po::error("Output directory does NOT exist: " + output_dir);
+    }
+
+    return true;
+  } catch (const po::error& e) {
+    std::cerr << "Error: " << e.what() << "\n";
+    return false;
+  }
 }
 
 } // namespace ORB_SLAM3::RealSense

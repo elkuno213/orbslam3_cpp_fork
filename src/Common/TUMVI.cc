@@ -1,5 +1,12 @@
 #include "Common/TUMVI.h"
+#include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <sstream>
+#include <boost/program_options.hpp>
+
+namespace fs = std::filesystem;
+namespace po = boost::program_options;
 
 namespace ORB_SLAM3::TUMVI {
 
@@ -102,6 +109,151 @@ void LoadIMU(
       vAcc.push_back(cv::Point3f(data[4], data[5], data[6]));
       vGyro.push_back(cv::Point3f(data[1], data[2], data[3]));
     }
+  }
+}
+
+bool ParseArguments(
+  int                       argc,
+  char**                    argv,
+  std::string&              vocabulary_file,
+  std::string&              settings_file,
+  std::vector<std::string>& sequences,
+  std::string&              output_dir,
+  Sensor                    sensor
+) {
+  po::options_description desc("Allowed options");
+  // clang-format off
+  desc.add_options()
+    ("help,h", "Show help message")
+    ("vocabulary-file", po::value<std::string>(&vocabulary_file)->required(), "Path to vocabulary text file")
+    ("settings-file", po::value<std::string>(&settings_file)->required(), "Path to settings yaml file")
+    ("sequences", po::value<std::vector<std::string>>(&sequences)->multitoken()->required(), "Sequences of paths to image folders, imu files and time files")
+    ("output-dir", po::value<std::string>(&output_dir)->default_value("/tmp"), "Path to output directory");
+  // clang-format on
+
+  try {
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+
+    if (vm.count("help")) {
+      std::cout << desc << "\n";
+      return false;
+    }
+
+    po::notify(vm);
+
+    // Check if vocabulary file exists.
+    if (!fs::is_regular_file(vocabulary_file)) {
+      throw po::error("Vocabulary path is not a file: " + vocabulary_file);
+    }
+    // Check if settings file exists.
+    if (!fs::is_regular_file(settings_file)) {
+      throw po::error("Settings path is not a file: " + settings_file);
+    }
+    // Check if output directory can be created.
+    if (!fs::is_directory(output_dir)) {
+      throw po::error("Output directory does NOT exist: " + output_dir);
+    }
+    // Check sequences.
+    switch (sensor) {
+      // Sequences are pairs of image folders and time files.
+      case Sensor::Monocular:
+        // Check number of sequences.
+        if (sequences.size() % 2 != 0) {
+          throw po::error("Odd number of sequence arguments - must provide pairs");
+        }
+        // Check if all filenames in sequences exist.
+        for (std::size_t i = 0; i < sequences.size(); i += 2) {
+          if (!fs::is_directory(sequences[i])) {
+            throw po::error("Image directory path is not a directory: " + sequences[i]);
+          }
+          if (!fs::is_regular_file(sequences[i + 1])) {
+            throw po::error("Time file path is not a file: " + sequences[i + 1]);
+          }
+        }
+        break;
+
+      // Sequences are triples of left image folders, right image folders and time files.
+      case Sensor::Stereo:
+        // Check number of sequences.
+        if (sequences.size() % 3 != 0) {
+          throw po::error("Number of sequence arguments must be multiple of three - provide triples"
+          );
+        }
+        // Check if all filenames in sequences exist.
+        for (std::size_t i = 0; i < sequences.size(); i += 3) {
+          if (!fs::is_directory(sequences[i])) {
+            throw po::error("Image 1 directory path is not a directory: " + sequences[i]);
+          }
+          if (!fs::is_directory(sequences[i + 1])) {
+            throw po::error("Image 2 directory path is not a directory: " + sequences[i + 1]);
+          }
+          if (!fs::is_regular_file(sequences[i + 2])) {
+            throw po::error("Time file path is not a file: " + sequences[i + 2]);
+          }
+        }
+        break;
+
+      // Sequences are triples of image folders, time files and imu files.
+      case Sensor::InertialMonocular:
+        // Check number of sequences.
+        if (sequences.size() % 3 != 0) {
+          throw po::error("Number of sequence arguments must be multiple of three - provide triples"
+          );
+        }
+        // Check if all filenames in sequences exist.
+        for (std::size_t i = 0; i < sequences.size(); i += 3) {
+          if (!fs::is_directory(sequences[i])) {
+            throw po::error("Image directory path is not a directory: " + sequences[i]);
+          }
+          if (!fs::is_regular_file(sequences[i + 1])) {
+            throw po::error("Time file path is not a file: " + sequences[i + 1]);
+          }
+          if (!fs::is_regular_file(sequences[i + 2])) {
+            throw po::error("IMU file path is not a file: " + sequences[i + 2]);
+          }
+        }
+        break;
+
+      // Sequences are quadruples of left image folders, right image folders, time files and imu
+      // files.
+      case Sensor::InertialStereo:
+        // Check number of sequences.
+        if (sequences.size() % 4 != 0) {
+          throw po::error(
+            "Number of sequence arguments must be multiple of four - provide quadruples"
+          );
+        }
+        // Check if all filenames in sequences exist.
+        for (std::size_t i = 0; i < sequences.size(); i += 4) {
+          if (!fs::is_directory(sequences[i])) {
+            throw po::error("Left image directory path is not a directory: " + sequences[i]);
+          }
+          if (!fs::is_directory(sequences[i + 1])) {
+            throw po::error("Right image directory path is not a directory: " + sequences[i + 1]);
+          }
+          if (!fs::is_regular_file(sequences[i + 2])) {
+            throw po::error("Time file path is not a file: " + sequences[i + 2]);
+          }
+          if (!fs::is_regular_file(sequences[i + 3])) {
+            throw po::error("IMU file path is not a file: " + sequences[i + 3]);
+          }
+        }
+        break;
+
+      case Sensor::RGBD:
+      case Sensor::InertialRGBD:
+      default:
+        throw po::error(
+          "Invalid sensor type. Only (Inertial)Monocular and (Inertial)Stereo are supported."
+        );
+        break;
+    }
+
+    return true;
+  } catch (const po::error& e) {
+    std::cerr << "Error: " << e.what() << "\n";
+    return false;
   }
 }
 

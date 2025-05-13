@@ -29,4 +29,13 @@ void LoadIMU(
   std::vector<cv::Point3f>& vGyro
 );
 
+bool ParseArguments(
+  int                       argc,
+  char**                    argv,
+  std::string&              vocabulary_filename,
+  std::string&              settings_filename,
+  std::vector<std::string>& sequences,
+  std::string&              output_dir
+);
+
 } // namespace ORB_SLAM3::EuRoC

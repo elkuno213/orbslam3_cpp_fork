@@ -17,38 +17,39 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "Common/EuRoC.h"
 #include "System.h"
 
-int main(int argc, char** argv) {
-  if (argc < 5) {
-    std::cerr
-      << std::endl
-      << "Usage: ./stereo_euroc path_to_vocabulary path_to_settings path_to_sequence_folder_1 "
-         "path_to_times_file_1 (path_to_image_folder_2 path_to_times_file_2 ... "
-         "path_to_image_folder_N path_to_times_file_N) (trajectory_file_name)"
-      << std::endl;
+namespace fs = std::filesystem;
 
+int main(int argc, char** argv) {
+  // Parse arguments.
+  std::string              vocabulary_file, settings_file, output_dir;
+  std::vector<std::string> sequences;
+
+  const bool args_ok = ORB_SLAM3::EuRoC::ParseArguments(
+    argc,
+    argv,
+    vocabulary_file,
+    settings_file,
+    sequences,
+    output_dir
+  );
+  if (!args_ok) {
     return 1;
   }
 
-  const int num_seq = (argc - 3) / 2;
-  std::cout << "num_seq = " << num_seq << std::endl;
-  bool        bFileName = (((argc - 3) % 2) == 1);
-  std::string file_name;
-  if (bFileName) {
-    file_name = std::string(argv[argc - 1]);
-    std::cout << "file name: " << file_name << std::endl;
-  }
+  const int num_seq = sequences.size() / 2;
 
   // Load all sequences:
-  int                               seq;
-  std::vector<vector<std::string> > vstrImageLeft;
-  std::vector<vector<std::string> > vstrImageRight;
-  std::vector<vector<double> >      vTimestampsCam;
-  std::vector<int>                  nImages;
+  int                              seq;
+  std::vector<vector<std::string>> vstrImageLeft;
+  std::vector<vector<std::string>> vstrImageRight;
+  std::vector<vector<double>>      vTimestampsCam;
+  std::vector<int>                 nImages;
 
   vstrImageLeft.resize(num_seq);
   vstrImageRight.resize(num_seq);
@@ -59,8 +60,8 @@ int main(int argc, char** argv) {
   for (seq = 0; seq < num_seq; seq++) {
     std::cout << "Loading images for sequence " << seq << "...";
 
-    std::string pathSeq(argv[(2 * seq) + 3]);
-    std::string pathTimeStamps(argv[(2 * seq) + 4]);
+    std::string pathSeq        = sequences[2 * seq];
+    std::string pathTimeStamps = sequences[2 * seq + 1];
 
     std::string pathCam0 = pathSeq + "/mav0/cam0/data";
     std::string pathCam1 = pathSeq + "/mav0/cam1/data";
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
   std::cout.precision(17);
 
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::STEREO, true);
+  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::STEREO, true);
 
   cv::Mat imLeft, imRight;
   for (seq = 0; seq < num_seq; seq++) {
@@ -134,11 +135,11 @@ int main(int argc, char** argv) {
 #ifdef REGISTER_TIMES
       t_track
         = t_resize + t_rect
-        + std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(t2 - t1).count();
+        + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(t2 - t1).count();
       SLAM.InsertTrackTime(t_track);
 #endif
 
-      double ttrack = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+      double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
 
       vTimesTrack[ni] = ttrack;
 
@@ -165,15 +166,11 @@ int main(int argc, char** argv) {
   SLAM.Shutdown();
 
   // Save camera trajectory
-  if (bFileName) {
-    const std::string kf_file = "kf_" + std::string(argv[argc - 1]) + ".txt";
-    const std::string f_file  = "f_" + std::string(argv[argc - 1]) + ".txt";
-    SLAM.SaveTrajectoryEuRoC(f_file);
-    SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file);
-  } else {
-    SLAM.SaveTrajectoryEuRoC("CameraTrajectory.txt");
-    SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
-  }
+  fs::path output_file_path;
+  output_file_path = fs::path(output_dir) / "CameraTrajectory.txt";
+  SLAM.SaveTrajectoryEuRoC(output_file_path.string());
+  output_file_path = fs::path(output_dir) / "KeyFrameTrajectory.txt";
+  SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
 
   return 0;
 }

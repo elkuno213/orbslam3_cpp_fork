@@ -72,11 +72,12 @@ cd ../
 echo "Configuring and building ORB_SLAM3 ..."
 
 # Install apt dependencies.
-apt-get install -y           \
-  libeigen3-dev              \
-  libopencv-dev              \
-  libboost-serialization-dev \
-  libssl-dev                 \
+apt-get install -y             \
+  libeigen3-dev                \
+  libopencv-dev                \
+  libboost-serialization-dev   \
+  libboost-program-options-dev \
+  libssl-dev                   \
   lsb-release
 
 # Install librealsense2.
