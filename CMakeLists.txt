@@ -147,9 +147,22 @@ endif()
 enable_testing()
 include(GoogleTest)
 
-add_executable(LoggingUtils_test test/LoggingUtils_test.cc)
-target_link_libraries(LoggingUtils_test PRIVATE ${PROJECT_NAME} GTest::GTest GTest::Main)
-gtest_discover_tests(LoggingUtils_test)
+set(TEST_FILES
+  test/LoggingUtils_test.cc
+  test/Settings_test.cc
+)
+
+foreach(TEST_FILE ${TEST_FILES})
+  get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+  add_executable(${TEST_NAME} ${TEST_FILE})
+  target_link_libraries(${TEST_NAME}
+    PRIVATE
+    ${PROJECT_NAME}
+    GTest::GTest
+    GTest::Main
+  )
+  gtest_discover_tests(${TEST_NAME})
+endforeach()
 
 # Build examples
 

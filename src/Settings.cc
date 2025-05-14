@@ -28,8 +28,6 @@
 #include "LoggingUtils.h"
 #include "System.h"
 
-using namespace std;
-
 namespace ORB_SLAM3 {
 
 template <>
@@ -39,16 +37,14 @@ float Settings::readParameter<float>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      _logger->critical("{} required parameter does not exist", name);
-      std::exit(-1);
+      throw std::runtime_error(fmt::format("{} required parameter does not exist", name));
     } else {
       _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return 0.0f;
     }
   } else if (!node.isReal()) {
-    _logger->critical("{} parameter must be a real number", name);
-    std::exit(-1);
+    throw std::runtime_error(fmt::format("{} parameter must be a real number", name));
   } else {
     found = true;
     return node.real();
@@ -62,16 +58,14 @@ int Settings::readParameter<int>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      _logger->critical("{} required parameter does not exist", name);
-      std::exit(-1);
+      throw std::runtime_error(fmt::format("{} required parameter does not exist", name));
     } else {
       _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return 0;
     }
   } else if (!node.isInt()) {
-    _logger->critical("{} parameter must be an integer number", name);
-    std::exit(-1);
+    throw std::runtime_error(fmt::format("{} parameter must be an integer number", name));
   } else {
     found = true;
     return node.operator int();
@@ -85,16 +79,14 @@ std::string Settings::readParameter<std::string>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      _logger->critical("{} required parameter does not exist", name);
-      std::exit(-1);
+      throw std::runtime_error(fmt::format("{} required parameter does not exist", name));
     } else {
       _logger->warn("{} optional parameter does not exist", name);
       found = false;
       return std::string();
     }
   } else if (!node.isString()) {
-    _logger->critical("{} parameter must be a string", name);
-    std::exit(-1);
+    throw std::runtime_error(fmt::format("{} parameter must be a string", name));
   } else {
     found = true;
     return node.string();
@@ -108,8 +100,7 @@ cv::Mat Settings::readParameter<cv::Mat>(
   cv::FileNode node = fSettings[name];
   if (node.empty()) {
     if (required) {
-      _logger->critical("{} required parameter does not exist", name);
-      std::exit(-1);
+      throw std::runtime_error(fmt::format("{} required parameter does not exist", name));
     } else {
       _logger->warn("{} optional parameter does not exist", name);
       found = false;
@@ -132,11 +123,10 @@ Settings::Settings(const std::string& configFile, const int& sensor)
   // Open settings file
   cv::FileStorage fSettings(configFile, cv::FileStorage::READ);
   if (!fSettings.isOpened()) {
-    _logger->critical("Failed to open configuration file at {}", configFile);
-    std::exit(-1);
-  } else {
-    _logger->info("Loading settings from {}...", configFile);
+    throw std::runtime_error(fmt::format("Failed to open configuration file at {}", configFile));
   }
+
+  _logger->info("Loading settings from {}...", configFile);
 
   // Read first camera
   readCamera1(fSettings);
@@ -260,8 +250,7 @@ void Settings::readCamera1(cv::FileStorage& fSettings) {
       static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea = vOverlapping;
     }
   } else {
-    _logger->critical("{} not known", cameraModel);
-    std::exit(-1);
+    throw std::runtime_error(fmt::format("{} not known", cameraModel));
   }
 }
 

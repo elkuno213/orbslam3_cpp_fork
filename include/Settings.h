@@ -222,10 +222,9 @@ private:
     cv::FileNode node = fSettings[name];
     if (node.empty()) {
       if (required) {
-        std::cerr << name << " required parameter does not exist, aborting..." << std::endl;
-        std::exit(-1);
+        throw std::runtime_error(fmt::format("{} required parameter does not exist", name));
       } else {
-        std::cerr << name << " optional parameter does not exist..." << std::endl;
+        _logger->warn("{} optional parameter does not exist", name);
         found = false;
         return T();
       }
