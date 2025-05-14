@@ -1,14 +1,20 @@
 #include "Common/RealSense.h"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <boost/program_options.hpp>
+#include "LoggingUtils.h"
 
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 namespace ORB_SLAM3::RealSense {
+
+namespace {
+
+static auto logger = logging::CreateModuleLogger("RealSense");
+
+} // anonymous namespace
 
 rs2_vector interpolateMeasure(
   const double     target_time,
@@ -103,34 +109,36 @@ rs2_option get_sensor_option(const rs2::sensor& sensor) {
   // Sensors usually have several options to control their properties
   //  such as Exposure, Brightness etc.
 
-  std::cout << "Sensor supports the following options:\n" << std::endl;
+  std::string msg = "Sensor supports the following options:\n";
 
   // The following loop shows how to iterate over all available options
   // Starting from 0 until RS2_OPTION_COUNT (exclusive)
   for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); i++) {
     rs2_option option_type = static_cast<rs2_option>(i);
     // SDK enum types can be streamed to get a  std::string that represents them
-    std::cout << "  " << i << ": " << option_type;
+    msg += fmt::format("\t{}: {}\n", i, option_type);
 
     // To control an option, use the following api:
 
     // First, verify that the sensor actually supports this option
     if (sensor.supports(option_type)) {
-      std::cout << std::endl;
+      msg += fmt::format("\n");
 
       // Get a human readable description of the option
       const char* description = sensor.get_option_description(option_type);
-      std::cout << "       Description   : " << description << std::endl;
+      msg                     += fmt::format("\t\tDescription: {}\n", description);
 
       // Get the current value of the option
       float current_value = sensor.get_option(option_type);
-      std::cout << "       Current Value : " << current_value << std::endl;
+      msg                 += fmt::format("\t\tCurrent Value : {}\n", current_value);
 
       // To change the value of an option, please follow the change_sensor_option() function
     } else {
-      std::cout << " is not supported" << std::endl;
+      msg += fmt::format("\t\tNot supported\n");
     }
   }
+
+  logger->info("{}", msg);
 
   uint32_t selected_sensor_option = 0;
   return static_cast<rs2_option>(selected_sensor_option);
@@ -157,7 +165,9 @@ bool ParseArguments(
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
     if (vm.count("help")) {
-      std::cout << desc << "\n";
+      std::ostringstream oss;
+      oss << desc;
+      logger->info("\n{}", oss.str());
       return false;
     }
 
@@ -178,7 +188,7 @@ bool ParseArguments(
 
     return true;
   } catch (const po::error& e) {
-    std::cerr << "Error: " << e.what() << "\n";
+    logger->error("{}", e.what());
     return false;
   }
 }

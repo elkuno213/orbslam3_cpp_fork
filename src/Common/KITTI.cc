@@ -2,13 +2,19 @@
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <boost/program_options.hpp>
+#include "LoggingUtils.h"
 
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 namespace ORB_SLAM3::KITTI {
+
+namespace {
+
+static auto logger = logging::CreateModuleLogger("KITTI");
+
+} // anonymous namespace
 
 void LoadMonocularImages(
   const std::string&        strPathToSequence,
@@ -101,7 +107,9 @@ bool ParseArguments(
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
     if (vm.count("help")) {
-      std::cout << desc << "\n";
+      std::ostringstream oss;
+      oss << desc;
+      logger->info("\n{}", oss.str());
       return false;
     }
 
@@ -126,7 +134,7 @@ bool ParseArguments(
 
     return true;
   } catch (const po::error& e) {
-    std::cerr << "Error: " << e.what() << "\n";
+    logger->error("{}", e.what());
     return false;
   }
 }
