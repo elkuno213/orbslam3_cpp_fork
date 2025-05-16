@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
   // Parse arguments.
   std::string vocabulary_file, settings_file, sequence_dir, association_file, output_dir;
   try {
-    const bool args_ok = ORB_SLAM3::TUM::ParseArguments(
+    const bool parsed = ORB_SLAM3::TUM::ParseArguments(
       argc,
       argv,
       vocabulary_file,
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
       association_file,
       output_dir
     );
-    if (!args_ok) {
+    if (!parsed) {
       return 0;
     }
   } catch (const std::exception& e) {
