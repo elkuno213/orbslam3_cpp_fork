@@ -3,18 +3,12 @@
 #include <fstream>
 #include <sstream>
 #include <boost/program_options.hpp>
-#include "LoggingUtils.h"
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 namespace ORB_SLAM3::EuRoC {
-
-namespace {
-
-static auto logger = logging::CreateModuleLogger("EuRoC");
-
-} // anonymous namespace
 
 void LoadMonocularImages(
   const std::string&        strImagePath,
@@ -125,50 +119,45 @@ bool ParseArguments(
     ("output-dir", po::value<std::string>(&output_dir)->default_value("/tmp"), "Path to output directory");
   // clang-format on
 
-  try {
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
 
-    if (vm.count("help")) {
-      std::ostringstream oss;
-      oss << desc;
-      logger->info("\n{}", oss.str());
-      return false;
-    }
-
-    po::notify(vm);
-
-    // Check if vocabulary file exists.
-    if (!fs::is_regular_file(vocabulary_file)) {
-      throw po::error("Vocabulary path is not a file: " + vocabulary_file);
-    }
-    // Check if settings file exists.
-    if (!fs::is_regular_file(settings_file)) {
-      throw po::error("Settings path is not a file: " + settings_file);
-    }
-    // Check number of sequences.
-    if (sequences.size() % 2 != 0) {
-      throw po::error("Odd number of sequence arguments - must provide pairs");
-    }
-    // Check if all filenames in sequences exist.
-    for (std::size_t i = 0; i < sequences.size(); i += 2) {
-      if (!fs::is_directory(sequences[i])) {
-        throw po::error("Image directory path is not a directory: " + sequences[i]);
-      }
-      if (!fs::is_regular_file(sequences[i + 1])) {
-        throw po::error("Time file path is not a file: " + sequences[i + 1]);
-      }
-    }
-    // Check if output directory can be created.
-    if (!fs::is_directory(output_dir)) {
-      throw po::error("Output directory does NOT exist: " + output_dir);
-    }
-
-    return true;
-  } catch (const po::error& e) {
-    logger->error("{}", e.what());
+  if (vm.count("help")) {
+    std::ostringstream oss;
+    oss << desc;
+    spdlog::info("\n{}", oss.str());
     return false;
   }
+
+  po::notify(vm);
+
+  // Check if vocabulary file exists.
+  if (!fs::is_regular_file(vocabulary_file)) {
+    throw po::error("Vocabulary path is not a file: " + vocabulary_file);
+  }
+  // Check if settings file exists.
+  if (!fs::is_regular_file(settings_file)) {
+    throw po::error("Settings path is not a file: " + settings_file);
+  }
+  // Check number of sequences.
+  if (sequences.size() % 2 != 0) {
+    throw po::error("Odd number of sequence arguments - must provide pairs");
+  }
+  // Check if all filenames in sequences exist.
+  for (std::size_t i = 0; i < sequences.size(); i += 2) {
+    if (!fs::is_directory(sequences[i])) {
+      throw po::error("Image directory path is not a directory: " + sequences[i]);
+    }
+    if (!fs::is_regular_file(sequences[i + 1])) {
+      throw po::error("Time file path is not a file: " + sequences[i + 1]);
+    }
+  }
+  // Check if output directory can be created.
+  if (!fs::is_directory(output_dir)) {
+    throw po::error("Output directory does NOT exist: " + output_dir);
+  }
+
+  return true;
 }
 
 } // namespace ORB_SLAM3::EuRoC
