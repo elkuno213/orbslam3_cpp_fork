@@ -151,6 +151,7 @@ set(TEST_FILES
   test/LoggingUtils_test.cc
   test/Settings_test.cc
   test/MapDrawer_test.cc
+  test/Viewer_test.cc
 )
 
 foreach(TEST_FILE ${TEST_FILES})
