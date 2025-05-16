@@ -81,34 +81,27 @@ Tracking::Tracking(
   } else {
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
-    bool b_parse_cam = ParseCamParamFile(fSettings);
-    if (!b_parse_cam) {
-      _logger->error("Config file has incorrect camera parameters");
+    if (!ParseCamParamFile(fSettings)) {
+      throw std::runtime_error(
+        fmt::format("Format incorrect of camera parameters in settings file at {}", strSettingPath)
+      );
     }
 
     // Load ORB parameters
-    bool b_parse_orb = ParseORBParamFile(fSettings);
-    if (!b_parse_orb) {
-      _logger->error("Config file has incorrect ORB parameters");
+    if (!ParseORBParamFile(fSettings)) {
+      throw std::runtime_error(
+        fmt::format("Format incorrect of ORB parameters in settings file at {}", strSettingPath)
+      );
     }
 
-    bool b_parse_imu = true;
     if (sensor == System::IMU_MONOCULAR || sensor == System::IMU_STEREO || sensor == System::IMU_RGBD) {
-      b_parse_imu = ParseIMUParamFile(fSettings);
-      if (!b_parse_imu) {
-        _logger->error("Config file has incorrect IMU parameters");
+      if (!ParseIMUParamFile(fSettings)) {
+        throw std::runtime_error(
+          fmt::format("Format incorrect of IMU parameters in settings file at {}", strSettingPath)
+        );
       }
 
       mnFramesToResetIMU = mMaxFrames;
-    }
-
-    if (!b_parse_cam || !b_parse_orb || !b_parse_imu) {
-      _logger->critical("Config file has incorrect format");
-      // TODO(VuHoi): handle better exception
-      try {
-        throw -1;
-      } catch (std::exception& e) {
-      }
     }
   }
 
@@ -1072,7 +1065,7 @@ bool Tracking::ParseCamParamFile(cv::FileStorage& fSettings) {
   if (fps == 0) {
     fps = 30;
   }
-  msg1 += fmt::format("- fps: {}", fps);
+  msg1 += fmt::format("- fps: {}\n", fps);
 
   // Max/Min Frames to insert keyframes and to check relocalisation
   mMinFrames = 0;
@@ -1081,9 +1074,9 @@ bool Tracking::ParseCamParamFile(cv::FileStorage& fSettings) {
   int nRGB = fSettings["Camera.RGB"];
   mbRGB    = nRGB;
   if (mbRGB) {
-    msg1 += "- Color order: RGB (ignored if grayscale)";
+    msg1 += "- Color order: RGB (ignored if grayscale)\n";
   } else {
-    msg1 += "- Color order: BGR (ignored if grayscale)";
+    msg1 += "- Color order: BGR (ignored if grayscale)\n";
   }
 
   msg = msg1 + msg2;
