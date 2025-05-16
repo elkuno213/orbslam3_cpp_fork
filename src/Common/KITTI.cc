@@ -3,18 +3,12 @@
 #include <fstream>
 #include <iomanip>
 #include <boost/program_options.hpp>
-#include "LoggingUtils.h"
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 namespace ORB_SLAM3::KITTI {
-
-namespace {
-
-static auto logger = logging::CreateModuleLogger("KITTI");
-
-} // anonymous namespace
 
 void LoadMonocularImages(
   const std::string&        strPathToSequence,
@@ -102,41 +96,36 @@ bool ParseArguments(
     ("output-dir", po::value<std::string>(&output_dir)->default_value("/tmp"), "Path to output directory");
   // clang-format on
 
-  try {
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
 
-    if (vm.count("help")) {
-      std::ostringstream oss;
-      oss << desc;
-      logger->info("\n{}", oss.str());
-      return false;
-    }
-
-    po::notify(vm);
-
-    // Check if vocabulary file exists.
-    if (!fs::is_regular_file(vocabulary_file)) {
-      throw po::error("Vocabulary path is not a file: " + vocabulary_file);
-    }
-    // Check if settings file exists.
-    if (!fs::is_regular_file(settings_file)) {
-      throw po::error("Settings path is not a file: " + settings_file);
-    }
-    // Check if sequence directory exists.
-    if (!fs::is_directory(sequence_dir)) {
-      throw po::error("Sequence directory does NOT exist: " + sequence_dir);
-    }
-    // Check if output directory can be created.
-    if (!fs::is_directory(output_dir)) {
-      throw po::error("Output directory does NOT exist: " + output_dir);
-    }
-
-    return true;
-  } catch (const po::error& e) {
-    logger->error("{}", e.what());
+  if (vm.count("help")) {
+    std::ostringstream oss;
+    oss << desc;
+    spdlog::info("\n{}", oss.str());
     return false;
   }
+
+  po::notify(vm);
+
+  // Check if vocabulary file exists.
+  if (!fs::is_regular_file(vocabulary_file)) {
+    throw po::error("Vocabulary path is not a file: " + vocabulary_file);
+  }
+  // Check if settings file exists.
+  if (!fs::is_regular_file(settings_file)) {
+    throw po::error("Settings path is not a file: " + settings_file);
+  }
+  // Check if sequence directory exists.
+  if (!fs::is_directory(sequence_dir)) {
+    throw po::error("Sequence directory does NOT exist: " + sequence_dir);
+  }
+  // Check if output directory can be created.
+  if (!fs::is_directory(output_dir)) {
+    throw po::error("Output directory does NOT exist: " + output_dir);
+  }
+
+  return true;
 }
 
 } // namespace ORB_SLAM3::KITTI
