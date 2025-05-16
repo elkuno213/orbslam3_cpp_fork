@@ -45,124 +45,138 @@ int main(int argc, char** argv) {
 
   // Parse arguments.
   std::string vocabulary_file, settings_file, sequence_dir, association_file, output_dir;
-
-  const bool args_ok = ORB_SLAM3::TUM::ParseArguments(
-    argc,
-    argv,
-    vocabulary_file,
-    settings_file,
-    sequence_dir,
-    association_file,
-    output_dir
-  );
-  if (!args_ok) {
-    return 1;
-  }
-
-  // Retrieve paths to images
-  std::vector<std::string> vstrImageFilenamesRGB;
-  std::vector<std::string> vstrImageFilenamesD;
-  std::vector<double>      vTimestamps;
-  ORB_SLAM3::TUM::LoadRGBDImages(
-    association_file,
-    vstrImageFilenamesRGB,
-    vstrImageFilenamesD,
-    vTimestamps
-  );
-
-  // Check consistency in the number of images and depthmaps
-  int nImages = vstrImageFilenamesRGB.size();
-  if (vstrImageFilenamesRGB.empty()) {
-    spdlog::error("No images found in provided path");
-    return 1;
-  } else if (vstrImageFilenamesD.size() != vstrImageFilenamesRGB.size()) {
-    spdlog::error(
-      "Different number of images for rgb and depth: {} vs {}",
-      vstrImageFilenamesRGB.size(),
-      vstrImageFilenamesD.size()
+  try {
+    const bool args_ok = ORB_SLAM3::TUM::ParseArguments(
+      argc,
+      argv,
+      vocabulary_file,
+      settings_file,
+      sequence_dir,
+      association_file,
+      output_dir
     );
+    if (!args_ok) {
+      return 0;
+    }
+  } catch (const std::exception& e) {
+    spdlog::error("Error when parsing arguments: {}", e.what());
     return 1;
   }
 
-  // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::RGBD, true);
-  float             imageScale = SLAM.GetImageScale();
+  // Run.
+  try {
+    // Retrieve paths to images
+    std::vector<std::string> vstrImageFilenamesRGB;
+    std::vector<std::string> vstrImageFilenamesD;
+    std::vector<double>      vTimestamps;
+    ORB_SLAM3::TUM::LoadRGBDImages(
+      association_file,
+      vstrImageFilenamesRGB,
+      vstrImageFilenamesD,
+      vTimestamps
+    );
 
-  // Vector for tracking time statistics
-  std::vector<float> vTimesTrack;
-  vTimesTrack.resize(nImages);
-
-  spdlog::info("Start processing sequence ...");
-  spdlog::info("Images in the sequence: {}", nImages);
-
-  // Main loop
-  cv::Mat imRGB, imD;
-  for (int ni = 0; ni < nImages; ni++) {
-    // Read image and depthmap from file
-    imRGB = cv::imread(
-      sequence_dir + "/" + vstrImageFilenamesRGB[ni],
-      cv::IMREAD_UNCHANGED
-    ); //,cv::IMREAD_UNCHANGED);
-    imD = cv::imread(
-      sequence_dir + "/" + vstrImageFilenamesD[ni],
-      cv::IMREAD_UNCHANGED
-    ); //,cv::IMREAD_UNCHANGED);
-    double tframe = vTimestamps[ni];
-
-    if (imRGB.empty()) {
-      spdlog::error("Failed to load image at: {}", sequence_dir + "/" + vstrImageFilenamesRGB[ni]);
+    // Check consistency in the number of images and depthmaps
+    int nImages = vstrImageFilenamesRGB.size();
+    if (vstrImageFilenamesRGB.empty()) {
+      spdlog::error("No images found in provided path");
+      return 1;
+    } else if (vstrImageFilenamesD.size() != vstrImageFilenamesRGB.size()) {
+      spdlog::error(
+        "Different number of images for rgb and depth: {} vs {}",
+        vstrImageFilenamesRGB.size(),
+        vstrImageFilenamesD.size()
+      );
       return 1;
     }
 
-    if (imageScale != 1.f) {
-      int width  = imRGB.cols * imageScale;
-      int height = imRGB.rows * imageScale;
-      cv::resize(imRGB, imRGB, cv::Size(width, height));
-      cv::resize(imD, imD, cv::Size(width, height));
+    // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::RGBD, true);
+    float             imageScale = SLAM.GetImageScale();
+
+    // Vector for tracking time statistics
+    std::vector<float> vTimesTrack;
+    vTimesTrack.resize(nImages);
+
+    spdlog::info("Start processing sequence ...");
+    spdlog::info("Images in the sequence: {}", nImages);
+
+    // Main loop
+    cv::Mat imRGB, imD;
+    for (int ni = 0; ni < nImages; ni++) {
+      // Read image and depthmap from file
+      imRGB = cv::imread(
+        sequence_dir + "/" + vstrImageFilenamesRGB[ni],
+        cv::IMREAD_UNCHANGED
+      ); //,cv::IMREAD_UNCHANGED);
+      imD = cv::imread(
+        sequence_dir + "/" + vstrImageFilenamesD[ni],
+        cv::IMREAD_UNCHANGED
+      ); //,cv::IMREAD_UNCHANGED);
+      double tframe = vTimestamps[ni];
+
+      if (imRGB.empty()) {
+        spdlog::error(
+          "Failed to load image at: {}",
+          sequence_dir + "/" + vstrImageFilenamesRGB[ni]
+        );
+        return 1;
+      }
+
+      if (imageScale != 1.f) {
+        int width  = imRGB.cols * imageScale;
+        int height = imRGB.rows * imageScale;
+        cv::resize(imRGB, imRGB, cv::Size(width, height));
+        cv::resize(imD, imD, cv::Size(width, height));
+      }
+
+      std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+
+      // Pass the image to the SLAM system
+      SLAM.TrackRGBD(imRGB, imD, tframe);
+
+      std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+
+      double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
+
+      vTimesTrack[ni] = ttrack;
+
+      // Wait to load the next frame
+      double T = 0;
+      if (ni < nImages - 1) {
+        T = vTimestamps[ni + 1] - tframe;
+      } else if (ni > 0) {
+        T = tframe - vTimestamps[ni - 1];
+      }
+
+      if (ttrack < T) {
+        usleep((T - ttrack) * 1e6);
+      }
     }
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    // Stop all threads
+    SLAM.Shutdown();
 
-    // Pass the image to the SLAM system
-    SLAM.TrackRGBD(imRGB, imD, tframe);
-
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-
-    double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
-
-    vTimesTrack[ni] = ttrack;
-
-    // Wait to load the next frame
-    double T = 0;
-    if (ni < nImages - 1) {
-      T = vTimestamps[ni + 1] - tframe;
-    } else if (ni > 0) {
-      T = tframe - vTimestamps[ni - 1];
+    // Tracking time statistics
+    std::sort(vTimesTrack.begin(), vTimesTrack.end());
+    float totaltime = 0;
+    for (int ni = 0; ni < nImages; ni++) {
+      totaltime += vTimesTrack[ni];
     }
+    spdlog::info("median tracking time: {}", vTimesTrack[nImages / 2]);
+    spdlog::info("mean tracking time: {}", totaltime / nImages);
 
-    if (ttrack < T) {
-      usleep((T - ttrack) * 1e6);
-    }
+    // Save camera trajectory
+    fs::path output_file_path;
+    output_file_path = fs::path(output_dir) / "CameraTrajectory.txt";
+    SLAM.SaveTrajectoryTUM(output_file_path.string());
+    output_file_path = fs::path(output_dir) / "KeyFrameTrajectory.txt";
+    SLAM.SaveKeyFrameTrajectoryTUM(output_file_path.string());
+  } catch (const std::exception& e) {
+    spdlog::error("Error when running ORB-SLAM3: {}", e.what());
+  } catch (...) {
+    spdlog::error("Unknown error when running ORB-SLAM3");
   }
-
-  // Stop all threads
-  SLAM.Shutdown();
-
-  // Tracking time statistics
-  std::sort(vTimesTrack.begin(), vTimesTrack.end());
-  float totaltime = 0;
-  for (int ni = 0; ni < nImages; ni++) {
-    totaltime += vTimesTrack[ni];
-  }
-  spdlog::info("median tracking time: {}", vTimesTrack[nImages / 2]);
-  spdlog::info("mean tracking time: {}", totaltime / nImages);
-
-  // Save camera trajectory
-  fs::path output_file_path;
-  output_file_path = fs::path(output_dir) / "CameraTrajectory.txt";
-  SLAM.SaveTrajectoryTUM(output_file_path.string());
-  output_file_path = fs::path(output_dir) / "KeyFrameTrajectory.txt";
-  SLAM.SaveKeyFrameTrajectoryTUM(output_file_path.string());
 
   return 0;
 }
