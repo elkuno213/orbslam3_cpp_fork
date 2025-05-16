@@ -53,104 +53,120 @@ int main(int argc, char** argv) {
 
   // Parse arguments.
   std::string vocabulary_file, settings_file, output_dir;
-
-  const bool args_ok
-    = ORB_SLAM3::RealSense::ParseArguments(argc, argv, vocabulary_file, settings_file, output_dir);
-  if (!args_ok) {
+  try {
+    const bool parsed = ORB_SLAM3::RealSense::ParseArguments(
+      argc,
+      argv,
+      vocabulary_file,
+      settings_file,
+      output_dir
+    );
+    if (!parsed) {
+      return 0;
+    }
+  } catch (const std::exception& e) {
+    spdlog::error("Error when parsing arguments: {}", e.what());
     return 1;
   }
 
-  struct sigaction sigIntHandler;
+  try {
+    struct sigaction sigIntHandler;
 
-  sigIntHandler.sa_handler = exit_loop_handler;
-  sigemptyset(&sigIntHandler.sa_mask);
-  sigIntHandler.sa_flags = 0;
+    sigIntHandler.sa_handler = exit_loop_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
 
-  sigaction(SIGINT, &sigIntHandler, NULL);
-  b_continue_session = true;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+    b_continue_session = true;
 
-  // Declare RealSense pipeline, encapsulating the actual device and sensors
-  rs2::pipeline pipe;
-  // Create a configuration for configuring the pipeline with a non default profile
-  rs2::config cfg;
+    // Declare RealSense pipeline, encapsulating the actual device and sensors
+    rs2::pipeline pipe;
+    // Create a configuration for configuring the pipeline with a non default profile
+    rs2::config cfg;
 
-  // Enable the left camera
-  cfg.enable_stream(RS2_STREAM_FISHEYE, 1, RS2_FORMAT_Y8);
-  cfg.enable_stream(RS2_STREAM_FISHEYE, 2, RS2_FORMAT_Y8);
+    // Enable the left camera
+    cfg.enable_stream(RS2_STREAM_FISHEYE, 1, RS2_FORMAT_Y8);
+    cfg.enable_stream(RS2_STREAM_FISHEYE, 2, RS2_FORMAT_Y8);
 
-  rs2::pipeline_profile pipe_profile = pipe.start(cfg);
+    rs2::pipeline_profile pipe_profile = pipe.start(cfg);
 
-  // Create SLAM system. It initializes all system threads and gets ready to process frames.
-  ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::MONOCULAR, true);
-  float             imageScale = SLAM.GetImageScale();
+    // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::System::MONOCULAR, true);
+    float             imageScale = SLAM.GetImageScale();
 
-  cv::Mat imCV;
+    cv::Mat imCV;
 
-  rs2::stream_profile fisheye_stream = pipe_profile.get_stream(RS2_STREAM_FISHEYE, 1);
-  rs2_intrinsics      intrinsics = fisheye_stream.as<rs2::video_stream_profile>().get_intrinsics();
-  int                 width_img  = intrinsics.width;
-  int                 height_img = intrinsics.height;
+    rs2::stream_profile fisheye_stream = pipe_profile.get_stream(RS2_STREAM_FISHEYE, 1);
+    rs2_intrinsics intrinsics = fisheye_stream.as<rs2::video_stream_profile>().get_intrinsics();
+    int            width_img  = intrinsics.width;
+    int            height_img = intrinsics.height;
 
-  double t_resize = 0.f;
-  double t_track  = 0.f;
+    double t_resize = 0.f;
+    double t_track  = 0.f;
 
-  while (b_continue_session) {
-    // cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
-    //  Get the stream from the device
-    rs2::frameset frame_set = pipe.wait_for_frames();
+    while (b_continue_session) {
+      // cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
+      //  Get the stream from the device
+      rs2::frameset frame_set = pipe.wait_for_frames();
 
-    double timestamp_ms = frame_set.get_timestamp(); // RS2_FRAME_METADATA_SENSOR_TIMESTAMP
+      double timestamp_ms = frame_set.get_timestamp(); // RS2_FRAME_METADATA_SENSOR_TIMESTAMP
 
-    if (rs2::video_frame image_frame = frame_set.first_or_default(RS2_STREAM_FISHEYE)) {
-      rs2::video_frame frame = frame_set.get_fisheye_frame(1); // Left image
-      imCV                   = cv::Mat(
-        cv::Size(width_img, height_img),
-        CV_8UC1,
-        (void*)(frame.get_data()),
-        cv::Mat::AUTO_STEP
-      );
-      if (imageScale != 1.f) {
+      if (rs2::video_frame image_frame = frame_set.first_or_default(RS2_STREAM_FISHEYE)) {
+        rs2::video_frame frame = frame_set.get_fisheye_frame(1); // Left image
+        imCV                   = cv::Mat(
+          cv::Size(width_img, height_img),
+          CV_8UC1,
+          (void*)(frame.get_data()),
+          cv::Mat::AUTO_STEP
+        );
+        if (imageScale != 1.f) {
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point t_Start_Resize = std::chrono::steady_clock::now();
+          std::chrono::steady_clock::time_point t_Start_Resize = std::chrono::steady_clock::now();
 #endif
-        int width  = imCV.cols * imageScale;
-        int height = imCV.rows * imageScale;
-        cv::resize(imCV, imCV, cv::Size(width, height));
+          int width  = imCV.cols * imageScale;
+          int height = imCV.rows * imageScale;
+          cv::resize(imCV, imCV, cv::Size(width, height));
 #ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
-        t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-                     t_End_Resize - t_Start_Resize
-        )
-                     .count();
-        SLAM.InsertResizeTime(t_resize);
+          std::chrono::steady_clock::time_point t_End_Resize = std::chrono::steady_clock::now();
+          t_resize = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                       t_End_Resize - t_Start_Resize
+          )
+                       .count();
+          SLAM.InsertResizeTime(t_resize);
+#endif
+        }
+
+        // clahe
+        // clahe->apply(imLeft,imLeft);
+        // clahe->apply(imRight,imRight);
+
+#ifdef REGISTER_TIMES
+        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+#endif
+
+        // Pass the image to the SLAM system
+        SLAM.TrackMonocular(imCV, timestamp_ms);
+
+#ifdef REGISTER_TIMES
+        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+        t_track
+          = t_resize
+          + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(t2 - t1).count();
+        SLAM.InsertTrackTime(t_track);
 #endif
       }
-
-      // clahe
-      // clahe->apply(imLeft,imLeft);
-      // clahe->apply(imRight,imRight);
-
-#ifdef REGISTER_TIMES
-      std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-#endif
-
-      // Pass the image to the SLAM system
-      SLAM.TrackMonocular(imCV, timestamp_ms);
-
-#ifdef REGISTER_TIMES
-      std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-      t_track
-        = t_resize
-        + std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(t2 - t1).count();
-      SLAM.InsertTrackTime(t_track);
-#endif
     }
+
+    pipe.stop();
+
+    // Stop all threads
+    SLAM.Shutdown();
+
+  } catch (const std::exception& e) {
+    spdlog::error("Error when running ORB-SLAM3: {}", e.what());
+  } catch (...) {
+    spdlog::error("Unknown error when running ORB-SLAM3");
   }
-
-  pipe.stop();
-
-  // Stop all threads
-  SLAM.Shutdown();
 
   return 0;
 }
