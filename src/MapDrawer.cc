@@ -38,12 +38,9 @@ MapDrawer::MapDrawer(Atlas* pAtlas, const std::string& strSettingPath, Settings*
     bool            is_correct = ParseViewerParamFile(fSettings);
 
     if (!is_correct) {
-      _logger->critical("Format in config file is NOT correct");
-      // TODO(VuHoi): hanlde better exception
-      try {
-        throw -1;
-      } catch (std::exception& e) {
-      }
+      throw std::runtime_error(
+        fmt::format("Format incorrect in settings file at {}", strSettingPath)
+      );
     }
   }
 }
