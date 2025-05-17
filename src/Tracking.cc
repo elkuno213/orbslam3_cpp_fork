@@ -94,7 +94,7 @@ Tracking::Tracking(
       );
     }
 
-    if (sensor == Sensor::InertialMonocular || sensor == Sensor::InertialStereo || sensor == Sensor::InertialRGBD) {
+    if (IsInertialBased(sensor)) {
       if (!ParseIMUParamFile(fSettings)) {
         throw std::runtime_error(
           fmt::format("Format incorrect of IMU parameters in settings file at {}", strSettingPath)
@@ -1826,7 +1826,7 @@ void Tracking::Track() {
     }
   }
 
-  if ((mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && mpLastKeyFrame) {
+  if (IsInertialBased(mSensor) && mpLastKeyFrame) {
     mCurrentFrame.SetNewBias(mpLastKeyFrame->GetImuBias());
   }
 
@@ -1836,7 +1836,7 @@ void Tracking::Track() {
 
   mLastProcessedState = mState;
 
-  if ((mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && !mbCreatedMap) {
+  if (IsInertialBased(mSensor) && !mbCreatedMap) {
 #ifdef REGISTER_TIMES
     std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
 #endif
@@ -1911,7 +1911,7 @@ void Tracking::Track() {
         }
 
         if (!bOK) {
-          if (mCurrentFrame.mnId <= (mnLastRelocFrameId + mnFramesToResetIMU) && (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD)) {
+          if (mCurrentFrame.mnId <= (mnLastRelocFrameId + mnFramesToResetIMU) && IsInertialBased(mSensor)) {
             mState = LOST;
           } else if (pCurrentMap->KeyFramesInMap() > 10) {
             mState         = RECENTLY_LOST;
@@ -1925,8 +1925,7 @@ void Tracking::Track() {
           _logger->warn("Tracking lost for a short time");
 
           bOK = true;
-          if ((mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo
-               || mSensor == Sensor::InertialRGBD)) {
+          if (IsInertialBased(mSensor)) {
             if (pCurrentMap->isImuInitialized()) {
               PredictStateIMU();
             } else {
@@ -1968,7 +1967,7 @@ void Tracking::Track() {
     } else {
       // Localization Mode: Local Mapping is deactivated (TODO Not available in inertial mode)
       if (mState == LOST) {
-        if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+        if (IsInertialBased(mSensor)) {
           _logger->warn("Tracking lost (with IMU)...");
         }
         bOK = Relocalization();
@@ -2058,7 +2057,7 @@ void Tracking::Track() {
     if (bOK) {
       mState = OK;
     } else if (mState == OK) {
-      if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+      if (IsInertialBased(mSensor)) {
         _logger->warn("Tracking lost for less than one second");
         if (!pCurrentMap->isImuInitialized() || !pCurrentMap->GetIniertialBA2()) {
           _logger->warn("IMU is not or recently initialized. Resetting active map...");
@@ -2078,7 +2077,7 @@ void Tracking::Track() {
 
     // Save frame if recent relocalization, since they are used for IMU reset (as we are making
     // copy, it shluld be once mCurrFrame is completely modified)
-    if ((mCurrentFrame.mnId<(mnLastRelocFrameId+mnFramesToResetIMU)) && (mCurrentFrame.mnId > mnFramesToResetIMU) && (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && pCurrentMap->isImuInitialized()) {
+    if ((mCurrentFrame.mnId<(mnLastRelocFrameId+mnFramesToResetIMU)) && (mCurrentFrame.mnId > mnFramesToResetIMU) && IsInertialBased(mSensor) && pCurrentMap->isImuInitialized()) {
       // TODO check this situation
       _logger->info("Saving pointer to frame. IMU needs reset...");
       Frame* pF       = new Frame(mCurrentFrame);
@@ -2125,7 +2124,7 @@ void Tracking::Track() {
         mbVelocity = false;
       }
 
-      if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+      if (IsInertialBased(mSensor)) {
         mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
       }
 
@@ -2157,7 +2156,7 @@ void Tracking::Track() {
 
       // Check if we need to insert a new keyframe
       // if(bNeedKF && bOK)
-      if (bNeedKF && (bOK || (mInsertKFsLost && mState == RECENTLY_LOST && (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD)))) {
+      if (bNeedKF && (bOK || (mInsertKFsLost && mState == RECENTLY_LOST && IsInertialBased(mSensor)))) {
         CreateNewKeyFrame();
       }
 
@@ -2188,7 +2187,7 @@ void Tracking::Track() {
         mpSystem->ResetActiveMap();
         return;
       }
-      if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+      if (IsInertialBased(mSensor)) {
         if (!pCurrentMap->isImuInitialized()) {
           _logger->warn("Tracking lost before IMU initialization. Resetting active map...");
           mpSystem->ResetActiveMap();
@@ -2543,7 +2542,7 @@ void Tracking::CreateInitialMapMonocular() {
 void Tracking::CreateMapInAtlas() {
   mnLastInitFrameId = mCurrentFrame.mnId;
   mpAtlas->CreateNewMap();
-  if (mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialRGBD) {
+  if (IsInertialBased(mSensor)) {
     mpAtlas->SetInertialSensor();
   }
   mbSetInit = false;
@@ -2561,7 +2560,7 @@ void Tracking::CreateMapInAtlas() {
     mbReadyToInitializate = false;
   }
 
-  if ((mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && mpImuPreintegratedFromLastKF) {
+  if (IsInertialBased(mSensor) && mpImuPreintegratedFromLastKF) {
     delete mpImuPreintegratedFromLastKF;
     mpImuPreintegratedFromLastKF = new IMU::Preintegrated(IMU::Bias(), *mpImuCalib);
   }
@@ -2641,7 +2640,7 @@ bool Tracking::TrackReferenceKeyFrame() {
     }
   }
 
-  if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+  if (IsInertialBased(mSensor)) {
     return true;
   } else {
     return nmatchesMap >= 10;
@@ -2773,7 +2772,7 @@ bool Tracking::TrackWithMotionModel() {
 
   if (nmatches < 20) {
     _logger->warn("Not enough matches");
-    if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+    if (IsInertialBased(mSensor)) {
       return true;
     } else {
       return false;
@@ -2810,7 +2809,7 @@ bool Tracking::TrackWithMotionModel() {
     return nmatches > 20;
   }
 
-  if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+  if (IsInertialBased(mSensor)) {
     return true;
   } else {
     return nmatchesMap >= 10;
@@ -2920,7 +2919,7 @@ bool Tracking::TrackLocalMap() {
 }
 
 bool Tracking::NeedNewKeyFrame() {
-  if ((mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && !mpAtlas->GetCurrentMap()->isImuInitialized()) {
+  if (IsInertialBased(mSensor) && !mpAtlas->GetCurrentMap()->isImuInitialized()) {
     if (mSensor == Sensor::InertialMonocular && (mCurrentFrame.mTimeStamp - mpLastKeyFrame->mTimeStamp) >= 0.25) {
       return true;
     } else if ((mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && (mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp) >= 0.25) {
@@ -3093,7 +3092,7 @@ void Tracking::CreateNewKeyFrame() {
   }
 
   // Reset preintegration from last KF (Create new object)
-  if (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) {
+  if (IsInertialBased(mSensor)) {
     mpImuPreintegratedFromLastKF = new IMU::Preintegrated(pKF->GetImuBias(), pKF->mImuCalib);
   }
 
@@ -3240,7 +3239,7 @@ void Tracking::SearchLocalPoints() {
       } else {
         th = 6;
       }
-    } else if (!mpAtlas->isImuInitialized() && (mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD)) {
+    } else if (!mpAtlas->isImuInitialized() && IsInertialBased(mSensor)) {
       th = 10;
     }
 
@@ -3428,7 +3427,7 @@ void Tracking::UpdateLocalKeyFrames() {
   }
 
   // Add 10 last temporal KFs (mainly for IMU)
-  if ((mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialRGBD) && mvpLocalKeyFrames.size() < 80) {
+  if (IsInertialBased(mSensor) && mvpLocalKeyFrames.size() < 80) {
     KeyFrame* tempKeyFrame = mCurrentFrame.mpLastKeyFrame;
 
     const int Nd = 20;
@@ -3640,7 +3639,7 @@ void Tracking::Reset(bool bLocMap) {
   // Clear Map (this erase MapPoints and KeyFrames)
   mpAtlas->clearAtlas();
   mpAtlas->CreateNewMap();
-  if (mSensor == Sensor::InertialStereo || mSensor == Sensor::InertialMonocular || mSensor == Sensor::InertialRGBD) {
+  if (IsInertialBased(mSensor)) {
     mpAtlas->SetInertialSensor();
   }
   mnInitialFrameId = 0;

@@ -11,4 +11,7 @@ enum class Sensor {
   InertialRGBD      = 5, // IMU + RGB-D camera
 };
 
+// Checks if sensor has IMU.
+bool IsInertialBased(Sensor sensor);
+
 } // namespace ORB_SLAM3

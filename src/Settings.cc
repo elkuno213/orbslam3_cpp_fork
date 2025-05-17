@@ -142,7 +142,7 @@ Settings::Settings(const std::string& configFile, Sensor sensor)
   readImageInfo(fSettings);
   _logger->info("Camera info loaded");
 
-  if (sensor_ == Sensor::InertialMonocular || sensor_ == Sensor::InertialStereo || sensor_ == Sensor::InertialRGBD) {
+  if (IsInertialBased(sensor_)) {
     readIMU(fSettings);
     _logger->info("IMU calibration loaded");
   }
@@ -614,7 +614,7 @@ std::string Settings::Str() const {
     }
   }
 
-  if (sensor_ == Sensor::InertialMonocular || sensor_ == Sensor::InertialStereo || sensor_ == Sensor::InertialRGBD) {
+  if (IsInertialBased(sensor_)) {
     // clang-format off
     output += fmt::format("- Gyro noise: {:.6f}\n"         , noiseGyro_   );
     output += fmt::format("- Accelerometer noise: {:.6f}\n", noiseAcc_    );
