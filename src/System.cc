@@ -87,8 +87,7 @@ System::System(
   // Check settings file
   cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
   if (!fsSettings.isOpened()) {
-    _logger->critical("Failed to open settings file {}", strSettingsFile);
-    std::exit(-1);
+    throw std::runtime_error(fmt::format("Failed to open settings file {}", strSettingsFile));
   }
 
   cv::FileNode node = fsSettings["File.version"];
@@ -129,8 +128,7 @@ System::System(
     mpVocabulary  = new ORBVocabulary();
     bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
     if (!bVocLoad) {
-      _logger->critical("Failed to open vocabulary file {}", strVocFile);
-      std::exit(-1);
+      throw std::runtime_error(fmt::format("Failed to open vocabulary file {}", strVocFile));
     }
     _logger->info("ORB vocabulary loaded");
 
@@ -147,8 +145,7 @@ System::System(
     mpVocabulary  = new ORBVocabulary();
     bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
     if (!bVocLoad) {
-      _logger->critical("Failed to open vocabulary file {}", strVocFile);
-      std::exit(-1);
+      throw std::runtime_error(fmt::format("Failed to open vocabulary file {}", strVocFile));
     }
     _logger->info("ORB vocabulary loaded");
 
@@ -161,8 +158,9 @@ System::System(
     bool isRead = LoadAtlas(FileType::BINARY_FILE);
 
     if (!isRead) {
-      _logger->critical("Faild to load Atlas, try with another session file or vocabulary file");
-      std::exit(-1);
+      throw std::runtime_error(
+        "Faild to load Atlas, try with another session file or vocabulary file"
+      );
     }
 
     // mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
@@ -277,8 +275,7 @@ Sophus::SE3f System::TrackStereo(
   std::string                    filename
 ) {
   if (mSensor != STEREO && mSensor != IMU_STEREO) {
-    _logger->critical("Invalid sensor type, it should be Stereo or Stereo-Inertial");
-    std::exit(-1);
+    throw std::runtime_error("Invalid sensor type, it should be Stereo or Stereo-Inertial");
   }
 
   cv::Mat imLeftToFeed, imRightToFeed;
@@ -376,8 +373,7 @@ Sophus::SE3f System::TrackRGBD(
   std::string                    filename
 ) {
   if (mSensor != RGBD && mSensor != IMU_RGBD) {
-    _logger->critical("Invalid sensor type, it should be RGB-D or RGB-D Inertial");
-    std::exit(-1);
+    throw std::runtime_error("Invalid sensor type, it should be RGB-D or RGB-D Inertial");
   }
 
   cv::Mat imToFeed      = im.clone();
@@ -470,8 +466,7 @@ Sophus::SE3f System::TrackMonocular(
   }
 
   if (mSensor != MONOCULAR && mSensor != IMU_MONOCULAR) {
-    _logger->critical("Invalid sensor type, it should be Monocular or Monocular-Inertial");
-    std::exit(-1);
+    throw std::runtime_error("Invalid sensor type, it should be Monocular or Monocular-Inertial");
   }
 
   cv::Mat imToFeed = im.clone();
