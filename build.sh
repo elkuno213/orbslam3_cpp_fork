@@ -32,6 +32,11 @@ cd ..
 
 echo "Configuring and building Thirdparty/DBoW2 ..."
 
+# Install apt dependencies.
+apt-get install -y             \
+  libboost-serialization-dev   \
+  libopencv-dev
+
 cd Thirdparty/DBoW2
 cmake -B build                           \
       -S .                               \
