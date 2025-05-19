@@ -9,7 +9,7 @@ for dir in "$@"; do
     echo "Formatting files in: $dir"
     find "$dir" \
       \( -iname "*.h" -o -iname "*.hpp" -o -iname "*.c" -o -iname "*.cpp" -o -iname "*.cc" \) \
-      -exec clang-format-15 -style=file -i {} +
+      -exec clang-format-16 -style=file -i {} +
   else
     echo "Warning: '$dir' is not a directory, skipping."
   fi
