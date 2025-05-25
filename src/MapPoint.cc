@@ -45,9 +45,7 @@ MapPoint::MapPoint()
   , mnVisible(1)
   , mnFound(1)
   , mbBad(false)
-  , mpReplaced(static_cast<MapPoint*>(NULL))
   , _logger(logging::CreateModuleLogger("MapPoint")) {
-  mpReplaced = static_cast<MapPoint*>(NULL);
 }
 
 MapPoint::MapPoint(const Eigen::Vector3f& Pos, KeyFrame* pRefKF, Map* pMap)
@@ -66,7 +64,6 @@ MapPoint::MapPoint(const Eigen::Vector3f& Pos, KeyFrame* pRefKF, Map* pMap)
   , mnVisible(1)
   , mnFound(1)
   , mbBad(false)
-  , mpReplaced(static_cast<MapPoint*>(NULL))
   , mfMinDistance(0)
   , mfMaxDistance(0)
   , mpMap(pMap)
@@ -102,7 +99,6 @@ MapPoint::MapPoint(
   , mnVisible(1)
   , mnFound(1)
   , mbBad(false)
-  , mpReplaced(static_cast<MapPoint*>(NULL))
   , mfMinDistance(0)
   , mfMaxDistance(0)
   , mpMap(pMap)
@@ -133,11 +129,9 @@ MapPoint::MapPoint(const Eigen::Vector3f& Pos, Map* pMap, Frame* pFrame, const i
   , mnCorrectedByKF(0)
   , mnCorrectedReference(0)
   , mnBAGlobalForKF(0)
-  , mpRefKF(static_cast<KeyFrame*>(NULL))
   , mnVisible(1)
   , mnFound(1)
   , mbBad(false)
-  , mpReplaced(NULL)
   , mpMap(pMap)
   , mnOriginMapId(pMap->GetId())
   , _logger(logging::CreateModuleLogger("MapPoint")) {
@@ -608,7 +602,7 @@ void MapPoint::PostLoad(
   if (!mpRefKF) {
     _logger->error("Map point {} observations has no reference key frame", nObs);
   }
-  mpReplaced = static_cast<MapPoint*>(NULL);
+  mpReplaced = nullptr;
   if (mBackupReplacedId >= 0) {
     auto it = mpMPid.find(mBackupReplacedId);
     if (it != mpMPid.end()) {

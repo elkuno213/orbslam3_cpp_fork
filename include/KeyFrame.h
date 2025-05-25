@@ -407,8 +407,8 @@ public:
   const int mnMaxY;
 
   // Preintegrated IMU measurements from previous keyframe
-  KeyFrame* mPrevKF;
-  KeyFrame* mNextKF;
+  KeyFrame* mPrevKF = nullptr;
+  KeyFrame* mNextKF = nullptr;
 
   IMU::Preintegrated* mpImuPreintegrated;
   IMU::Calib          mImuCalib;
@@ -466,7 +466,7 @@ protected:
 
   // Spanning Tree and Loop Edges
   bool                mbFirstConnection;
-  KeyFrame*           mpParent;
+  KeyFrame*           mpParent = nullptr;
   std::set<KeyFrame*> mspChildrens;
   std::set<KeyFrame*> mspLoopEdges;
   std::set<KeyFrame*> mspMergeEdges;

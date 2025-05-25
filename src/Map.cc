@@ -33,7 +33,6 @@ Map::Map()
   , mnBigChangeIdx(0)
   , mbImuInitialized(false)
   , mnMapChange(0)
-  , mpFirstRegionKF(static_cast<KeyFrame*>(NULL))
   , mbFail(false)
   , mIsInUse(false)
   , mHasTumbnail(false)
@@ -43,8 +42,7 @@ Map::Map()
   , mbIMU_BA1(false)
   , mbIMU_BA2(false)
   , _logger(logging::CreateModuleLogger("Map")) {
-  mnId       = nNextId++;
-  mThumbnail = static_cast<GLubyte*>(NULL);
+  mnId = nNextId++;
 }
 
 Map::Map(int initKFid)
@@ -55,7 +53,6 @@ Map::Map(int initKFid)
   , mHasTumbnail(false)
   , mbBad(false)
   , mbImuInitialized(false)
-  , mpFirstRegionKF(static_cast<KeyFrame*>(NULL))
   , mnMapChange(0)
   , mbFail(false)
   , mnMapChangeNotified(0)
@@ -63,8 +60,7 @@ Map::Map(int initKFid)
   , mbIMU_BA1(false)
   , mbIMU_BA2(false)
   , _logger(logging::CreateModuleLogger("Map")) {
-  mnId       = nNextId++;
-  mThumbnail = static_cast<GLubyte*>(NULL);
+  mnId = nNextId++;
 }
 
 Map::~Map() {
@@ -76,10 +72,8 @@ Map::~Map() {
   // TODO: erase all keyframes from memory
   mspKeyFrames.clear();
 
-  if (mThumbnail) {
-    delete mThumbnail;
-  }
-  mThumbnail = static_cast<GLubyte*>(NULL);
+  delete mThumbnail;
+  mThumbnail = nullptr;
 
   mvpReferenceMapPoints.clear();
   mvpKeyFrameOrigins.clear();
@@ -226,7 +220,7 @@ void Map::clear() {
   // }
 
   std::ranges::for_each(mspKeyFrames, [](KeyFrame* const kf) {
-    kf->UpdateMap(static_cast<Map*>(NULL));
+    kf->UpdateMap(nullptr);
     // delete *sit;
   });
 

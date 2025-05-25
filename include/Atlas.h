@@ -145,7 +145,7 @@ protected:
   // have an error with this cointainer
   std::vector<Map*> mvpBackupMaps;
 
-  Map* mpCurrentMap;
+  Map* mpCurrentMap = nullptr;
 
   std::vector<GeometricCamera*> mvpCameras;
 

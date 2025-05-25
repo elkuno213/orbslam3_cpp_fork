@@ -149,7 +149,7 @@ public:
 
   std::vector<KeyFrame*>         mvpKeyFrameOrigins;
   std::vector<unsigned long int> mvBackupKeyFrameOriginsId;
-  KeyFrame*                      mpFirstRegionKF;
+  KeyFrame*                      mpFirstRegionKF = nullptr;
   std::mutex                     mMutexMapUpdate;
 
   // This avoid that two points are created simultaneously in separate threads (id conflict)
@@ -198,8 +198,9 @@ protected:
   // Index related to a big change in the map (loop closure, global BA)
   int mnBigChangeIdx;
 
+  // TODO(VuHoi): currently unused
   // View of the map in aerial sight (for the AtlasViewer)
-  GLubyte* mThumbnail;
+  GLubyte* mThumbnail = nullptr;
 
   bool mIsInUse;
   bool mHasTumbnail;

@@ -1014,15 +1014,15 @@ void LocalMapping::KeyFrameCulling() {
             neighbor->mNextKF->mpImuPreintegrated->MergePrevious(neighbor->mpImuPreintegrated);
             neighbor->mNextKF->mPrevKF = neighbor->mPrevKF;
             neighbor->mPrevKF->mNextKF = neighbor->mNextKF;
-            neighbor->mNextKF          = NULL;
-            neighbor->mPrevKF          = NULL;
+            neighbor->mNextKF          = nullptr;
+            neighbor->mPrevKF          = nullptr;
             neighbor->SetBadFlag();
           } else if(!mpCurrentKeyFrame->GetMap()->GetIniertialBA2() && ((neighbor->GetImuPosition()-neighbor->mPrevKF->GetImuPosition()).norm()<0.02) && (t<3)) {
             neighbor->mNextKF->mpImuPreintegrated->MergePrevious(neighbor->mpImuPreintegrated);
             neighbor->mNextKF->mPrevKF = neighbor->mPrevKF;
             neighbor->mPrevKF->mNextKF = neighbor->mNextKF;
-            neighbor->mNextKF          = NULL;
-            neighbor->mPrevKF          = NULL;
+            neighbor->mNextKF          = nullptr;
+            neighbor->mPrevKF          = nullptr;
             neighbor->SetBadFlag();
           }
         }
@@ -1290,7 +1290,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) {
         100,
         false,
         mpCurrentKeyFrame->mnId,
-        NULL,
+        nullptr,
         true,
         priorG,
         priorA
@@ -1301,7 +1301,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) {
         100,
         false,
         mpCurrentKeyFrame->mnId,
-        NULL,
+        nullptr,
         false
       );
     }

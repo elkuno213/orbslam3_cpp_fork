@@ -218,7 +218,7 @@ protected:
   cv::Mat mDescriptor;
 
   // Reference KeyFrame
-  KeyFrame*         mpRefKF;
+  KeyFrame*         mpRefKF = nullptr;
   long unsigned int mBackupRefKFId;
 
   // Tracking counters
@@ -227,7 +227,7 @@ protected:
 
   // Bad flag (we do not currently erase MapPoint from memory)
   bool      mbBad;
-  MapPoint* mpReplaced;
+  MapPoint* mpReplaced = nullptr;
   // For save relation without pointer, this is necessary for save/load function
   long long int mBackupReplacedId;
 
@@ -235,7 +235,7 @@ protected:
   float mfMinDistance;
   float mfMaxDistance;
 
-  Map* mpMap;
+  Map* mpMap = nullptr;
 
   // Mutex
   std::mutex mMutexPos;

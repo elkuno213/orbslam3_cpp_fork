@@ -289,7 +289,7 @@ protected:
   System* mpSystem;
 
   // Drawers
-  Viewer*      mpViewer;
+  Viewer*      mpViewer = nullptr;
   FrameDrawer* mpFrameDrawer;
   MapDrawer*   mpMapDrawer;
   bool         bStepByStep;
@@ -327,7 +327,7 @@ protected:
   int mnMatchesInliers;
 
   // Last Frame, KeyFrame and Relocalisation Info
-  KeyFrame*    mpLastKeyFrame;
+  KeyFrame*    mpLastKeyFrame = nullptr;
   unsigned int mnLastKeyFrameId;
   unsigned int mnLastRelocFrameId;
   double       mTimeStampLost;

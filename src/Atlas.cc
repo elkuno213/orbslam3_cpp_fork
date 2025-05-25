@@ -28,24 +28,17 @@
 namespace ORB_SLAM3 {
 
 Atlas::Atlas() : _logger(logging::CreateModuleLogger("Atlas")) {
-  mpCurrentMap = static_cast<Map*>(NULL);
 }
 
 Atlas::Atlas(int initKFid)
   : mnLastInitKFidMap(initKFid), mHasViewer(false), _logger(logging::CreateModuleLogger("Atlas")) {
-  mpCurrentMap = static_cast<Map*>(NULL);
   CreateNewMap();
 }
 
 Atlas::~Atlas() {
-  // TODO(VuHoi): use nullptr
   std::erase_if(mspMaps, [](Map* map) {
-    if (map) {
-      delete map;
-      map = static_cast<Map*>(NULL);
-      return true;
-    }
-    return false;
+    delete map;  // delete object (no-op for nullptr)
+    return true; // to remove all entries of set
   });
 }
 
@@ -216,7 +209,7 @@ void Atlas::clearAtlas() {
     delete *it;
   }*/
   mspMaps.clear();
-  mpCurrentMap      = static_cast<Map*>(NULL);
+  mpCurrentMap      = nullptr;
   mnLastInitKFidMap = 0;
 }
 
@@ -240,10 +233,9 @@ void Atlas::SetMapBad(Map* pMap) {
 }
 
 void Atlas::RemoveBadMaps() {
-  /*for(Map* pMap : mspBadMaps)
-  {
-      delete pMap;
-      pMap = static_cast<Map*>(NULL);
+  /*for (Map* pMap : mspBadMaps) {
+    delete pMap;
+    pMap = nullptr;
   }*/
   mspBadMaps.clear();
 }

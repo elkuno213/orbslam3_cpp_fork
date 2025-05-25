@@ -55,7 +55,6 @@ System::System(
   const std::string& strSequence
 )
   : mSensor(sensor)
-  , mpViewer(static_cast<Viewer*>(NULL))
   , mbReset(false)
   , mbResetActiveMap(false)
   , mbActivateLocalizationMode(false)

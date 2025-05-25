@@ -62,7 +62,7 @@ public:
     const float&      bf,
     const float&      thDepth,
     GeometricCamera*  pCamera,
-    Frame*            pPrevF   = static_cast<Frame*>(NULL),
+    Frame*            pPrevF   = nullptr,
     const IMU::Calib& ImuCalib = IMU::Calib()
   );
 
@@ -78,7 +78,7 @@ public:
     const float&      bf,
     const float&      thDepth,
     GeometricCamera*  pCamera,
-    Frame*            pPrevF   = static_cast<Frame*>(NULL),
+    Frame*            pPrevF   = nullptr,
     const IMU::Calib& ImuCalib = IMU::Calib()
   );
 
@@ -92,7 +92,7 @@ public:
     cv::Mat&          distCoef,
     const float&      bf,
     const float&      thDepth,
-    Frame*            pPrevF   = static_cast<Frame*>(NULL),
+    Frame*            pPrevF   = nullptr,
     const IMU::Calib& ImuCalib = IMU::Calib()
   );
 
@@ -160,7 +160,7 @@ public:
   // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
   bool UnprojectStereo(const int& i, Eigen::Vector3f& x3D);
 
-  ConstraintPoseImu* mpcpi;
+  ConstraintPoseImu* mpcpi = nullptr;
 
   bool imuIsPreintegrated();
   void setIntegrated();
@@ -230,7 +230,8 @@ public:
   ORBVocabulary* mpORBvocabulary;
 
   // Feature extractor. The right is used only in the stereo case.
-  ORBextractor *mpORBextractorLeft, *mpORBextractorRight;
+  ORBextractor* mpORBextractorLeft  = nullptr;
+  ORBextractor* mpORBextractorRight = nullptr;
 
   // Frame timestamp.
   double mTimeStamp;
@@ -278,7 +279,7 @@ public:
   // ORB descriptor, each row associated to a keypoint.
   cv::Mat mDescriptors, mDescriptorsRight;
 
-  // MapPoints associated to keypoints, NULL pointer if no association.
+  // MapPoints associated to keypoints, nullptr if no association.
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
   int               mnCloseMPs;
@@ -298,19 +299,19 @@ public:
   IMU::Calib mImuCalib;
 
   // Imu preintegration from last keyframe
-  IMU::Preintegrated* mpImuPreintegrated;
+  IMU::Preintegrated* mpImuPreintegrated = nullptr;
   KeyFrame*           mpLastKeyFrame;
 
   // Pointer to previous frame
-  Frame*              mpPrevFrame;
-  IMU::Preintegrated* mpImuPreintegratedFrame;
+  Frame*              mpPrevFrame             = nullptr;
+  IMU::Preintegrated* mpImuPreintegratedFrame = nullptr;
 
   // Current and Next Frame id.
   static long unsigned int nNextId;
   long unsigned int        mnId;
 
   // Reference Keyframe.
-  KeyFrame* mpReferenceKF;
+  KeyFrame* mpReferenceKF = nullptr;
 
   // Scale pyramid info.
   int                mnScaleLevels;
@@ -394,7 +395,7 @@ public:
     GeometricCamera*  pCamera,
     GeometricCamera*  pCamera2,
     Sophus::SE3f&     Tlr,
-    Frame*            pPrevF   = static_cast<Frame*>(NULL),
+    Frame*            pPrevF   = nullptr,
     const IMU::Calib& ImuCalib = IMU::Calib()
   );
 
