@@ -45,7 +45,7 @@ bool sortByVal(const std::pair<MapPoint*, int>& a, const std::pair<MapPoint*, in
 }
 
 void Optimizer::GlobalBundleAdjustemnt(
-  Map* pMap, int nIterations, bool* pbStopFlag, const unsigned long nLoopKF, const bool bRobust
+  Map* pMap, int nIterations, bool* pbStopFlag, const KeyFrameID nLoopKF, const bool bRobust
 ) {
   std::vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
   std::vector<MapPoint*> vpMP  = pMap->GetAllMapPoints();
@@ -57,7 +57,7 @@ void Optimizer::BundleAdjustment(
   const std::vector<MapPoint*>& vpMP,
   int                           nIterations,
   bool*                         pbStopFlag,
-  const unsigned long           nLoopKF,
+  const KeyFrameID              nLoopKF,
   const bool                    bRobust
 ) {
   std::vector<bool> vbNotIncludedMP;
@@ -80,7 +80,7 @@ void Optimizer::BundleAdjustment(
     optimizer.setForceStopFlag(pbStopFlag);
   }
 
-  long unsigned int maxKFid = 0;
+  KeyFrameID maxKFid = 0;
 
   const int nExpectedSize = (vpKFs.size()) * vpMP.size();
 
@@ -370,18 +370,18 @@ void Optimizer::BundleAdjustment(
 }
 
 void Optimizer::FullInertialBA(
-  Map*                    pMap,
-  int                     its,
-  const bool              bFixLocal,
-  const long unsigned int nLoopId,
-  bool*                   pbStopFlag,
-  bool                    bInit,
-  float                   priorG,
-  float                   priorA,
-  Eigen::VectorXd*        vSingVal,
-  bool*                   bHess
+  Map*             pMap,
+  int              its,
+  const bool       bFixLocal,
+  const KeyFrameID nLoopId,
+  bool*            pbStopFlag,
+  bool             bInit,
+  float            priorG,
+  float            priorA,
+  Eigen::VectorXd* vSingVal,
+  bool*            bHess
 ) {
-  long unsigned int            maxKFid = pMap->GetMaxKFid();
+  KeyFrameID                   maxKFid = pMap->GetMaxKFid();
   const std::vector<KeyFrame*> vpKFs   = pMap->GetAllKeyFrames();
   const std::vector<MapPoint*> vpMPs   = pMap->GetAllMapPoints();
 
@@ -564,7 +564,7 @@ void Optimizer::FullInertialBA(
   const float thHuberMono   = std::sqrt(5.991);
   const float thHuberStereo = std::sqrt(7.815);
 
-  const unsigned long iniMPid = maxKFid * 5;
+  const MapPointID iniMPid = maxKFid * 5;
 
   std::vector<bool> vbNotIncludedMP(vpMPs.size(), false);
 
@@ -572,7 +572,7 @@ void Optimizer::FullInertialBA(
     MapPoint*               pMP    = vpMPs[i];
     g2o::VertexSBAPointXYZ* vPoint = new g2o::VertexSBAPointXYZ();
     vPoint->setEstimate(pMP->GetWorldPos().cast<double>());
-    unsigned long id = pMP->mnId + iniMPid + 1;
+    int id = pMP->mnId + iniMPid + 1;
     vPoint->setId(id);
     vPoint->setMarginalized(true);
     optimizer.addVertex(vPoint);
@@ -1137,7 +1137,7 @@ void Optimizer::LocalBundleAdjustment(
     optimizer.setForceStopFlag(pbStopFlag);
   }
 
-  unsigned long maxKFid = 0;
+  KeyFrameID maxKFid = 0;
 
   // DEBUG LBA
   pCurrentMap->msOptKFs.clear();
@@ -1443,7 +1443,7 @@ void Optimizer::OptimizeEssentialGraph(
   const std::vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
   const std::vector<MapPoint*> vpMPs = pMap->GetAllMapPoints();
 
-  const unsigned int nMaxKFid = pMap->GetMaxKFid();
+  const KeyFrameID nMaxKFid = pMap->GetMaxKFid();
 
   std::vector<g2o::Sim3, Eigen::aligned_allocator<g2o::Sim3>> vScw(nMaxKFid + 1);
   std::vector<g2o::Sim3, Eigen::aligned_allocator<g2o::Sim3>> vCorrectedSwc(nMaxKFid + 1);
@@ -1462,7 +1462,7 @@ void Optimizer::OptimizeEssentialGraph(
     }
     g2o::VertexSim3Expmap* VSim3 = new g2o::VertexSim3Expmap();
 
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     auto it = CorrectedSim3.find(kf);
 
@@ -1490,19 +1490,19 @@ void Optimizer::OptimizeEssentialGraph(
     vpVertices[nIDi] = VSim3;
   }
 
-  std::set<std::pair<long unsigned int, long unsigned int>> sInsertedEdges;
+  std::set<std::pair<KeyFrameID, KeyFrameID>> sInsertedEdges;
 
   const Eigen::Matrix<double, 7, 7> matLambda = Eigen::Matrix<double, 7, 7>::Identity();
 
   // Set Loop edges
   int count_loop = 0;
   for (const auto& [kf, connections] : LoopConnections) {
-    const long unsigned int nIDi = kf->mnId;
-    const g2o::Sim3         Siw  = vScw[nIDi];
-    const g2o::Sim3         Swi  = Siw.inverse();
+    const KeyFrameID nIDi = kf->mnId;
+    const g2o::Sim3  Siw  = vScw[nIDi];
+    const g2o::Sim3  Swi  = Siw.inverse();
 
     for (KeyFrame* const connected_kf : connections) {
-      const long unsigned int nIDj = connected_kf->mnId;
+      const KeyFrameID nIDj = connected_kf->mnId;
       if ((nIDi != pCurKF->mnId || nIDj != pLoopKF->mnId) && kf->GetWeight(connected_kf) < minFeat) {
         continue;
       }
@@ -1525,7 +1525,7 @@ void Optimizer::OptimizeEssentialGraph(
 
   // Set normal edges
   for (KeyFrame* const kf : vpKFs) {
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     g2o::Sim3 Swi;
 
@@ -1541,7 +1541,7 @@ void Optimizer::OptimizeEssentialGraph(
 
     // Spanning tree edge
     if (pParentKF) {
-      int nIDj = pParentKF->mnId;
+      KeyFrameID nIDj = pParentKF->mnId;
 
       g2o::Sim3 Sjw;
 
@@ -1657,7 +1657,7 @@ void Optimizer::OptimizeEssentialGraph(
 
   // SE3 Pose Recovering. Sim3:[sR t;0 1] -> SE3:[R t/s;0 1]
   for (KeyFrame* const kf : vpKFs) {
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     g2o::VertexSim3Expmap* VSim3 = static_cast<g2o::VertexSim3Expmap*>(optimizer.vertex(nIDi));
     g2o::Sim3              CorrectedSiw = VSim3->estimate();
@@ -1678,7 +1678,7 @@ void Optimizer::OptimizeEssentialGraph(
       continue;
     }
 
-    int nIDr;
+    KeyFrameID nIDr;
     if (mp->mnCorrectedByKF == pCurKF->mnId) {
       nIDr = mp->mnCorrectedReference;
     } else {
@@ -1722,8 +1722,8 @@ void Optimizer::OptimizeEssentialGraph(
   solver->setUserLambdaInit(1e-16);
   optimizer.setAlgorithm(solver);
 
-  Map*               pMap     = pCurKF->GetMap();
-  const unsigned int nMaxKFid = pMap->GetMaxKFid();
+  Map*             pMap     = pCurKF->GetMap();
+  const KeyFrameID nMaxKFid = pMap->GetMaxKFid();
 
   std::vector<g2o::Sim3, Eigen::aligned_allocator<g2o::Sim3>> vScw(nMaxKFid + 1);
   std::vector<g2o::Sim3, Eigen::aligned_allocator<g2o::Sim3>> vCorrectedSwc(nMaxKFid + 1);
@@ -1742,7 +1742,7 @@ void Optimizer::OptimizeEssentialGraph(
 
     g2o::VertexSim3Expmap* VSim3 = new g2o::VertexSim3Expmap();
 
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     Sophus::SE3d Tcw = kf->GetPose().cast<double>();
     g2o::Sim3    Siw(Tcw.unit_quaternion(), Tcw.translation(), 1.0);
@@ -1764,7 +1764,7 @@ void Optimizer::OptimizeEssentialGraph(
     vpBadPose[nIDi]  = false;
   }
 
-  std::set<unsigned long> sIdKF;
+  std::set<KeyFrameID> sIdKF;
   for (KeyFrame* const kf : vpFixedCorrectedKFs) {
     if (kf->isBad()) {
       continue;
@@ -1772,7 +1772,7 @@ void Optimizer::OptimizeEssentialGraph(
 
     g2o::VertexSim3Expmap* VSim3 = new g2o::VertexSim3Expmap();
 
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     Sophus::SE3d Tcw = kf->GetPose().cast<double>();
     g2o::Sim3    Siw(Tcw.unit_quaternion(), Tcw.translation(), 1.0);
@@ -1803,7 +1803,7 @@ void Optimizer::OptimizeEssentialGraph(
       continue;
     }
 
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     if (sIdKF.count(nIDi)) { // It has already added in the corrected merge KFs
       continue;
@@ -1842,8 +1842,8 @@ void Optimizer::OptimizeEssentialGraph(
   const Eigen::Matrix<double, 7, 7> matLambda = Eigen::Matrix<double, 7, 7>::Identity();
 
   for (KeyFrame* const kf : vpKFs) {
-    int       num_connections = 0;
-    const int nIDi            = kf->mnId;
+    int              num_connections = 0;
+    const KeyFrameID nIDi            = kf->mnId;
 
     g2o::Sim3 correctedSwi;
     g2o::Sim3 Swi;
@@ -1859,7 +1859,7 @@ void Optimizer::OptimizeEssentialGraph(
 
     // Spanning tree edge
     if (pParentKFi && spKFs.find(pParentKFi) != spKFs.end()) {
-      int nIDj = pParentKFi->mnId;
+      KeyFrameID nIDj = pParentKFi->mnId;
 
       g2o::Sim3 Sjw;
       bool      bHasRelation = false;
@@ -1967,7 +1967,7 @@ void Optimizer::OptimizeEssentialGraph(
       continue;
     }
 
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     g2o::VertexSim3Expmap* VSim3 = static_cast<g2o::VertexSim3Expmap*>(optimizer.vertex(nIDi));
     g2o::Sim3              CorrectedSiw = VSim3->estimate();
@@ -2292,8 +2292,8 @@ void Optimizer::LocalInertialBA(
     maxOpt = 25;
     opt_it = 4;
   }
-  const int           Nd      = std::min((int)pCurrentMap->KeyFramesInMap() - 2, maxOpt);
-  const unsigned long maxKFid = pKF->mnId;
+  const int        Nd      = std::min((int)pCurrentMap->KeyFramesInMap() - 2, maxOpt);
+  const KeyFrameID maxKFid = pKF->mnId;
 
   std::vector<KeyFrame*>       vpOptimizableKFs;
   const std::vector<KeyFrame*> vpNeighsKFs = pKF->GetVectorCovisibleKeyFrames();
@@ -2563,9 +2563,9 @@ void Optimizer::LocalInertialBA(
   const float thHuberStereo = std::sqrt(7.815);
   const float chi2Stereo2   = 7.815;
 
-  const unsigned long iniMPid = maxKFid * 5;
+  const MapPointID iniMPid = maxKFid * 5;
 
-  std::map<int, int> mVisEdges;
+  std::map<KeyFrameID, int> mVisEdges;
   for (int i = 0; i < N; i++) {
     KeyFrame* pKFi        = vpOptimizableKFs[i];
     mVisEdges[pKFi->mnId] = 0;
@@ -2898,7 +2898,7 @@ void Optimizer::InertialOptimization(
   float            priorA
 ) {
   int                          its     = 200;
-  long unsigned int            maxKFid = pMap->GetMaxKFid();
+  KeyFrameID                   maxKFid = pMap->GetMaxKFid();
   const std::vector<KeyFrame*> vpKFs   = pMap->GetAllKeyFrames();
 
   // Setup optimizer
@@ -3073,7 +3073,7 @@ void Optimizer::InertialOptimization(
   Map* pMap, Eigen::Vector3d& bg, Eigen::Vector3d& ba, float priorG, float priorA
 ) {
   int                          its     = 200; // Check number of iterations
-  long unsigned int            maxKFid = pMap->GetMaxKFid();
+  KeyFrameID                   maxKFid = pMap->GetMaxKFid();
   const std::vector<KeyFrame*> vpKFs   = pMap->GetAllKeyFrames();
 
   // Setup optimizer
@@ -3222,7 +3222,7 @@ void Optimizer::InertialOptimization(
 
 void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& scale) {
   int                          its     = 10;
-  long unsigned int            maxKFid = pMap->GetMaxKFid();
+  KeyFrameID                   maxKFid = pMap->GetMaxKFid();
   const std::vector<KeyFrame*> vpKFs   = pMap->GetAllKeyFrames();
 
   // Setup optimizer
@@ -3348,7 +3348,7 @@ void Optimizer::LocalBundleAdjustment(
     optimizer.setForceStopFlag(pbStopFlag);
   }
 
-  long unsigned int   maxKFid = 0;
+  KeyFrameID          maxKFid = 0;
   std::set<KeyFrame*> spKeyFrameBA;
 
   Map* pCurrentMap = pMainKF->GetMap();
@@ -3560,7 +3560,7 @@ void Optimizer::LocalBundleAdjustment(
     }
   }
 
-  std::map<unsigned long int, int> mWrongObsKF;
+  std::map<KeyFrameID, int> mWrongObsKF;
   if (bDoMore) {
     // Check inlier observations
     int badMonoMP = 0, badStereoMP = 0;
@@ -3757,8 +3757,8 @@ void Optimizer::MergeInertialBA(
   Map*                          pMap,
   LoopClosing::KeyFrameAndPose& corrPoses
 ) {
-  const int           Nd      = 6;
-  const unsigned long maxKFid = pCurrKF->mnId;
+  const int        Nd      = 6;
+  const KeyFrameID maxKFid = pCurrKF->mnId;
 
   std::vector<KeyFrame*> vpOptimizableKFs;
   vpOptimizableKFs.reserve(2 * Nd);
@@ -4056,7 +4056,7 @@ void Optimizer::MergeInertialBA(
   const float thHuberStereo = std::sqrt(7.815);
   const float chi2Stereo2   = 7.815;
 
-  const unsigned long iniMPid = maxKFid * 5;
+  const MapPointID iniMPid = maxKFid * 5;
 
   for (MapPoint* const mp : lLocalMapPoints) {
     if (!mp) {
@@ -5064,7 +5064,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
   const std::vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
   const std::vector<MapPoint*> vpMPs = pMap->GetAllMapPoints();
 
-  const unsigned int nMaxKFid = pMap->GetMaxKFid();
+  const KeyFrameID nMaxKFid = pMap->GetMaxKFid();
 
   std::vector<g2o::Sim3, Eigen::aligned_allocator<g2o::Sim3>> vScw(nMaxKFid + 1);
   std::vector<g2o::Sim3, Eigen::aligned_allocator<g2o::Sim3>> vCorrectedSwc(nMaxKFid + 1);
@@ -5080,7 +5080,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
 
     VertexPose4DoF* V4DoF;
 
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     auto it = CorrectedSim3.find(kf);
 
@@ -5108,7 +5108,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
     optimizer.addVertex(V4DoF);
     vpVertices[nIDi] = V4DoF;
   }
-  std::set<std::pair<long unsigned int, long unsigned int>> sInsertedEdges;
+  std::set<std::pair<KeyFrameID, KeyFrameID>> sInsertedEdges;
 
   // Edge used in posegraph has still 6Dof, even if updates of camera poses are just in 4DoF
   Eigen::Matrix<double, 6, 6> matLambda = Eigen::Matrix<double, 6, 6>::Identity();
@@ -5119,11 +5119,11 @@ void Optimizer::OptimizeEssentialGraph4DoF(
   // Set Loop edges
   Edge4DoF* e_loop;
   for (const auto& [kf, connections] : LoopConnections) {
-    const long unsigned int nIDi = kf->mnId;
-    const g2o::Sim3         Siw  = vScw[nIDi];
+    const KeyFrameID nIDi = kf->mnId;
+    const g2o::Sim3  Siw  = vScw[nIDi];
 
     for (KeyFrame* const connected_kf : connections) {
-      const long unsigned int nIDj = connected_kf->mnId;
+      const KeyFrameID nIDj = connected_kf->mnId;
       if ((nIDi != pCurKF->mnId || nIDj != pLoopKF->mnId) && kf->GetWeight(connected_kf) < minFeat) {
         continue;
       }
@@ -5149,7 +5149,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
 
   // 1. Set normal edges
   for (KeyFrame* const kf : vpKFs) {
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     g2o::Sim3 Siw;
 
@@ -5165,7 +5165,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
     // 1.1.0 Spanning tree edge
     KeyFrame* pParentKF = nullptr;
     if (pParentKF) {
-      int nIDj = pParentKF->mnId;
+      KeyFrameID nIDj = pParentKF->mnId;
 
       g2o::Sim3 Swj;
 
@@ -5193,7 +5193,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
     // 1.1.1 Inertial edges
     KeyFrame* prevKF = kf->mPrevKF;
     if (prevKF) {
-      int nIDj = prevKF->mnId;
+      KeyFrameID nIDj = prevKF->mnId;
 
       g2o::Sim3 Swj;
 
@@ -5296,7 +5296,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
 
   // SE3 Pose Recovering. Sim3:[sR t;0 1] -> SE3:[R t/s;0 1]
   for (KeyFrame* const kf : vpKFs) {
-    const int nIDi = kf->mnId;
+    const KeyFrameID nIDi = kf->mnId;
 
     VertexPose4DoF* Vi = static_cast<VertexPose4DoF*>(optimizer.vertex(nIDi));
     Eigen::Matrix3d Ri = Vi->estimate().Rcw[0];
@@ -5316,7 +5316,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
       continue;
     }
 
-    int nIDr;
+    KeyFrameID nIDr;
 
     KeyFrame* pRefKF = mp->GetReferenceKeyFrame();
     nIDr             = pRefKF->mnId;

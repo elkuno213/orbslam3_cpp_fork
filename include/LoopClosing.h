@@ -33,6 +33,7 @@
 #include <Thirdparty/g2o/g2o/types/sim3.h>
 #include <opencv2/core.hpp>
 #include <spdlog/logger.h>
+#include "Common/Common.h"
 #include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
@@ -78,7 +79,7 @@ public:
   void RequestResetActiveMap(Map* pMap);
 
   // This function will run in a separate thread
-  void RunGlobalBundleAdjustment(Map* pActiveMap, unsigned long nLoopKF);
+  void RunGlobalBundleAdjustment(Map* pActiveMap, KeyFrameID nLoopKF);
 
   bool isRunningGBA() {
     std::unique_lock<std::mutex> lock(mMutexGBA);
@@ -244,7 +245,7 @@ protected:
   g2o::Sim3 mSold_new;
   //-------
 
-  long unsigned int mLastLoopKFid;
+  KeyFrameID mLastLoopKFid;
 
   // Variables related to Global Bundle Adjustment
   bool         mbRunningGBA;

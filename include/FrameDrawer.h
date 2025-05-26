@@ -77,8 +77,8 @@ protected:
   std::vector<cv::KeyPoint> mvOutlierKeys;
   std::vector<MapPoint*>    mvpOutlierMPs;
 
-  std::map<long unsigned int, cv::Point2f> mmProjectPoints;
-  std::map<long unsigned int, cv::Point2f> mmMatchedInImage;
+  std::map<MapPointID, cv::Point2f> mmProjectPoints;
+  std::map<MapPointID, cv::Point2f> mmMatchedInImage;
 };
 
 } // namespace ORB_SLAM3

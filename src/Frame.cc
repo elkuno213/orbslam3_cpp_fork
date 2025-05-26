@@ -33,11 +33,11 @@
 
 namespace ORB_SLAM3 {
 
-long unsigned int Frame::nNextId               = 0;
-bool              Frame::mbInitialComputations = true;
-float             Frame::cx, Frame::cy, Frame::fx, Frame::fy, Frame::invfx, Frame::invfy;
-float             Frame::mnMinX, Frame::mnMinY, Frame::mnMaxX, Frame::mnMaxY;
-float             Frame::mfGridElementWidthInv, Frame::mfGridElementHeightInv;
+FrameID Frame::nNextId               = 0;
+bool    Frame::mbInitialComputations = true;
+float   Frame::cx, Frame::cy, Frame::fx, Frame::fy, Frame::invfx, Frame::invfy;
+float   Frame::mnMinX, Frame::mnMinY, Frame::mnMaxX, Frame::mnMaxY;
+float   Frame::mfGridElementWidthInv, Frame::mfGridElementHeightInv;
 
 // For stereo fisheye matching
 cv::BFMatcher Frame::BFmatcher = cv::BFMatcher(cv::NORM_HAMMING);
@@ -453,7 +453,7 @@ Frame::Frame(
 
   mvpMapPoints = std::vector<MapPoint*>(N, nullptr);
 
-  mmProjectPoints.clear(); // = std::map<long unsigned int, cv::Point2f>(N, nullptr);
+  mmProjectPoints.clear(); // = std::map<MapPointID, cv::Point2f>(N, nullptr);
   mmMatchedInImage.clear();
 
   mvbOutlier = std::vector<bool>(N, false);

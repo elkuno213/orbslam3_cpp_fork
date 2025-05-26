@@ -29,6 +29,7 @@
 #include <opencv2/features2d.hpp>
 #include <sophus/se3.hpp>
 #include <spdlog/logger.h>
+#include "Common/Common.h"
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
 
@@ -307,8 +308,8 @@ public:
   IMU::Preintegrated* mpImuPreintegratedFrame = nullptr;
 
   // Current and Next Frame id.
-  static long unsigned int nNextId;
-  long unsigned int        mnId;
+  static FrameID nNextId;
+  FrameID        mnId;
 
   // Reference Keyframe.
   KeyFrame* mpReferenceKF = nullptr;
@@ -330,8 +331,8 @@ public:
 
   static bool mbInitialComputations;
 
-  std::map<long unsigned int, cv::Point2f> mmProjectPoints;
-  std::map<long unsigned int, cv::Point2f> mmMatchedInImage;
+  std::map<MapPointID, cv::Point2f> mmProjectPoints;
+  std::map<MapPointID, cv::Point2f> mmMatchedInImage;
 
   string mNameFile;
 

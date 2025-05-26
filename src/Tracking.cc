@@ -3652,7 +3652,7 @@ void Tracking::ResetActiveMap(bool bLocMap) {
 
   std::list<bool> lbLost;
   // lbLost.reserve(mlbLost.size());
-  unsigned int index = mnFirstFrameId;
+  KeyFrameID index = mnFirstFrameId;
   _logger->info("First frame ID: {}", mnFirstFrameId);
   for (Map* const map : mpAtlas->GetAllMaps()) {
     if (map->GetAllKeyFrames().size() > 0) {
@@ -3743,10 +3743,10 @@ void Tracking::InformOnlyTracking(const bool& flag) {
 }
 
 void Tracking::UpdateFrameIMU(const float s, const IMU::Bias& b, KeyFrame* pCurrentKeyFrame) {
-  Map*         pMap  = pCurrentKeyFrame->GetMap();
-  unsigned int index = mnFirstFrameId;
-  auto         lRit  = mlpReferences.begin();
-  auto         lbL   = mlbLost.begin();
+  Map*    pMap  = pCurrentKeyFrame->GetMap();
+  FrameID index = mnFirstFrameId;
+  auto    lRit  = mlpReferences.begin();
+  auto    lbL   = mlbLost.begin();
   for (auto lit = mlRelativeFramePoses.begin(); lit != mlRelativeFramePoses.end();
        lit++, lRit++, lbL++) {
     if (*lbL) {

@@ -25,6 +25,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include <Thirdparty/g2o/g2o/types/sim3.h>
+#include "Common/Common.h"
 #include "LoopClosing.h"
 
 namespace ORB_SLAM3 {
@@ -41,27 +42,27 @@ public:
     const std::vector<MapPoint*>& vpMP,
     int                           nIterations = 5,
     bool*                         pbStopFlag  = nullptr,
-    const unsigned long           nLoopKF     = 0,
+    const KeyFrameID              nLoopKF     = 0,
     const bool                    bRobust     = true
   );
   void static GlobalBundleAdjustemnt(
-    Map*                pMap,
-    int                 nIterations = 5,
-    bool*               pbStopFlag  = nullptr,
-    const unsigned long nLoopKF     = 0,
-    const bool          bRobust     = true
+    Map*             pMap,
+    int              nIterations = 5,
+    bool*            pbStopFlag  = nullptr,
+    const KeyFrameID nLoopKF     = 0,
+    const bool       bRobust     = true
   );
   void static FullInertialBA(
-    Map*                pMap,
-    int                 its,
-    const bool          bFixLocal  = false,
-    const unsigned long nLoopKF    = 0,
-    bool*               pbStopFlag = nullptr,
-    bool                bInit      = false,
-    float               priorG     = 1e2,
-    float               priorA     = 1e6,
-    Eigen::VectorXd*    vSingVal   = nullptr,
-    bool*               bHess      = nullptr
+    Map*             pMap,
+    int              its,
+    const bool       bFixLocal  = false,
+    const KeyFrameID nLoopKF    = 0,
+    bool*            pbStopFlag = nullptr,
+    bool             bInit      = false,
+    float            priorG     = 1e2,
+    float            priorA     = 1e6,
+    Eigen::VectorXd* vSingVal   = nullptr,
+    bool*            bHess      = nullptr
   );
 
   void static LocalBundleAdjustment(

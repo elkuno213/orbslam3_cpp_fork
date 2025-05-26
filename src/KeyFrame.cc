@@ -34,7 +34,7 @@
 
 namespace ORB_SLAM3 {
 
-long unsigned int KeyFrame::nNextId = 0;
+KeyFrameID KeyFrame::nNextId = 0;
 
 KeyFrame::KeyFrame()
   : mnFrameId(0)
@@ -961,9 +961,9 @@ void KeyFrame::PreSave(
 }
 
 void KeyFrame::PostLoad(
-  std::map<long unsigned int, KeyFrame*>&   mpKFid,
-  std::map<long unsigned int, MapPoint*>&   mpMPid,
-  std::map<unsigned int, GeometricCamera*>& mpCamId
+  std::map<KeyFrameID, KeyFrame*>&      mpKFid,
+  std::map<MapPointID, MapPoint*>&      mpMPid,
+  std::map<CameraID, GeometricCamera*>& mpCamId
 ) {
   // Rebuild the empty variables
 
@@ -998,19 +998,19 @@ void KeyFrame::PostLoad(
 
   // KeyFrame childrens
   mspChildrens.clear();
-  for (const unsigned long id : mvBackupChildrensId) {
+  for (const KeyFrameID id : mvBackupChildrensId) {
     mspChildrens.insert(mpKFid[id]);
   }
 
   // Loop edge KeyFrame
   mspLoopEdges.clear();
-  for (const unsigned long id : mvBackupLoopEdgesId) {
+  for (const KeyFrameID id : mvBackupLoopEdgesId) {
     mspLoopEdges.insert(mpKFid[id]);
   }
 
   // Merge edge KeyFrame
   mspMergeEdges.clear();
-  for (const unsigned long id : mvBackupMergeEdgesId) {
+  for (const KeyFrameID id : mvBackupMergeEdgesId) {
     mspMergeEdges.insert(mpKFid[id]);
   }
 

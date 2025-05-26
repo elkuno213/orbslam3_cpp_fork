@@ -160,8 +160,8 @@ void MapDrawer::DrawKeyFrames(
 
   Map* pActiveMap = mpAtlas->GetCurrentMap();
   // DEBUG LBA
-  std::set<long unsigned int> sOptKFs   = pActiveMap->msOptKFs;
-  std::set<long unsigned int> sFixedKFs = pActiveMap->msFixedKFs;
+  std::set<KeyFrameID> sOptKFs   = pActiveMap->msOptKFs;
+  std::set<KeyFrameID> sFixedKFs = pActiveMap->msFixedKFs;
 
   if (!pActiveMap) {
     return;
@@ -172,7 +172,7 @@ void MapDrawer::DrawKeyFrames(
   if (bDrawKF) {
     for (KeyFrame* const kf : vpKFs) {
       Eigen::Matrix4f Twc         = kf->GetPoseInverse().matrix();
-      unsigned int    index_color = kf->mnOriginMapId;
+      MapID           index_color = kf->mnOriginMapId;
 
       glPushMatrix();
 
@@ -297,7 +297,7 @@ void MapDrawer::DrawKeyFrames(
 
       for (KeyFrame* const kf : map->GetAllKeyFrames()) {
         Eigen::Matrix4f Twc         = kf->GetPoseInverse().matrix();
-        unsigned int    index_color = kf->mnOriginMapId;
+        MapID           index_color = kf->mnOriginMapId;
 
         glPushMatrix();
 

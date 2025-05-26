@@ -32,6 +32,7 @@
 #include <pangolin/pangolin.h>
 #include <sophus/se3.hpp>
 #include <spdlog/logger.h>
+#include "Common/Common.h"
 #include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
@@ -73,7 +74,7 @@ class Map {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Map();
-  Map(int initKFid);
+  Map(KeyFrameID initKFid);
   ~Map();
 
   void AddKeyFrame(KeyFrame* pKF);
@@ -91,11 +92,11 @@ public:
   long unsigned int MapPointsInMap();
   long unsigned     KeyFramesInMap();
 
-  long unsigned int GetId();
+  MapID GetId();
 
-  long unsigned int GetInitKFid();
-  void              SetInitKFid(long unsigned int initKFif);
-  long unsigned int GetMaxKFid();
+  KeyFrameID GetInitKFid();
+  void       SetInitKFid(KeyFrameID initKFif);
+  KeyFrameID GetMaxKFid();
 
   KeyFrame* GetOriginKF();
 
@@ -129,15 +130,15 @@ public:
 
   void PrintEssentialGraph();
   bool CheckEssentialGraph();
-  void ChangeId(long unsigned int nId);
+  void ChangeId(MapID nId);
 
-  unsigned int GetLowerKFID();
+  KeyFrameID GetLowerKFID();
 
   void PreSave(std::set<GeometricCamera*>& spCams);
   void PostLoad(
     KeyFrameDatabase* pKFDB,
     ORBVocabulary*    pORBVoc /*, std::map<long unsigned int, KeyFrame*>& mpKeyFrameId*/,
-    std::map<unsigned int, GeometricCamera*>& mpCams
+    std::map<CameraID, GeometricCamera*>& mpCams
   );
 
   void printReprojectionError(
@@ -147,10 +148,10 @@ public:
     std::string&          name_folder
   );
 
-  std::vector<KeyFrame*>         mvpKeyFrameOrigins;
-  std::vector<unsigned long int> mvBackupKeyFrameOriginsId;
-  KeyFrame*                      mpFirstRegionKF = nullptr;
-  std::mutex                     mMutexMapUpdate;
+  std::vector<KeyFrame*>  mvpKeyFrameOrigins;
+  std::vector<KeyFrameID> mvBackupKeyFrameOriginsId;
+  KeyFrame*               mpFirstRegionKF = nullptr;
+  std::mutex              mMutexMapUpdate;
 
   // This avoid that two points are created simultaneously in separate threads (id conflict)
   std::mutex mMutexPointCreation;
@@ -161,14 +162,14 @@ public:
   static const int THUMB_WIDTH  = 512;
   static const int THUMB_HEIGHT = 512;
 
-  static long unsigned int nNextId;
+  static MapID nNextId;
 
   // DEBUG: show KFs which are used in LBA
-  std::set<long unsigned int> msOptKFs;
-  std::set<long unsigned int> msFixedKFs;
+  std::set<KeyFrameID> msOptKFs;
+  std::set<KeyFrameID> msFixedKFs;
 
 protected:
-  long unsigned int mnId;
+  MapID mnId;
 
   std::set<MapPoint*> mspMapPoints;
   std::set<KeyFrame*> mspKeyFrames;
@@ -181,8 +182,8 @@ protected:
   KeyFrame* mpKFinitial;
   KeyFrame* mpKFlowerID;
 
-  unsigned long int mnBackupKFinitialID;
-  unsigned long int mnBackupKFlowerID;
+  KeyFrameID mnBackupKFinitialID;
+  KeyFrameID mnBackupKFlowerID;
 
   std::vector<MapPoint*> mvpReferenceMapPoints;
 
@@ -191,9 +192,9 @@ protected:
   int mnMapChange;
   int mnMapChangeNotified;
 
-  long unsigned int mnInitKFid;
-  long unsigned int mnMaxKFid;
-  // long unsigned int mnLastLoopKFid;
+  KeyFrameID mnInitKFid;
+  KeyFrameID mnMaxKFid;
+  // KeyFrameID mnLastLoopKFid;
 
   // Index related to a big change in the map (loop closure, global BA)
   int mnBigChangeIdx;

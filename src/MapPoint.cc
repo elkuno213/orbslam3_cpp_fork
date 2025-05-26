@@ -27,8 +27,8 @@
 
 namespace ORB_SLAM3 {
 
-long unsigned int MapPoint::nNextId = 0;
-std::mutex        MapPoint::mGlobalMutex;
+MapPointID MapPoint::nNextId = 0;
+std::mutex MapPoint::mGlobalMutex;
 
 MapPoint::MapPoint()
   : mnFirstKFid(0)
@@ -570,7 +570,7 @@ void MapPoint::UpdateMap(Map* pMap) {
   mpMap = pMap;
 }
 
-void MapPoint::PreSave(set<KeyFrame*>& spKF, set<MapPoint*>& spMP) {
+void MapPoint::PreSave(std::set<KeyFrame*>& spKF, std::set<MapPoint*>& spMP) {
   mBackupReplacedId = -1;
   if (mpReplaced && spMP.find(mpReplaced) != spMP.end()) {
     mBackupReplacedId = mpReplaced->mnId;
@@ -596,7 +596,7 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF, set<MapPoint*>& spMP) {
 }
 
 void MapPoint::PostLoad(
-  std::map<long unsigned int, KeyFrame*>& mpKFid, std::map<long unsigned int, MapPoint*>& mpMPid
+  std::map<KeyFrameID, KeyFrame*>& mpKFid, std::map<MapPointID, MapPoint*>& mpMPid
 ) {
   mpRefKF = mpKFid[mBackupRefKFId];
   if (!mpRefKF) {

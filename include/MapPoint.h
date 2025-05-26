@@ -31,6 +31,7 @@
 #include <boost/serialization/map.hpp>
 #include <opencv2/core.hpp>
 #include <spdlog/logger.h>
+#include "Common/Common.h"
 #include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {
@@ -151,41 +152,39 @@ public:
   void UpdateMap(Map* pMap);
 
   void PreSave(std::set<KeyFrame*>& spKF, std::set<MapPoint*>& spMP);
-  void PostLoad(
-    std::map<long unsigned int, KeyFrame*>& mpKFid, std::map<long unsigned int, MapPoint*>& mpMPid
-  );
+  void PostLoad(std::map<KeyFrameID, KeyFrame*>& mpKFid, std::map<MapPointID, MapPoint*>& mpMPid);
 
 public:
-  long unsigned int        mnId;
-  static long unsigned int nNextId;
-  long int                 mnFirstKFid;
-  long int                 mnFirstFrame;
-  int                      nObs;
+  MapPointID        mnId;
+  static MapPointID nNextId;
+  KeyFrameID        mnFirstKFid;
+  FrameID           mnFirstFrame;
+  int               nObs;
 
   // Variables used by the tracking
-  float             mTrackProjX;
-  float             mTrackProjY;
-  float             mTrackDepth;
-  float             mTrackDepthR;
-  float             mTrackProjXR;
-  float             mTrackProjYR;
-  bool              mbTrackInView, mbTrackInViewR;
-  int               mnTrackScaleLevel, mnTrackScaleLevelR;
-  float             mTrackViewCos, mTrackViewCosR;
-  long unsigned int mnTrackReferenceForFrame;
-  long unsigned int mnLastFrameSeen;
+  float   mTrackProjX;
+  float   mTrackProjY;
+  float   mTrackDepth;
+  float   mTrackDepthR;
+  float   mTrackProjXR;
+  float   mTrackProjYR;
+  bool    mbTrackInView, mbTrackInViewR;
+  int     mnTrackScaleLevel, mnTrackScaleLevelR;
+  float   mTrackViewCos, mTrackViewCosR;
+  FrameID mnTrackReferenceForFrame;
+  FrameID mnLastFrameSeen;
 
   // Variables used by local mapping
-  long unsigned int mnBALocalForKF;
-  long unsigned int mnFuseCandidateForKF;
+  KeyFrameID mnBALocalForKF;
+  KeyFrameID mnFuseCandidateForKF;
 
   // Variables used by loop closing
   long unsigned int mnLoopPointForKF;
-  long unsigned int mnCorrectedByKF;
-  long unsigned int mnCorrectedReference;
+  KeyFrameID        mnCorrectedByKF;
+  KeyFrameID        mnCorrectedReference;
   Eigen::Vector3f   mPosGBA;
-  long unsigned int mnBAGlobalForKF;
-  long unsigned int mnBALocalForMerge;
+  KeyFrameID        mnBAGlobalForKF;
+  KeyFrameID        mnBALocalForMerge;
 
   // Variable used by merging
   Eigen::Vector3f mPosMerge;
@@ -199,7 +198,7 @@ public:
 
   static std::mutex mGlobalMutex;
 
-  unsigned int mnOriginMapId;
+  MapID mnOriginMapId;
 
 protected:
   // Position in absolute coordinates
@@ -208,8 +207,8 @@ protected:
   // Keyframes observing the point and associated index in keyframe
   std::map<KeyFrame*, std::tuple<int, int>> mObservations;
   // For save relation without pointer, this is necessary for save/load function
-  std::map<long unsigned int, int> mBackupObservationsId1;
-  std::map<long unsigned int, int> mBackupObservationsId2;
+  std::map<KeyFrameID, int> mBackupObservationsId1;
+  std::map<KeyFrameID, int> mBackupObservationsId2;
 
   // Mean viewing direction
   Eigen::Vector3f mNormalVector;
@@ -218,8 +217,8 @@ protected:
   cv::Mat mDescriptor;
 
   // Reference KeyFrame
-  KeyFrame*         mpRefKF = nullptr;
-  long unsigned int mBackupRefKFId;
+  KeyFrame*  mpRefKF = nullptr;
+  KeyFrameID mBackupRefKFId;
 
   // Tracking counters
   int mnVisible;
@@ -229,7 +228,7 @@ protected:
   bool      mbBad;
   MapPoint* mpReplaced = nullptr;
   // For save relation without pointer, this is necessary for save/load function
-  long long int mBackupReplacedId;
+  MapPointID mBackupReplacedId;
 
   // Scale invariance distances
   float mfMinDistance;

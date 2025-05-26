@@ -30,7 +30,7 @@ namespace ORB_SLAM3 {
 Atlas::Atlas() : _logger(logging::CreateModuleLogger("Atlas")) {
 }
 
-Atlas::Atlas(int initKFid)
+Atlas::Atlas(KeyFrameID initKFid)
   : mnLastInitKFidMap(initKFid), mHasViewer(false), _logger(logging::CreateModuleLogger("Atlas")) {
   CreateNewMap();
 }
@@ -75,7 +75,7 @@ void Atlas::ChangeMap(Map* pMap) {
   mpCurrentMap->SetCurrentMap();
 }
 
-unsigned long int Atlas::GetLastInitKFid() {
+KeyFrameID Atlas::GetLastInitKFid() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
   return mnLastInitKFidMap;
 }
@@ -294,7 +294,7 @@ void Atlas::PreSave() {
 }
 
 void Atlas::PostLoad() {
-  std::map<unsigned int, GeometricCamera*> mpCams;
+  std::map<CameraID, GeometricCamera*> mpCams;
   for (GeometricCamera* const camera : mvpCameras) {
     mpCams[camera->GetId()] = camera;
   }
@@ -356,8 +356,8 @@ long unsigned int Atlas::GetNumLivedMP() {
   );
 }
 
-std::map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes() {
-  std::map<long unsigned int, KeyFrame*> mpIdKFs;
+std::map<KeyFrameID, KeyFrame*> Atlas::GetAtlasKeyframes() {
+  std::map<KeyFrameID, KeyFrame*> mpIdKFs;
 
   // Construct a map of keyframe IDs and keyframes.
   for (Map* const map : mvpBackupMaps) {

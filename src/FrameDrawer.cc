@@ -42,14 +42,14 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale) {
   std::vector<float>                                vCurrentDepth;
   float                                             thDepth;
 
-  Frame                                    currentFrame;
-  std::vector<MapPoint*>                   vpLocalMap;
-  std::vector<cv::KeyPoint>                vMatchesKeys;
-  std::vector<MapPoint*>                   vpMatchedMPs;
-  std::vector<cv::KeyPoint>                vOutlierKeys;
-  std::vector<MapPoint*>                   vpOutlierMPs;
-  std::map<long unsigned int, cv::Point2f> mProjectPoints;
-  std::map<long unsigned int, cv::Point2f> mMatchedInImage;
+  Frame                             currentFrame;
+  std::vector<MapPoint*>            vpLocalMap;
+  std::vector<cv::KeyPoint>         vMatchesKeys;
+  std::vector<MapPoint*>            vpMatchedMPs;
+  std::vector<cv::KeyPoint>         vOutlierKeys;
+  std::vector<MapPoint*>            vpOutlierMPs;
+  std::map<MapPointID, cv::Point2f> mProjectPoints;
+  std::map<MapPointID, cv::Point2f> mMatchedInImage;
 
   cv::Scalar standardColor(0, 255, 0);
   cv::Scalar odometryColor(255, 0, 0);
@@ -210,8 +210,7 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale) {
   }
 
   // Draw
-  if (state == Tracking::NOT_INITIALIZED) // INITIALIZING
-  {
+  if (state == Tracking::NOT_INITIALIZED) { // INITIALIZING
     for (unsigned int i = 0; i < vMatches.size(); i++) {
       if (vMatches[i] >= 0) {
         cv::Point2f pt1, pt2;
@@ -226,8 +225,7 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale) {
         cv::line(im, pt1, pt2, cv::Scalar(0, 255, 0));
       }
     }
-  } else if (state == Tracking::OK) // TRACKING
-  {
+  } else if (state == Tracking::OK) { // TRACKING
     mnTracked         = 0;
     mnTrackedVO       = 0;
     const float r     = 5;

@@ -80,7 +80,7 @@ MLPnPsolver::MLPnPsolver(const Frame& F, const std::vector<MapPoint*>& vpMapPoin
         mvSigma2.push_back(F.mvLevelSigma2[kp.octave]);
 
         // Bearing vector should be normalized
-        cv::Point3f cv_br = mpCamera->unproject(kp.pt);
+        cv::Point3f cv_br  = mpCamera->unproject(kp.pt);
         cv_br             /= cv_br.z;
         bearingVector_t br(cv_br.x, cv_br.y, cv_br.z);
         mvBearingVecs.push_back(br);
@@ -418,12 +418,12 @@ void MLPnPsolver::computePose(
     int l   = 0;
     for (std::size_t i = 0; i < numberCorrespondences; ++i) {
       // invert matrix
-      cov2_mat_t temp          = nullspaces[i].transpose() * covMats[i] * nullspaces[i];
-      temp                     = temp.inverse().eval();
-      P.coeffRef(l, l)         = temp(0, 0);
-      P.coeffRef(l, l + 1)     = temp(0, 1);
-      P.coeffRef(l + 1, l)     = temp(1, 0);
-      P.coeffRef(l + 1, l + 1) = temp(1, 1);
+      cov2_mat_t temp           = nullspaces[i].transpose() * covMats[i] * nullspaces[i];
+      temp                      = temp.inverse().eval();
+      P.coeffRef(l, l)          = temp(0, 0);
+      P.coeffRef(l, l + 1)      = temp(0, 1);
+      P.coeffRef(l + 1, l)      = temp(1, 0);
+      P.coeffRef(l + 1, l + 1)  = temp(1, 1);
       l                        += 2;
     }
   }
@@ -588,8 +588,8 @@ void MLPnPsolver::computePose(
       point_t reproPt;
       double  norms = 0.0;
       for (int p = 0; p < 6; ++p) {
-        reproPt = Ts[i].block<3, 3>(0, 0) * points3v[p] + Ts[i].block<3, 1>(0, 3);
-        reproPt = reproPt / reproPt.norm();
+        reproPt  = Ts[i].block<3, 3>(0, 0) * points3v[p] + Ts[i].block<3, 1>(0, 3);
+        reproPt  = reproPt / reproPt.norm();
         norms   += (1.0 - reproPt.transpose() * f[indices[p]]);
       }
       normVal[i] = norms;
@@ -631,8 +631,8 @@ void MLPnPsolver::computePose(
       }
       Ts[s] = Ts[s].inverse().eval();
       for (int p = 0; p < 6; ++p) {
-        bearingVector_t v = Ts[s].block<3, 3>(0, 0) * points3v[p] + Ts[s].block<3, 1>(0, 3);
-        v                 = v / v.norm();
+        bearingVector_t v  = Ts[s].block<3, 3>(0, 0) * points3v[p] + Ts[s].block<3, 1>(0, 3);
+        v                  = v / v.norm();
         error[s]          += (1.0 - v.transpose() * f[indices[p]]);
       }
     }
@@ -688,10 +688,10 @@ Eigen::Vector3d MLPnPsolver::rot2rodrigues(const Eigen::Matrix3d& R) {
   double trace = R.trace() - 1.0;
   double wnorm = acos(trace / 2.0);
   if (wnorm > std::numeric_limits<double>::epsilon()) {
-    omega[0]  = (R(2, 1) - R(1, 2));
-    omega[1]  = (R(0, 2) - R(2, 0));
-    omega[2]  = (R(1, 0) - R(0, 1));
-    double sc = wnorm / (2.0 * sin(wnorm));
+    omega[0]   = (R(2, 1) - R(1, 2));
+    omega[1]   = (R(0, 2) - R(2, 0));
+    omega[2]   = (R(1, 0) - R(0, 1));
+    double sc  = wnorm / (2.0 * sin(wnorm));
     omega     *= sc;
   }
   return omega;
@@ -786,7 +786,7 @@ void MLPnPsolver::mlpnp_residuals_and_jacs(
   Eigen::MatrixXd jacs(2, 6);
 
   for (int i = 0; i < pts.size(); ++i) {
-    Eigen::Vector3d ptCam = R * pts[i] + T;
+    Eigen::Vector3d ptCam  = R * pts[i] + T;
     ptCam                 /= ptCam.norm();
 
     r[ii]     = nullspaces[i].col(0).transpose() * ptCam;

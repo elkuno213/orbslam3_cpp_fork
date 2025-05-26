@@ -35,6 +35,7 @@
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
 #include <spdlog/logger.h>
+#include "Common/Common.h"
 #include "ImuTypes.h"
 #include "ORBVocabulary.h"
 #include "SerializationUtils.h"
@@ -53,7 +54,7 @@ class KeyFrame {
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& mnId;
-    ar& const_cast<long unsigned int&>(mnFrameId);
+    ar& const_cast<FrameID&>(mnFrameId);
     ar& const_cast<double&>(mTimeStamp);
     // Grid
     ar& const_cast<int&>(mnGridCols);
@@ -298,9 +299,9 @@ public:
     std::set<KeyFrame*>& spKF, std::set<MapPoint*>& spMP, std::set<GeometricCamera*>& spCam
   );
   void PostLoad(
-    std::map<long unsigned int, KeyFrame*>&   mpKFid,
-    std::map<long unsigned int, MapPoint*>&   mpMPid,
-    std::map<unsigned int, GeometricCamera*>& mpCamId
+    std::map<KeyFrameID, KeyFrame*>&      mpKFid,
+    std::map<MapPointID, MapPoint*>&      mpMPid,
+    std::map<CameraID, GeometricCamera*>& mpCamId
   );
 
   void SetORBVocabulary(ORBVocabulary* pORBVoc);
@@ -310,9 +311,9 @@ public:
 
   // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
-  static long unsigned int nNextId;
-  long unsigned int        mnId;
-  const long unsigned int  mnFrameId;
+  static KeyFrameID nNextId;
+  KeyFrameID        mnId;
+  const FrameID     mnFrameId;
 
   const double mTimeStamp;
 
@@ -323,39 +324,39 @@ public:
   const float mfGridElementHeightInv;
 
   // Variables used by the tracking
-  long unsigned int mnTrackReferenceForFrame;
-  long unsigned int mnFuseTargetForKF;
+  FrameID    mnTrackReferenceForFrame;
+  KeyFrameID mnFuseTargetForKF;
 
   // Variables used by the local mapping
-  long unsigned int mnBALocalForKF;
-  long unsigned int mnBAFixedForKF;
+  KeyFrameID mnBALocalForKF;
+  KeyFrameID mnBAFixedForKF;
 
   // Number of optimizations by BA(amount of iterations in BA)
   long unsigned int mnNumberOfOpt;
 
   // Variables used by the keyframe database
-  long unsigned int mnLoopQuery;
-  int               mnLoopWords;
-  float             mLoopScore;
-  long unsigned int mnRelocQuery;
-  int               mnRelocWords;
-  float             mRelocScore;
-  long unsigned int mnMergeQuery;
-  int               mnMergeWords;
-  float             mMergeScore;
-  long unsigned int mnPlaceRecognitionQuery;
-  int               mnPlaceRecognitionWords;
-  float             mPlaceRecognitionScore;
+  KeyFrameID mnLoopQuery;
+  int        mnLoopWords;
+  float      mLoopScore;
+  FrameID    mnRelocQuery;
+  int        mnRelocWords;
+  float      mRelocScore;
+  KeyFrameID mnMergeQuery;
+  int        mnMergeWords;
+  float      mMergeScore;
+  KeyFrameID mnPlaceRecognitionQuery;
+  int        mnPlaceRecognitionWords;
+  float      mPlaceRecognitionScore;
 
   bool mbCurrentPlaceRecognition;
 
   // Variables used by loop closing
-  Sophus::SE3f      mTcwGBA;
-  Sophus::SE3f      mTcwBefGBA;
-  Eigen::Vector3f   mVwbGBA;
-  Eigen::Vector3f   mVwbBefGBA;
-  IMU::Bias         mBiasGBA;
-  long unsigned int mnBAGlobalForKF;
+  Sophus::SE3f    mTcwGBA;
+  Sophus::SE3f    mTcwBefGBA;
+  Eigen::Vector3f mVwbGBA;
+  Eigen::Vector3f mVwbBefGBA;
+  IMU::Bias       mBiasGBA;
+  KeyFrameID      mnBAGlobalForKF;
 
   // Variables used by merging
   Sophus::SE3f      mTcwMerge;
@@ -364,10 +365,10 @@ public:
   Eigen::Vector3f   mVwbMerge;
   Eigen::Vector3f   mVwbBefMerge;
   IMU::Bias         mBiasMerge;
-  long unsigned int mnMergeCorrectedForKF;
+  KeyFrameID        mnMergeCorrectedForKF;
   long unsigned int mnMergeForKF;
   float             mfScaleMerge;
-  long unsigned int mnBALocalForMerge;
+  KeyFrameID        mnBALocalForMerge;
 
   float mfScale;
 
@@ -413,7 +414,7 @@ public:
   IMU::Preintegrated* mpImuPreintegrated;
   IMU::Calib          mImuCalib;
 
-  unsigned int mnOriginMapId;
+  MapID mnOriginMapId;
 
   string mNameFile;
 
@@ -449,7 +450,7 @@ protected:
   // MapPoints associated to keypoints
   std::vector<MapPoint*> mvpMapPoints;
   // For save relation without pointer, this is necessary for save/load function
-  std::vector<long long int> mvBackupMapPointsId;
+  std::vector<MapPointID> mvBackupMapPointsId;
 
   // BoW
   KeyFrameDatabase* mpKeyFrameDB;
@@ -462,7 +463,7 @@ protected:
   std::vector<KeyFrame*>   mvpOrderedConnectedKeyFrames;
   std::vector<int>         mvOrderedWeights;
   // For save relation without pointer, this is necessary for save/load function
-  std::map<long unsigned int, int> mBackupConnectedKeyFrameIdWeights;
+  std::map<KeyFrameID, int> mBackupConnectedKeyFrameIdWeights;
 
   // Spanning Tree and Loop Edges
   bool                mbFirstConnection;
@@ -471,10 +472,10 @@ protected:
   std::set<KeyFrame*> mspLoopEdges;
   std::set<KeyFrame*> mspMergeEdges;
   // For save relation without pointer, this is necessary for save/load function
-  long long int                  mBackupParentId;
-  std::vector<long unsigned int> mvBackupChildrensId;
-  std::vector<long unsigned int> mvBackupLoopEdgesId;
-  std::vector<long unsigned int> mvBackupMergeEdgesId;
+  KeyFrameID              mBackupParentId;
+  std::vector<KeyFrameID> mvBackupChildrensId;
+  std::vector<KeyFrameID> mvBackupLoopEdgesId;
+  std::vector<KeyFrameID> mvBackupMergeEdgesId;
 
   // Bad flags
   bool mbNotErase;
@@ -486,12 +487,12 @@ protected:
   Map* mpMap;
 
   // Backup variables for inertial
-  long long int      mBackupPrevKFId;
-  long long int      mBackupNextKFId;
+  KeyFrameID         mBackupPrevKFId;
+  KeyFrameID         mBackupNextKFId;
   IMU::Preintegrated mBackupImuPreintegrated;
 
   // Backup for Cameras
-  unsigned int mnBackupIdCamera, mnBackupIdCamera2;
+  CameraID mnBackupIdCamera, mnBackupIdCamera2;
 
   // Calibration
   Eigen::Matrix3f mK_;

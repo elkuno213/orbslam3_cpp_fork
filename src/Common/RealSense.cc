@@ -119,11 +119,11 @@ rs2_option get_sensor_option(const rs2::sensor& sensor) {
       msg += fmt::format("\n");
 
       // Get a human readable description of the option
-      const char* description = sensor.get_option_description(option_type);
+      const char* description  = sensor.get_option_description(option_type);
       msg                     += fmt::format("\t\tDescription: {}\n", description);
 
       // Get the current value of the option
-      float current_value = sensor.get_option(option_type);
+      float current_value  = sensor.get_option(option_type);
       msg                 += fmt::format("\t\tCurrent Value : {}\n", current_value);
 
       // To change the value of an option, please follow the change_sensor_option() function

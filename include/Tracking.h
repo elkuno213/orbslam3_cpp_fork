@@ -312,8 +312,8 @@ protected:
   int mMinFrames;
   int mMaxFrames;
 
-  int mnFirstImuFrameId;
-  int mnFramesToResetIMU;
+  FrameID mnFirstImuFrameId;
+  int     mnFramesToResetIMU;
 
   // Threshold close/far points
   // Points seen as close by the stereo/RGBD sensor are considered reliable
@@ -327,15 +327,15 @@ protected:
   int mnMatchesInliers;
 
   // Last Frame, KeyFrame and Relocalisation Info
-  KeyFrame*    mpLastKeyFrame = nullptr;
-  unsigned int mnLastKeyFrameId;
-  unsigned int mnLastRelocFrameId;
-  double       mTimeStampLost;
-  double       time_recently_lost;
+  KeyFrame*  mpLastKeyFrame = nullptr;
+  KeyFrameID mnLastKeyFrameId;
+  KeyFrameID mnLastRelocFrameId;
+  double     mTimeStampLost;
+  double     time_recently_lost;
 
-  unsigned int mnFirstFrameId;
-  unsigned int mnInitialFrameId;
-  unsigned int mnLastInitFrameId;
+  FrameID    mnFirstFrameId;
+  KeyFrameID mnInitialFrameId;
+  KeyFrameID mnLastInitFrameId;
 
   bool mbCreatedMap;
 
@@ -362,7 +362,7 @@ protected:
 
   GeometricCamera *mpCamera, *mpCamera2;
 
-  int initID, lastID;
+  KeyFrameID initID, lastID;
 
   Sophus::SE3f mTlr;
 

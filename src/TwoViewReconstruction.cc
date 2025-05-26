@@ -704,9 +704,9 @@ bool TwoViewReconstruction::ReconstructH(
     vR.push_back(R);
 
     Eigen::Vector3f tp;
-    tp(0) = x1[i];
-    tp(1) = 0;
-    tp(2) = -x3[i];
+    tp(0)  = x1[i];
+    tp(1)  = 0;
+    tp(2)  = -x3[i];
     tp    *= d1 - d3;
 
     Eigen::Vector3f t = U * tp;
@@ -743,9 +743,9 @@ bool TwoViewReconstruction::ReconstructH(
     vR.push_back(R);
 
     Eigen::Vector3f tp;
-    tp(0) = x1[i];
-    tp(1) = 0;
-    tp(2) = x3[i];
+    tp(0)  = x1[i];
+    tp(1)  = 0;
+    tp(2)  = x3[i];
     tp    *= d1 + d3;
 
     Eigen::Vector3f t = U * tp;

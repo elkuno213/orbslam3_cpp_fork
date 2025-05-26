@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace ORB_SLAM3 {
 
 enum class Sensor {
@@ -22,5 +24,12 @@ bool IsStereoBased(Sensor sensor);
 
 // Check if sensor has RGB-D camera.
 bool IsRGBDBased(Sensor sensor);
+
+// ID types.
+using CameraID   = std::uint16_t;
+using FrameID    = std::uint64_t;
+using KeyFrameID = std::uint32_t;
+using MapPointID = std::uint32_t;
+using MapID      = std::uint16_t;
 
 } // namespace ORB_SLAM3

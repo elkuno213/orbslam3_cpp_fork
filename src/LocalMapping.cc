@@ -382,8 +382,8 @@ void LocalMapping::EmptyQueue() {
 
 void LocalMapping::MapPointCulling() {
   // Check Recent Added MapPoints
-  auto                    lit          = mlpRecentAddedMapPoints.begin();
-  const unsigned long int nCurrentKFid = mpCurrentKeyFrame->mnId;
+  auto             lit          = mlpRecentAddedMapPoints.begin();
+  const KeyFrameID nCurrentKFid = mpCurrentKeyFrame->mnId;
 
   int nThObs;
   if (mbMonocular) {
@@ -924,7 +924,7 @@ void LocalMapping::KeyFrameCulling() {
   int        count    = 0;
 
   // Compoute last KF from optimizable window:
-  unsigned int last_ID;
+  KeyFrameID last_ID;
   if (mbInertial) {
     int       count  = 0;
     KeyFrame* aux_KF = mpCurrentKeyFrame;
@@ -1314,7 +1314,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) {
   // Get Map Mutex
   std::unique_lock<std::mutex> lock(mpAtlas->GetCurrentMap()->mMutexMapUpdate);
 
-  unsigned long GBAid = mpCurrentKeyFrame->mnId;
+  KeyFrameID GBAid = mpCurrentKeyFrame->mnId;
 
   // Process keyframes in the queue
   while (CheckNewKeyFrames()) {

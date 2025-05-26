@@ -72,13 +72,13 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   Atlas();
-  Atlas(int initKFid); // When its initialization the first map is created
+  Atlas(KeyFrameID initKFid); // When its initialization the first map is created
   ~Atlas();
 
   void CreateNewMap();
   void ChangeMap(Map* pMap);
 
-  unsigned long int GetLastInitKFid();
+  KeyFrameID GetLastInitKFid();
 
   void SetViewer(Viewer* pViewer);
 
@@ -126,7 +126,7 @@ public:
   void PreSave();
   void PostLoad();
 
-  std::map<long unsigned int, KeyFrame*> GetAtlasKeyframes();
+  std::map<KeyFrameID, KeyFrame*> GetAtlasKeyframes();
 
   void              SetKeyFrameDababase(KeyFrameDatabase* pKFDB);
   KeyFrameDatabase* GetKeyFrameDatabase();
@@ -149,7 +149,7 @@ protected:
 
   std::vector<GeometricCamera*> mvpCameras;
 
-  unsigned long int mnLastInitKFidMap;
+  KeyFrameID mnLastInitKFidMap;
 
   Viewer* mpViewer;
   bool    mHasViewer;

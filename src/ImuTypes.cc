@@ -250,7 +250,7 @@ void Preintegrated::IntegrateNewMeasurement(
   B.block<3, 3>(0, 0) = dRi.rightJ * dt;
 
   // Update covariance
-  C.block<9, 9>(0, 0) = A * C.block<9, 9>(0, 0) * A.transpose() + B * Nga * B.transpose();
+  C.block<9, 9>(0, 0)  = A * C.block<9, 9>(0, 0) * A.transpose() + B * Nga * B.transpose();
   C.block<6, 6>(9, 9) += NgaWalk;
 
   // Update rotation jacobian wrt bias correction

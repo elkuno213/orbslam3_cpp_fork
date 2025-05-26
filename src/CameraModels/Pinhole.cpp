@@ -26,7 +26,7 @@
 namespace ORB_SLAM3 {
 // BOOST_CLASS_EXPORT_GUID(Pinhole, "Pinhole")
 
-long unsigned int GeometricCamera::nNextId = 0;
+CameraID GeometricCamera::nNextId = 0;
 
 Pinhole::Pinhole() {
   mvParameters.resize(4);

@@ -197,7 +197,7 @@ void ImuCamPose::Update(const double* pu) {
 
   // Update body pose
   twb += Rwb * ut;
-  Rwb = Rwb * ExpSO3(ur);
+  Rwb  = Rwb * ExpSO3(ur);
 
   // Normalize rotation after 5 updates
   its++;
@@ -396,8 +396,8 @@ void EdgeStereo::linearizeOplus() {
   const double           inv_z2 = 1.0 / (Xc(2) * Xc(2));
 
   Eigen::Matrix<double, 3, 3> proj_jac;
-  proj_jac.block<2, 3>(0, 0) = VPose->estimate().pCamera[cam_idx]->projectJac(Xc);
-  proj_jac.block<1, 3>(2, 0) = proj_jac.block<1, 3>(0, 0);
+  proj_jac.block<2, 3>(0, 0)  = VPose->estimate().pCamera[cam_idx]->projectJac(Xc);
+  proj_jac.block<1, 3>(2, 0)  = proj_jac.block<1, 3>(0, 0);
   proj_jac(2, 2)             += bf * inv_z2;
 
   _jacobianOplusXi = -proj_jac * Rcw;
@@ -424,8 +424,8 @@ void EdgeStereoOnlyPose::linearizeOplus() {
   const double           inv_z2 = 1.0 / (Xc(2) * Xc(2));
 
   Eigen::Matrix<double, 3, 3> proj_jac;
-  proj_jac.block<2, 3>(0, 0) = VPose->estimate().pCamera[cam_idx]->projectJac(Xc);
-  proj_jac.block<1, 3>(2, 0) = proj_jac.block<1, 3>(0, 0);
+  proj_jac.block<2, 3>(0, 0)  = VPose->estimate().pCamera[cam_idx]->projectJac(Xc);
+  proj_jac.block<1, 3>(2, 0)  = proj_jac.block<1, 3>(0, 0);
   proj_jac(2, 2)             += bf * inv_z2;
 
   Eigen::Matrix<double, 3, 6> SE3deriv;

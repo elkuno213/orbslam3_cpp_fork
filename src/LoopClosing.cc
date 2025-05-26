@@ -2256,7 +2256,7 @@ void LoopClosing::ResetIfRequested() {
   }
 }
 
-void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap, unsigned long nLoopKF) {
+void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap, KeyFrameID nLoopKF) {
   _logger->info("Starting global bundle adjustment...");
 
 #ifdef REGISTER_TIMES
