@@ -40,6 +40,12 @@ class GeometricCamera {
   }
 
 public:
+  // Camera types.
+  enum class Type {
+    Pinhole = 0,
+    Fisheye = 1,
+  };
+
   GeometricCamera() {
   }
   GeometricCamera(const std::vector<float>& _vParameters) : mvParameters(_vParameters) {
@@ -111,12 +117,9 @@ public:
     return mnId;
   }
 
-  unsigned int GetType() {
+  Type GetType() {
     return mnType;
   }
-
-  const static unsigned int CAM_PINHOLE = 0;
-  const static unsigned int CAM_FISHEYE = 1;
 
   static CameraID nNextId;
 
@@ -125,7 +128,7 @@ protected:
 
   CameraID mnId;
 
-  unsigned int mnType;
+  Type mnType;
 };
 } // namespace ORB_SLAM3
 

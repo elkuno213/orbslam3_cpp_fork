@@ -30,20 +30,20 @@ namespace ORB_SLAM3 {
 KannalaBrandt8::KannalaBrandt8() : precision(1e-6) {
   mvParameters.resize(8);
   mnId   = nNextId++;
-  mnType = CAM_FISHEYE;
+  mnType = Type::Fisheye;
 }
 KannalaBrandt8::KannalaBrandt8(const std::vector<float> _vParameters)
   : GeometricCamera(_vParameters), precision(1e-6), mvLappingArea(2, 0), tvr(nullptr) {
   assert(mvParameters.size() == 8);
   mnId   = nNextId++;
-  mnType = CAM_FISHEYE;
+  mnType = Type::Fisheye;
 }
 
 KannalaBrandt8::KannalaBrandt8(const std::vector<float> _vParameters, const float _precision)
   : GeometricCamera(_vParameters), precision(_precision), mvLappingArea(2, 0) {
   assert(mvParameters.size() == 8);
   mnId   = nNextId++;
-  mnType = CAM_FISHEYE;
+  mnType = Type::Fisheye;
 }
 KannalaBrandt8::KannalaBrandt8(KannalaBrandt8* pKannala)
   : GeometricCamera(pKannala->mvParameters)
@@ -52,7 +52,7 @@ KannalaBrandt8::KannalaBrandt8(KannalaBrandt8* pKannala)
   , tvr(nullptr) {
   assert(mvParameters.size() == 8);
   mnId   = nNextId++;
-  mnType = CAM_FISHEYE;
+  mnType = Type::Fisheye;
 }
 
 cv::Point2f KannalaBrandt8::project(const cv::Point3f& p3D) {
@@ -475,7 +475,7 @@ void KannalaBrandt8::Triangulate(
 }
 
 bool KannalaBrandt8::IsEqual(GeometricCamera* pCam) {
-  if (pCam->GetType() != GeometricCamera::CAM_FISHEYE) {
+  if (pCam->GetType() != Type::Fisheye) {
     return false;
   }
 

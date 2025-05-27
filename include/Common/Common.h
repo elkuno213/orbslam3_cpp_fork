@@ -15,6 +15,7 @@ enum class TrackingState {
   Lost           = 4,
 };
 
+// Sensor types.
 enum class Sensor {
   Monocular         = 0, // Monocular camera
   Stereo            = 1, // Stereo camera

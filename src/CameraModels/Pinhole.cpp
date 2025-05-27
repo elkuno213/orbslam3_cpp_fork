@@ -31,19 +31,19 @@ CameraID GeometricCamera::nNextId = 0;
 Pinhole::Pinhole() {
   mvParameters.resize(4);
   mnId   = nNextId++;
-  mnType = CAM_PINHOLE;
+  mnType = Type::Pinhole;
 }
 Pinhole::Pinhole(const std::vector<float> _vParameters)
   : GeometricCamera(_vParameters), tvr(nullptr) {
   assert(mvParameters.size() == 4);
   mnId   = nNextId++;
-  mnType = CAM_PINHOLE;
+  mnType = Type::Pinhole;
 }
 
 Pinhole::Pinhole(Pinhole* pPinhole) : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
   assert(mvParameters.size() == 4);
   mnId   = nNextId++;
-  mnType = CAM_PINHOLE;
+  mnType = Type::Pinhole;
 }
 
 Pinhole::~Pinhole() {
@@ -203,7 +203,7 @@ std::istream& operator>>(std::istream& is, Pinhole& ph) {
 }
 
 bool Pinhole::IsEqual(GeometricCamera* pCam) {
-  if (pCam->GetType() != GeometricCamera::CAM_PINHOLE) {
+  if (pCam->GetType() != Type::Pinhole) {
     return false;
   }
 

@@ -112,9 +112,9 @@ Tracking::Tracking(
   std::vector<GeometricCamera*> vpCams = mpAtlas->GetAllCameras();
   _logger->info("There are {} cameras in the atlas", vpCams.size());
   for (GeometricCamera* const camera : vpCams) {
-    if (camera->GetType() == GeometricCamera::CAM_PINHOLE) {
+    if (camera->GetType() == GeometricCamera::Type::Pinhole) {
       _logger->info("Camera {} is pinhole", camera->GetId());
-    } else if (camera->GetType() == GeometricCamera::CAM_FISHEYE) {
+    } else if (camera->GetType() == GeometricCamera::Type::Fisheye) {
       _logger->info("Camera {} is fisheye", camera->GetId());
     } else {
       _logger->info("Camera {} is unknown", camera->GetId());
