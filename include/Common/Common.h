@@ -1,8 +1,19 @@
 #pragma once
 
 #include <cstdint>
+#include <fmt/core.h>
+#include <fmt/format.h>
 
 namespace ORB_SLAM3 {
+
+enum class TrackingState {
+  NotReady       = -1,
+  NoImagesYet    = 0,
+  NotInitialized = 1,
+  Tracking       = 2,
+  RecentlyLost   = 3,
+  Lost           = 4,
+};
 
 enum class Sensor {
   Monocular         = 0, // Monocular camera
@@ -33,3 +44,31 @@ using MapPointID = std::uint32_t;
 using MapID      = std::uint16_t;
 
 } // namespace ORB_SLAM3
+
+template <>
+struct fmt::formatter<ORB_SLAM3::TrackingState> : fmt::formatter<std::string_view> {
+  auto format(ORB_SLAM3::TrackingState s, format_context& ctx) const {
+    std::string_view name = "Unknown";
+    switch (s) {
+      case ORB_SLAM3::TrackingState::NotReady:
+        name = "NotReady";
+        break;
+      case ORB_SLAM3::TrackingState::NoImagesYet:
+        name = "NoImagesYet";
+        break;
+      case ORB_SLAM3::TrackingState::NotInitialized:
+        name = "NotInitialized";
+        break;
+      case ORB_SLAM3::TrackingState::Tracking:
+        name = "Tracking";
+        break;
+      case ORB_SLAM3::TrackingState::RecentlyLost:
+        name = "RecentlyLost";
+        break;
+      case ORB_SLAM3::TrackingState::Lost:
+        name = "Lost";
+        break;
+    }
+    return formatter<std::string_view>::format(name, ctx);
+  }
+};

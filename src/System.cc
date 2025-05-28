@@ -1357,7 +1357,7 @@ void System::SaveDebugData(const int& initIdx) {
   f.close();
 }
 
-int System::GetTrackingState() {
+TrackingState System::GetTrackingState() {
   std::unique_lock<std::mutex> lock(mMutexState);
   return mTrackingState;
 }
@@ -1385,7 +1385,7 @@ bool System::isLost() {
   if (!mpAtlas->isImuInitialized()) {
     return false;
   } else {
-    if ((mpTracker->mState == Tracking::LOST)) { //||(mpTracker->mState==Tracking::RECENTLY_LOST))
+    if (mpTracker->mState == TrackingState::Lost) {
       return true;
     } else {
       return false;

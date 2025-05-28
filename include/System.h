@@ -152,7 +152,7 @@ public:
 
   // Information from most recent processed frame
   // You can call this right after TrackMonocular (or stereo or RGBD)
-  int                       GetTrackingState();
+  TrackingState             GetTrackingState();
   std::vector<MapPoint*>    GetTrackedMapPoints();
   std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
@@ -228,7 +228,7 @@ private:
   bool mbShutDown;
 
   // Tracking state
-  int                       mTrackingState;
+  TrackingState             mTrackingState;
   std::vector<MapPoint*>    mTrackedMapPoints;
   std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
   std::mutex                mMutexState;
