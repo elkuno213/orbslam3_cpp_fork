@@ -31,7 +31,6 @@
 #include <spdlog/spdlog.h>
 #include "Common/Common.h"
 #include "ImuTypes.h"
-#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 

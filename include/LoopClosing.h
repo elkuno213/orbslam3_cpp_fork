@@ -34,7 +34,6 @@
 #include <opencv2/core.hpp>
 #include <spdlog/logger.h>
 #include "Common/Common.h"
-#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 

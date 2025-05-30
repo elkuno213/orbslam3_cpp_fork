@@ -29,7 +29,6 @@
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/vector.hpp>
 #include "Common/Common.h"
-#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 

@@ -33,7 +33,6 @@
 #include "Common/Common.h"
 #include "Frame.h"
 #include "ImuTypes.h"
-#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 

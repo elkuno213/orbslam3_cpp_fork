@@ -2,10 +2,10 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include "Atlas.h"
+#include "Common/Common.h"
 #include "FrameDrawer.h"
 #include "KeyFrameDatabase.h"
 #include "MapDrawer.h"
-#include "ORBVocabulary.h"
 #include "System.h"
 
 using namespace ORB_SLAM3;

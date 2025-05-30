@@ -31,7 +31,6 @@
 #include <spdlog/logger.h>
 #include "Common/Common.h"
 #include "ImuTypes.h"
-#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 #define FRAME_GRID_ROWS 48

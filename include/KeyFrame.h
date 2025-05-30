@@ -37,7 +37,6 @@
 #include <spdlog/logger.h>
 #include "Common/Common.h"
 #include "ImuTypes.h"
-#include "ORBVocabulary.h"
 #include "SerializationUtils.h"
 
 namespace ORB_SLAM3 {

@@ -33,7 +33,6 @@
 #include <sophus/se3.hpp>
 #include <spdlog/logger.h>
 #include "Common/Common.h"
-#include "ORBVocabulary.h"
 
 namespace ORB_SLAM3 {
 

@@ -29,13 +29,13 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 #include <spdlog/spdlog.h>
+#include "Common/Common.h"
 #include "Frame.h"
 #include "GeometricCamera.h"
 #include "KannalaBrandt8.h"
 #include "KeyFrame.h"
 #include "Map.h"
 #include "MapPoint.h"
-#include "ORBVocabulary.h"
 #include "Pinhole.h"
 
 namespace ORB_SLAM3 {

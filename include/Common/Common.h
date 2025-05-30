@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <Thirdparty/DBoW2/DBoW2/FORB.h>
+#include <Thirdparty/DBoW2/DBoW2/TemplatedVocabulary.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
 
@@ -43,6 +45,9 @@ using FrameID    = std::uint64_t;
 using KeyFrameID = std::uint32_t;
 using MapPointID = std::uint32_t;
 using MapID      = std::uint16_t;
+
+// Vocabulary type from DBoW2.
+using ORBVocabulary = DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB>;
 
 } // namespace ORB_SLAM3
 
