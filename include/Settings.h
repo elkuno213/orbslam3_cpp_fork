@@ -42,10 +42,10 @@ public:
   /*
    * Enum for the different camera types implemented
    */
-  enum CameraType {
+  enum class CameraType {
     PinHole       = 0,
     Rectified     = 1,
-    KannalaBrandt = 2
+    KannalaBrandt = 2,
   };
 
   /*

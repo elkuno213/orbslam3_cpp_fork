@@ -538,7 +538,7 @@ void Tracking::newParameterLoader(Settings* settings) {
   mK_(0, 2) = mpCamera->getParameter(2);
   mK_(1, 2) = mpCamera->getParameter(3);
 
-  if ((IsStereoBased(mSensor) || mSensor == Sensor::InertialRGBD) && settings->cameraType() == Settings::KannalaBrandt) {
+  if ((IsStereoBased(mSensor) || mSensor == Sensor::InertialRGBD) && settings->cameraType() == Settings::CameraType::KannalaBrandt) {
     mpCamera2 = settings->camera2();
     mpCamera2 = mpAtlas->AddCamera(mpCamera2);
 
