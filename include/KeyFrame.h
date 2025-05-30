@@ -329,8 +329,8 @@ public:
   KeyFrameID mnBALocalForKF;
   KeyFrameID mnBAFixedForKF;
 
-  // Number of optimizations by BA(amount of iterations in BA)
-  long unsigned int mnNumberOfOpt;
+  // Number of optimizations by BA (amount of iterations in BA)
+  std::size_t mnNumberOfOpt;
 
   // Variables used by the keyframe database
   KeyFrameID mnLoopQuery;
@@ -357,16 +357,16 @@ public:
   KeyFrameID      mnBAGlobalForKF;
 
   // Variables used by merging
-  Sophus::SE3f      mTcwMerge;
-  Sophus::SE3f      mTcwBefMerge;
-  Sophus::SE3f      mTwcBefMerge;
-  Eigen::Vector3f   mVwbMerge;
-  Eigen::Vector3f   mVwbBefMerge;
-  IMU::Bias         mBiasMerge;
-  KeyFrameID        mnMergeCorrectedForKF;
-  long unsigned int mnMergeForKF;
-  float             mfScaleMerge;
-  KeyFrameID        mnBALocalForMerge;
+  Sophus::SE3f    mTcwMerge;
+  Sophus::SE3f    mTcwBefMerge;
+  Sophus::SE3f    mTwcBefMerge;
+  Eigen::Vector3f mVwbMerge;
+  Eigen::Vector3f mVwbBefMerge;
+  IMU::Bias       mBiasMerge;
+  KeyFrameID      mnMergeCorrectedForKF;
+  std::size_t     mnMergeForKF;
+  float           mfScaleMerge;
+  KeyFrameID      mnBALocalForMerge;
 
   float mfScale;
 

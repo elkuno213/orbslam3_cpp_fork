@@ -166,12 +166,12 @@ std::vector<MapPoint*> Map::GetAllMapPoints() {
   return std::vector<MapPoint*>(mspMapPoints.begin(), mspMapPoints.end());
 }
 
-long unsigned int Map::MapPointsInMap() {
+std::size_t Map::MapPointsInMap() {
   std::unique_lock<std::mutex> lock(mMutexMap);
   return mspMapPoints.size();
 }
 
-long unsigned int Map::KeyFramesInMap() {
+std::size_t Map::KeyFramesInMap() {
   std::unique_lock<std::mutex> lock(mMutexMap);
   return mspKeyFrames.size();
 }

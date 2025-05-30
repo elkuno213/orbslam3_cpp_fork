@@ -155,12 +155,12 @@ int Atlas::GetLastBigChangeIdx() {
   return mpCurrentMap->GetLastBigChangeIdx();
 }
 
-long unsigned int Atlas::MapPointsInMap() {
+std::size_t Atlas::MapPointsInMap() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
   return mpCurrentMap->MapPointsInMap();
 }
 
-long unsigned Atlas::KeyFramesInMap() {
+std::size_t Atlas::KeyFramesInMap() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
   return mpCurrentMap->KeyFramesInMap();
 }
@@ -192,7 +192,7 @@ std::vector<Map*> Atlas::GetAllMaps() {
   return vMaps;
 }
 
-int Atlas::CountMaps() {
+std::size_t Atlas::CountMaps() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
   return mspMaps.size();
 }
@@ -300,7 +300,7 @@ void Atlas::PostLoad() {
   }
 
   mspMaps.clear();
-  unsigned long int numKF = 0, numMP = 0;
+  std::size_t numKF = 0, numMP = 0;
   for (Map* const map : mvpBackupMaps) {
     mspMaps.insert(map);
     map->PostLoad(mpKeyFrameDB, mpORBVocabulary, mpCams);
@@ -326,7 +326,7 @@ ORBVocabulary* Atlas::GetORBVocabulary() {
   return mpORBVocabulary;
 }
 
-long unsigned int Atlas::GetNumLivedKF() {
+std::size_t Atlas::GetNumLivedKF() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
 
   // Return the total number of keyframes across all maps in atlas.
@@ -341,7 +341,7 @@ long unsigned int Atlas::GetNumLivedKF() {
   );
 }
 
-long unsigned int Atlas::GetNumLivedMP() {
+std::size_t Atlas::GetNumLivedMP() {
   std::unique_lock<std::mutex> lock(mMutexAtlas);
 
   // Return the total number of mappoints across all maps in atlas.

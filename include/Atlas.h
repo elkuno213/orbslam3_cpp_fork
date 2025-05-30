@@ -94,8 +94,8 @@ public:
   void InformNewBigChange();
   int  GetLastBigChangeIdx();
 
-  long unsigned int MapPointsInMap();
-  long unsigned     KeyFramesInMap();
+  std::size_t MapPointsInMap();
+  std::size_t KeyFramesInMap();
 
   // Method for get data in current map
   std::vector<KeyFrame*> GetAllKeyFrames();
@@ -104,7 +104,7 @@ public:
 
   std::vector<Map*> GetAllMaps();
 
-  int CountMaps();
+  std::size_t CountMaps();
 
   void clearMap();
 
@@ -132,9 +132,8 @@ public:
   void           SetORBVocabulary(ORBVocabulary* pORBVoc);
   ORBVocabulary* GetORBVocabulary();
 
-  long unsigned int GetNumLivedKF();
-
-  long unsigned int GetNumLivedMP();
+  std::size_t GetNumLivedKF();
+  std::size_t GetNumLivedMP();
 
 protected:
   std::set<Map*> mspMaps;
