@@ -5048,7 +5048,7 @@ void Optimizer::OptimizeEssentialGraph4DoF(
   const LoopClosing::KeyFrameAndPose&             CorrectedSim3,
   const std::map<KeyFrame*, std::set<KeyFrame*>>& LoopConnections
 ) {
-  typedef g2o::BlockSolver<g2o::BlockSolverTraits<4, 4>> BlockSolver_4_4;
+  using BlockSolver_4_4 = g2o::BlockSolver<g2o::BlockSolverTraits<4, 4>>;
 
   // Setup optimizer
   g2o::SparseOptimizer optimizer;
