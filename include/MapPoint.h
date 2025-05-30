@@ -98,7 +98,6 @@ class MapPoint {
   }
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   MapPoint();
 
   MapPoint(const Eigen::Vector3f& Pos, KeyFrame* pRefKF, Map* pMap);

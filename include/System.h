@@ -54,7 +54,6 @@ public:
   };
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
   System(
     const std::string& strVocFile,

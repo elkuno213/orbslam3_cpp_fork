@@ -69,8 +69,6 @@ class Atlas {
   }
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
   Atlas();
   Atlas(KeyFrameID initKFid); // When its initialization the first map is created
   ~Atlas();

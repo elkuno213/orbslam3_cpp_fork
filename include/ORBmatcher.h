@@ -146,7 +146,6 @@ public:
   static const int TH_LOW;
   static const int TH_HIGH;
   static const int HISTO_LENGTH;
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 protected:
   float RadiusByViewingCos(const float& viewCos);

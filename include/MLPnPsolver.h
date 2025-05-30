@@ -63,8 +63,6 @@ class MapPoint;
 
 class MLPnPsolver {
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
   MLPnPsolver(const Frame& F, const std::vector<MapPoint*>& vpMapPointMatches);
 
   ~MLPnPsolver();

@@ -33,7 +33,6 @@ class MapPoint;
 
 class Sim3Solver {
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Sim3Solver(
     KeyFrame*                     pKF1,
     KeyFrame*                     pKF2,

@@ -51,7 +51,6 @@ class Viewer;
 
 class Tracking {
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Tracking(
     System*            pSys,
     ORBVocabulary*     pVoc,

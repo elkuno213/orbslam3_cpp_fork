@@ -38,7 +38,6 @@ class Settings;
 
 class MapDrawer {
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   MapDrawer(Atlas* pAtlas, const std::string& strSettingPath, Settings* settings);
 
   void newParameterLoader(Settings* settings);

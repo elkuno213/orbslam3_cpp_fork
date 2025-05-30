@@ -71,7 +71,6 @@ class Map {
   }
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Map();
   Map(KeyFrameID initKFid);
   ~Map();
