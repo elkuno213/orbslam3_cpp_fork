@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
     int     width_img, height_img;
     double  timestamp_image = -1.0;
     bool    image_ready     = false;
-    int     count_im_buffer = 0; // count dropped frames
+    std::size_t     count_im_buffer = 0; // count dropped frames
 
     auto imu_callback = [&](const rs2::frame& frame) {
       std::unique_lock<std::mutex> lock(imu_mutex);

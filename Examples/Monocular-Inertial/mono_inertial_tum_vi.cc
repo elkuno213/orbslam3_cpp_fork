@@ -69,17 +69,17 @@ int main(int argc, char** argv) {
 
   // Run.
   try {
-    const int num_seq = sequences.size() / 3;
+    const std::size_t num_seq = sequences.size() / 3;
 
     // Load all sequences:
-    int                              seq;
+    std::size_t                              seq;
     std::vector<vector<std::string>> vstrImageFilenames;
     std::vector<vector<double>>      vTimestampsCam;
     std::vector<vector<cv::Point3f>> vAcc, vGyro;
     std::vector<vector<double>>      vTimestampsImu;
-    std::vector<int>                 nImages;
-    std::vector<int>                 nImu;
-    std::vector<int>                 first_imu(num_seq, 0);
+    std::vector<std::size_t>                 nImages;
+    std::vector<std::size_t>                 nImu;
+    std::vector<std::size_t>                 first_imu(num_seq, 0);
 
     vstrImageFilenames.resize(num_seq);
     vTimestampsCam.resize(num_seq);
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
     nImages.resize(num_seq);
     nImu.resize(num_seq);
 
-    int tot_images = 0;
+    std::size_t tot_images = 0;
     for (seq = 0; seq < num_seq; seq++) {
       std::string pathSeq        = sequences[3 * seq];
       std::string pathTimeStamps = sequences[3 * seq + 1];
@@ -148,14 +148,14 @@ int main(int argc, char** argv) {
     double t_resize = 0.f;
     double t_track  = 0.f;
 
-    int proccIm = 0;
+    std::size_t proccIm = 0;
     for (seq = 0; seq < num_seq; seq++) {
       // Main loop
       cv::Mat                            im;
       std::vector<ORB_SLAM3::IMU::Point> vImuMeas;
       proccIm                  = 0;
       cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
-      for (int ni = 0; ni < nImages[seq]; ni++, proccIm++) {
+      for (std::size_t ni = 0; ni < nImages[seq]; ni++, proccIm++) {
         // Read image from file
         im
           = cv::imread(vstrImageFilenames[seq][ni], cv::IMREAD_GRAYSCALE); //,cv::IMREAD_GRAYSCALE);
@@ -261,7 +261,7 @@ int main(int argc, char** argv) {
 
     std::sort(vTimesTrack.begin(), vTimesTrack.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages[0]; ni++) {
+    for (std::size_t ni = 0; ni < nImages[0]; ni++) {
       totaltime += vTimesTrack[ni];
     }
     spdlog::info("median tracking time: {}", vTimesTrack[nImages[0] / 2]);

@@ -233,12 +233,12 @@ int main(int argc, char** argv) {
     // assert(vAccel.size() == vAccel_times.size());
     // assert(vGyro.size() == vGyro_times.size());
 
-    for (int i = 0; i < vAccel.size(); ++i) {
+    for (std::size_t i = 0; i < vAccel.size(); ++i) {
       accFile << std::setprecision(15) << vAccel_times[i] << "," << vAccel[i].x << ","
               << vAccel[i].y << "," << vAccel[i].z << std::endl;
     }
 
-    for (int i = 0; i < vGyro.size(); ++i) {
+    for (std::size_t i = 0; i < vGyro.size(); ++i) {
       gyroFile << std::setprecision(15) << vGyro_times[i] << "," << vGyro[i].x << "," << vGyro[i].y
                << "," << vGyro[i].z << std::endl;
     }

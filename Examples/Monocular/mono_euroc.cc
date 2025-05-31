@@ -65,10 +65,10 @@ int main(int argc, char** argv) {
 
   // Run.
   try {
-    const int num_seq = sequences.size() / 2;
+    const std::size_t num_seq = sequences.size() / 2;
 
     // Load all sequences:
-    int                              seq;
+    std::size_t                              seq;
     std::vector<vector<std::string>> vstrImageFilenames;
     std::vector<vector<double>>      vTimestampsCam;
     std::vector<int>                 nImages;
