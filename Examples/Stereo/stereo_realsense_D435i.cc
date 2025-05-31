@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     }
 
     std::vector<rs2::sensor> sensors = selected_device.query_sensors();
-    int                      index   = 0;
+    std::size_t              index   = 0;
     // We can now iterate the sensors and print their names
     for (rs2::sensor sensor : sensors) {
       if (sensor.supports(RS2_CAMERA_INFO_NAME)) {
@@ -124,11 +124,11 @@ int main(int argc, char** argv) {
     std::mutex              imu_mutex;
     std::condition_variable cond_image_rec;
 
-    cv::Mat imCV, imRightCV;
-    int     width_img, height_img;
-    double  timestamp_image = -1.0;
-    bool    image_ready     = false;
-    int     count_im_buffer = 0; // count dropped frames
+    cv::Mat     imCV, imRightCV;
+    int         width_img, height_img;
+    double      timestamp_image = -1.0;
+    bool        image_ready     = false;
+    std::size_t count_im_buffer = 0; // count dropped frames
 
     auto imu_callback = [&](const rs2::frame& frame) {
       std::unique_lock<std::mutex> lock(imu_mutex);

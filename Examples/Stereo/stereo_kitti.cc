@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     std::vector<double>      vTimestamps;
     ORB_SLAM3::KITTI::LoadStereoImages(sequence_dir, vstrImageLeft, vstrImageRight, vTimestamps);
 
-    const int nImages = vstrImageLeft.size();
+    const std::size_t nImages = vstrImageLeft.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::Sensor::Stereo, true);
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
     // Main loop
     cv::Mat imLeft, imRight;
-    for (int ni = 0; ni < nImages; ni++) {
+    for (std::size_t ni = 0; ni < nImages; ni++) {
       // Read left and right images from file
       imLeft  = cv::imread(vstrImageLeft[ni], cv::IMREAD_UNCHANGED);  //,cv::IMREAD_UNCHANGED);
       imRight = cv::imread(vstrImageRight[ni], cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
     // Tracking time statistics
     std::sort(vTimesTrack.begin(), vTimesTrack.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages; ni++) {
+    for (std::size_t ni = 0; ni < nImages; ni++) {
       totaltime += vTimesTrack[ni];
     }
     spdlog::info("median tracking time: {}", vTimesTrack[nImages / 2]);

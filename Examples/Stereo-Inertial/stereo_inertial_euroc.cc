@@ -66,18 +66,18 @@ int main(int argc, char** argv) {
 
   // Run.
   try {
-    const int num_seq = sequences.size() / 2;
+    const std::size_t num_seq = sequences.size() / 2;
 
     // Load all sequences:
-    int                              seq;
+    std::size_t                      seq;
     std::vector<vector<std::string>> vstrImageLeft;
     std::vector<vector<std::string>> vstrImageRight;
     std::vector<vector<double>>      vTimestampsCam;
     std::vector<vector<cv::Point3f>> vAcc, vGyro;
     std::vector<vector<double>>      vTimestampsImu;
-    std::vector<int>                 nImages;
-    std::vector<int>                 nImu;
-    std::vector<int>                 first_imu(num_seq, 0);
+    std::vector<std::size_t>         nImages;
+    std::vector<std::size_t>         nImu;
+    std::vector<std::size_t>         first_imu(num_seq, 0);
 
     vstrImageLeft.resize(num_seq);
     vstrImageRight.resize(num_seq);
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
     nImages.resize(num_seq);
     nImu.resize(num_seq);
 
-    int tot_images = 0;
+    std::size_t tot_images = 0;
     for (seq = 0; seq < num_seq; seq++) {
       std::string pathSeq        = sequences[2 * seq];
       std::string pathTimeStamps = sequences[2 * seq + 1];
@@ -112,9 +112,9 @@ int main(int argc, char** argv) {
       ORB_SLAM3::EuRoC::LoadIMU(pathImu, vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
       spdlog::info("IMU data loaded!");
 
-      nImages[seq] = vstrImageLeft[seq].size();
+      nImages[seq]  = vstrImageLeft[seq].size();
       tot_images   += nImages[seq];
-      nImu[seq]    = vTimestampsImu[seq].size();
+      nImu[seq]     = vTimestampsImu[seq].size();
 
       if ((nImages[seq] <= 0) || (nImu[seq] <= 0)) {
         spdlog::error("Failed to load images or IMU for sequence {}", seq);
@@ -151,9 +151,9 @@ int main(int argc, char** argv) {
       double                             t_rect   = 0.f;
       double                             t_resize = 0.f;
       double                             t_track  = 0.f;
-      int                                num_rect = 0;
-      int                                proccIm  = 0;
-      for (int ni = 0; ni < nImages[seq]; ni++, proccIm++) {
+      std::size_t                        num_rect = 0;
+      std::size_t                        proccIm  = 0;
+      for (std::size_t ni = 0; ni < nImages[seq]; ni++, proccIm++) {
         // Read left and right images from file
         imLeft  = cv::imread(vstrImageLeft[seq][ni], cv::IMREAD_UNCHANGED);
         imRight = cv::imread(vstrImageRight[seq][ni], cv::IMREAD_UNCHANGED);

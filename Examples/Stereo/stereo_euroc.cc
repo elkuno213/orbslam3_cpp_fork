@@ -63,21 +63,21 @@ int main(int argc, char** argv) {
   }
 
   try {
-    const int num_seq = sequences.size() / 2;
+    const std::size_t num_seq = sequences.size() / 2;
 
     // Load all sequences:
-    int                              seq;
+    std::size_t                      seq;
     std::vector<vector<std::string>> vstrImageLeft;
     std::vector<vector<std::string>> vstrImageRight;
     std::vector<vector<double>>      vTimestampsCam;
-    std::vector<int>                 nImages;
+    std::vector<std::size_t>         nImages;
 
     vstrImageLeft.resize(num_seq);
     vstrImageRight.resize(num_seq);
     vTimestampsCam.resize(num_seq);
     nImages.resize(num_seq);
 
-    int tot_images = 0;
+    std::size_t tot_images = 0;
     for (seq = 0; seq < num_seq; seq++) {
       std::string pathSeq        = sequences[2 * seq];
       std::string pathTimeStamps = sequences[2 * seq + 1];
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
       );
       spdlog::info("Images loaded!");
 
-      nImages[seq] = vstrImageLeft[seq].size();
+      nImages[seq]  = vstrImageLeft[seq].size();
       tot_images   += nImages[seq];
     }
 
@@ -110,12 +110,12 @@ int main(int argc, char** argv) {
     cv::Mat imLeft, imRight;
     for (seq = 0; seq < num_seq; seq++) {
       // Seq loop
-      double t_resize = 0;
-      double t_rect   = 0;
-      double t_track  = 0;
-      int    num_rect = 0;
-      int    proccIm  = 0;
-      for (int ni = 0; ni < nImages[seq]; ni++, proccIm++) {
+      double      t_resize = 0;
+      double      t_rect   = 0;
+      double      t_track  = 0;
+      std::size_t num_rect = 0;
+      std::size_t proccIm  = 0;
+      for (std::size_t ni = 0; ni < nImages[seq]; ni++, proccIm++) {
         // Read left and right images from file
         imLeft = cv::imread(vstrImageLeft[seq][ni], cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
         imRight

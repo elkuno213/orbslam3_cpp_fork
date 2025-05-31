@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     }
 
     std::vector<rs2::sensor> sensors = selected_device.query_sensors();
-    int                      index   = 0;
+    std::size_t              index   = 0;
     // We can now iterate the sensors and print their names
     for (rs2::sensor sensor : sensors) {
       if (sensor.supports(RS2_CAMERA_INFO_NAME)) {
@@ -152,11 +152,11 @@ int main(int argc, char** argv) {
     std::vector<double>     v_accel_timestamp_sync;
     std::vector<rs2_vector> v_accel_data_sync;
 
-    cv::Mat imCV, depthCV;
-    int     width_img, height_img;
-    double  timestamp_image = -1.0;
-    bool    image_ready     = false;
-    int     count_im_buffer = 0; // count dropped frames
+    cv::Mat     imCV, depthCV;
+    int         width_img, height_img;
+    double      timestamp_image = -1.0;
+    bool        image_ready     = false;
+    std::size_t count_im_buffer = 0; // count dropped frames
 
     // start and stop just to get necessary profile
     rs2::pipeline_profile pipe_profile = pipe.start(cfg);
@@ -204,8 +204,8 @@ int main(int argc, char** argv) {
         image_ready     = true;
 
         while (v_gyro_timestamp.size() > v_accel_timestamp_sync.size()) {
-          int    index       = v_accel_timestamp_sync.size();
-          double target_time = v_gyro_timestamp[index];
+          std::size_t index       = v_accel_timestamp_sync.size();
+          double      target_time = v_gyro_timestamp[index];
 
           v_accel_data_sync.push_back(current_accel_data);
           v_accel_timestamp_sync.push_back(target_time);
@@ -227,8 +227,8 @@ int main(int argc, char** argv) {
           current_accel_timestamp = (m_frame.get_timestamp() + offset) * 1e-3;
 
           while (v_gyro_timestamp.size() > v_accel_timestamp_sync.size()) {
-            int    index       = v_accel_timestamp_sync.size();
-            double target_time = v_gyro_timestamp[index];
+            std::size_t index       = v_accel_timestamp_sync.size();
+            double      target_time = v_gyro_timestamp[index];
 
             rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
               target_time,
@@ -323,8 +323,8 @@ int main(int argc, char** argv) {
         count_im_buffer = 0;
 
         while (v_gyro_timestamp.size() > v_accel_timestamp_sync.size()) {
-          int    index       = v_accel_timestamp_sync.size();
-          double target_time = v_gyro_timestamp[index];
+          std::size_t index       = v_accel_timestamp_sync.size();
+          double      target_time = v_gyro_timestamp[index];
 
           rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
             target_time,
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
       depthCV.convertTo(depthCV_8U,CV_8U,0.01);
       cv::imshow("depth image", depthCV_8U);*/
 
-      for (int i = 0; i < vGyro.size(); ++i) {
+      for (std::size_t i = 0; i < vGyro.size(); ++i) {
         ORB_SLAM3::IMU::Point lastPoint(
           vAccel[i].x,
           vAccel[i].y,

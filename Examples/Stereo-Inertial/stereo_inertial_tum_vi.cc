@@ -68,18 +68,18 @@ int main(int argc, char** argv) {
   }
   // Run.
   try {
-    const int num_seq = sequences.size() / 4;
+    const std::size_t num_seq = sequences.size() / 4;
 
     // Load all sequences:
-    int                              seq;
+    std::size_t                      seq;
     std::vector<vector<std::string>> vstrImageLeftFilenames;
     std::vector<vector<std::string>> vstrImageRightFilenames;
     std::vector<vector<double>>      vTimestampsCam;
     std::vector<vector<cv::Point3f>> vAcc, vGyro;
     std::vector<vector<double>>      vTimestampsImu;
-    std::vector<int>                 nImages;
-    std::vector<int>                 nImu;
-    std::vector<int>                 first_imu(num_seq, 0);
+    std::vector<std::size_t>         nImages;
+    std::vector<std::size_t>         nImu;
+    std::vector<std::size_t>         first_imu(num_seq, 0);
 
     vstrImageLeftFilenames.resize(num_seq);
     vstrImageRightFilenames.resize(num_seq);
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
     nImages.resize(num_seq);
     nImu.resize(num_seq);
 
-    int tot_images = 0;
+    std::size_t tot_images = 0;
     for (seq = 0; seq < num_seq; seq++) {
       std::string pathSeqLeft    = sequences[4 * seq];
       std::string pathSeqRight   = sequences[4 * seq + 1];
@@ -117,9 +117,9 @@ int main(int argc, char** argv) {
       spdlog::info("first IMU ts: {}", vTimestampsImu[seq][0]);
       spdlog::info("IMU data loaded!");
 
-      nImages[seq] = vstrImageLeftFilenames[seq].size();
+      nImages[seq]  = vstrImageLeftFilenames[seq].size();
       tot_images   += nImages[seq];
-      nImu[seq]    = vTimestampsImu[seq].size();
+      nImu[seq]     = vTimestampsImu[seq].size();
 
       if ((nImages[seq] <= 0) || (nImu[seq] <= 0)) {
         spdlog::error("Failed to load images or IMU for sequence {}", seq);
@@ -146,14 +146,14 @@ int main(int argc, char** argv) {
     double t_resize = 0.f;
     double t_track  = 0.f;
 
-    int proccIm = 0;
+    std::size_t proccIm = 0;
     for (seq = 0; seq < num_seq; seq++) {
       // Main loop
       cv::Mat                            imLeft, imRight;
       std::vector<ORB_SLAM3::IMU::Point> vImuMeas;
       proccIm                  = 0;
       cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
-      for (int ni = 0; ni < nImages[seq]; ni++, proccIm++) {
+      for (std::size_t ni = 0; ni < nImages[seq]; ni++, proccIm++) {
         // Read image from file
         imLeft  = cv::imread(vstrImageLeftFilenames[seq][ni], cv::IMREAD_GRAYSCALE);
         imRight = cv::imread(vstrImageRightFilenames[seq][ni], cv::IMREAD_GRAYSCALE);
@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
         SLAM.InsertTrackTime(t_track);
 #endif
 
-        double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
+        double ttrack  = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
         ttrack_tot    += ttrack;
 
         vTimesTrack[ni] = ttrack;
@@ -262,7 +262,7 @@ int main(int argc, char** argv) {
 
     std::sort(vTimesTrack.begin(), vTimesTrack.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages[0]; ni++) {
+    for (std::size_t ni = 0; ni < nImages[0]; ni++) {
       totaltime += vTimesTrack[ni];
     }
     spdlog::info("median tracking time: {}", vTimesTrack[nImages[0] / 2]);

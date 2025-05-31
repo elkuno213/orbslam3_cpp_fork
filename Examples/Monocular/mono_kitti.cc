@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     std::vector<double>      vTimestamps;
     ORB_SLAM3::KITTI::LoadMonocularImages(sequence_dir, vstrImageFilenames, vTimestamps);
 
-    int nImages = vstrImageFilenames.size();
+    std::size_t nImages = vstrImageFilenames.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::System SLAM(vocabulary_file, settings_file, ORB_SLAM3::Sensor::Monocular, true);
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
     double t_track  = 0.f;
 
     cv::Mat im;
-    for (int ni = 0; ni < nImages; ni++) {
+    for (std::size_t ni = 0; ni < nImages; ni++) {
       // Read image from file
       im = cv::imread(vstrImageFilenames[ni], cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
       double tframe = vTimestamps[ni];
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
     // Tracking time statistics
     std::sort(vTimesTrack.begin(), vTimesTrack.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages; ni++) {
+    for (std::size_t ni = 0; ni < nImages; ni++) {
       totaltime += vTimesTrack[ni];
     }
     spdlog::info("median tracking time: {}", vTimesTrack[nImages / 2]);

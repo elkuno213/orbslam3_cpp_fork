@@ -68,21 +68,21 @@ int main(int argc, char** argv) {
 
   // Run.
   try {
-    const int num_seq = sequences.size() / 3;
+    const std::size_t num_seq = sequences.size() / 3;
 
     // Load all sequences:
-    int                              seq;
+    std::size_t                      seq;
     std::vector<vector<std::string>> vstrImageLeftFilenames;
     std::vector<vector<std::string>> vstrImageRightFilenames;
     std::vector<vector<double>>      vTimestampsCam;
-    std::vector<int>                 nImages;
+    std::vector<std::size_t>         nImages;
 
     vstrImageLeftFilenames.resize(num_seq);
     vstrImageRightFilenames.resize(num_seq);
     vTimestampsCam.resize(num_seq);
     nImages.resize(num_seq);
 
-    int tot_images = 0;
+    std::size_t tot_images = 0;
     for (seq = 0; seq < num_seq; seq++) {
       std::string pathSeqLeft    = sequences[3 * seq];
       std::string pathSeqRight   = sequences[3 * seq + 1];
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
       spdlog::info("first cam ts: {}", vTimestampsCam[seq][0]);
       spdlog::info("Images loaded!");
 
-      nImages[seq] = vstrImageLeftFilenames[seq].size();
+      nImages[seq]  = vstrImageLeftFilenames[seq].size();
       tot_images   += nImages[seq];
 
       if ((nImages[seq] <= 0)) {
@@ -125,11 +125,11 @@ int main(int argc, char** argv) {
     double t_resize = 0.f;
     double t_track  = 0.f;
 
-    int proccIm = 0;
+    std::size_t proccIm = 0;
     for (seq = 0; seq < num_seq; seq++) {
       // Main loop
       proccIm = 0;
-      for (int ni = 0; ni < nImages[seq]; ni++, proccIm++) {
+      for (std::size_t ni = 0; ni < nImages[seq]; ni++, proccIm++) {
         // Read image from file
         imLeft  = cv::imread(vstrImageLeftFilenames[seq][ni], cv::IMREAD_GRAYSCALE);
         imRight = cv::imread(vstrImageRightFilenames[seq][ni], cv::IMREAD_GRAYSCALE);
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
         SLAM.InsertTrackTime(t_track);
 #endif
 
-        double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
+        double ttrack  = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
         ttrack_tot    += ttrack;
 
         vTimesTrack[ni] = ttrack;
@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
 
     std::sort(vTimesTrack.begin(), vTimesTrack.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages[0]; ni++) {
+    for (std::size_t ni = 0; ni < nImages[0]; ni++) {
       totaltime += vTimesTrack[ni];
     }
     spdlog::info("median tracking time: {}", vTimesTrack[nImages[0] / 2]);

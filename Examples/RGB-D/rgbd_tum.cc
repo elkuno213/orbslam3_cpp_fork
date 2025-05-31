@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     );
 
     // Check consistency in the number of images and depthmaps
-    int nImages = vstrImageFilenamesRGB.size();
+    std::size_t nImages = vstrImageFilenamesRGB.size();
     if (vstrImageFilenamesRGB.empty()) {
       spdlog::error("No images found in provided path");
       return 1;
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
     // Main loop
     cv::Mat imRGB, imD;
-    for (int ni = 0; ni < nImages; ni++) {
+    for (std::size_t ni = 0; ni < nImages; ni++) {
       // Read image and depthmap from file
       imRGB = cv::imread(
         sequence_dir + "/" + vstrImageFilenamesRGB[ni],
@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
     // Tracking time statistics
     std::sort(vTimesTrack.begin(), vTimesTrack.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages; ni++) {
+    for (std::size_t ni = 0; ni < nImages; ni++) {
       totaltime += vTimesTrack[ni];
     }
     spdlog::info("median tracking time: {}", vTimesTrack[nImages / 2]);

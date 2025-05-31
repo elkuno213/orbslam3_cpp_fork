@@ -123,11 +123,11 @@ int main(int argc, char** argv) {
     std::mutex              imu_mutex;
     std::condition_variable cond_image_rec;
 
-    cv::Mat imCV;
-    int     width_img, height_img;
-    double  timestamp_image = -1.0;
-    bool    image_ready     = false;
-    int     count_im_buffer = 0; // count dropped frames
+    cv::Mat     imCV;
+    int         width_img, height_img;
+    double      timestamp_image = -1.0;
+    bool        image_ready     = false;
+    std::size_t count_im_buffer = 0; // count dropped frames
 
     auto imu_callback = [&](const rs2::frame& frame) {
       std::unique_lock<std::mutex> lock(imu_mutex);

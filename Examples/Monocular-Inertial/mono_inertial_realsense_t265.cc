@@ -122,11 +122,11 @@ int main(int argc, char** argv) {
     std::vector<double>     v_accel_timestamp_sync;
     std::vector<rs2_vector> v_accel_data_sync;
 
-    cv::Mat imCV, imCV_right;
-    int     width_img, height_img; // width_img = 848, height_img = 800;
-    double  timestamp_image = -1.0;
-    bool    image_ready     = false;
-    int     count_im_buffer = 0; // count dropped frames
+    cv::Mat     imCV, imCV_right;
+    int         width_img, height_img; // width_img = 848, height_img = 800;
+    double      timestamp_image = -1.0;
+    bool        image_ready     = false;
+    std::size_t count_im_buffer = 0; // count dropped frames
 
     auto imu_callback = [&](const rs2::frame& frame) {
       std::unique_lock<std::mutex> lock(imu_mutex);
@@ -154,8 +154,8 @@ int main(int argc, char** argv) {
         image_ready = true;
 
         while (v_gyro_timestamp.size() > v_accel_timestamp_sync.size()) {
-          int    index       = v_accel_timestamp_sync.size();
-          double target_time = v_gyro_timestamp[index];
+          std::size_t index       = v_accel_timestamp_sync.size();
+          double      target_time = v_gyro_timestamp[index];
 
           rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
             target_time,
@@ -184,8 +184,8 @@ int main(int argc, char** argv) {
           current_accel_timestamp = (m_frame.get_timestamp() + offset) * 1e-3;
 
           while (v_gyro_timestamp.size() > v_accel_timestamp_sync.size()) {
-            int    index       = v_accel_timestamp_sync.size();
-            double target_time = v_gyro_timestamp[index];
+            std::size_t index       = v_accel_timestamp_sync.size();
+            double      target_time = v_gyro_timestamp[index];
 
             rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
               target_time,
@@ -275,8 +275,8 @@ int main(int argc, char** argv) {
         count_im_buffer = 0;
 
         while (v_gyro_timestamp.size() > v_accel_timestamp_sync.size()) {
-          int    index       = v_accel_timestamp_sync.size();
-          double target_time = v_gyro_timestamp[index];
+          std::size_t index       = v_accel_timestamp_sync.size();
+          double      target_time = v_gyro_timestamp[index];
 
           rs2_vector interp_data = ORB_SLAM3::RealSense::interpolateMeasure(
             target_time,
@@ -325,7 +325,7 @@ int main(int argc, char** argv) {
         image_ready = false;
       }
 
-      for (int i = 0; i < vGyro.size(); ++i) {
+      for (std::size_t i = 0; i < vGyro.size(); ++i) {
         ORB_SLAM3::IMU::Point lastPoint(
           vAccel[i].x,
           vAccel[i].y,
