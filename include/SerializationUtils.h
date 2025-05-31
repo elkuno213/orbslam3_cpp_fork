@@ -85,10 +85,10 @@ void serializeMatrix(Archive& ar, cv::Mat& mat, const unsigned int version) {
   }
 
   if (continuous) {
-    const unsigned int data_size = rows * cols * mat.elemSize();
-    ar&                boost::serialization::make_array(mat.ptr(), data_size);
+    const std::size_t data_size = rows * cols * mat.elemSize();
+    ar&               boost::serialization::make_array(mat.ptr(), data_size);
   } else {
-    const unsigned int row_size = cols * mat.elemSize();
+    const std::size_t row_size = cols * mat.elemSize();
     for (int i = 0; i < rows; i++) {
       ar& boost::serialization::make_array(mat.ptr(i), row_size);
     }

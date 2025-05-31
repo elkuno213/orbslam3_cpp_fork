@@ -103,7 +103,7 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale) {
 
   // Draw
   if (state == TrackingState::NotInitialized) {
-    for (unsigned int i = 0; i < vMatches.size(); i++) {
+    for (std::size_t i = 0; i < vMatches.size(); i++) {
       if (vMatches[i] >= 0) {
         cv::Point2f pt1, pt2;
         if (imageScale != 1.f) {
@@ -211,7 +211,7 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale) {
 
   // Draw
   if (state == TrackingState::NotInitialized) { // INITIALIZING
-    for (unsigned int i = 0; i < vMatches.size(); i++) {
+    for (std::size_t i = 0; i < vMatches.size(); i++) {
       if (vMatches[i] >= 0) {
         cv::Point2f pt1, pt2;
         if (imageScale != 1.f) {

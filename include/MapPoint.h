@@ -178,12 +178,12 @@ public:
   KeyFrameID mnFuseCandidateForKF;
 
   // Variables used by loop closing
-  long unsigned int mnLoopPointForKF;
-  KeyFrameID        mnCorrectedByKF;
-  KeyFrameID        mnCorrectedReference;
-  Eigen::Vector3f   mPosGBA;
-  KeyFrameID        mnBAGlobalForKF;
-  KeyFrameID        mnBALocalForMerge;
+  std::size_t     mnLoopPointForKF;
+  KeyFrameID      mnCorrectedByKF;
+  KeyFrameID      mnCorrectedReference;
+  Eigen::Vector3f mPosGBA;
+  KeyFrameID      mnBAGlobalForKF;
+  KeyFrameID      mnBALocalForMerge;
 
   // Variable used by merging
   Eigen::Vector3f mPosMerge;

@@ -2578,7 +2578,7 @@ void Optimizer::LocalInertialBA(
     g2o::VertexSBAPointXYZ* vPoint = new g2o::VertexSBAPointXYZ();
     vPoint->setEstimate(mp->GetWorldPos().cast<double>());
 
-    unsigned long id = mp->mnId + iniMPid + 1;
+    unsigned long id = mp->mnId + iniMPid + 1; // TODO(VuHoi): int?
     vPoint->setId(id);
     vPoint->setMarginalized(true);
     optimizer.addVertex(vPoint);
@@ -4066,7 +4066,7 @@ void Optimizer::MergeInertialBA(
     g2o::VertexSBAPointXYZ* vPoint = new g2o::VertexSBAPointXYZ();
     vPoint->setEstimate(mp->GetWorldPos().cast<double>());
 
-    unsigned long id = mp->mnId + iniMPid + 1;
+    unsigned long id = mp->mnId + iniMPid + 1; // TODO(VuHoi): int?
     vPoint->setId(id);
     vPoint->setMarginalized(true);
     optimizer.addVertex(vPoint);

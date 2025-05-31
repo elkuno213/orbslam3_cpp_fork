@@ -95,11 +95,11 @@ public:
   double          mInitTime;
   double          mCostTime;
 
-  unsigned int mInitSect;
-  unsigned int mIdxInit;
-  unsigned int mnKFs;
-  double       mFirstTs;
-  int          mnMatchesInliers;
+  std::size_t mInitSect; // TODO(VuHoi): currently unused
+  std::size_t mIdxInit;
+  std::size_t mnKFs;
+  double      mFirstTs;
+  int         mnMatchesInliers;
 
   // For debugging (erase in normal mode)
   int         mInitFr;

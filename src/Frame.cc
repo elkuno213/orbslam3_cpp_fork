@@ -507,8 +507,8 @@ void Frame::AssignFeaturesToGrid() {
 
   int nReserve = 0.5f * N / (nCells);
 
-  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
-    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++) {
+  for (std::size_t i = 0; i < FRAME_GRID_COLS; i++) {
+    for (std::size_t j = 0; j < FRAME_GRID_ROWS; j++) {
       mGrid[i][j].reserve(nReserve);
       if (Nleft != -1) {
         mGridRight[i][j].reserve(nReserve);
