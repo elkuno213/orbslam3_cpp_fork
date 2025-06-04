@@ -256,7 +256,7 @@ public:
   float mThDepth;
 
   // Number of KeyPoints.
-  int N;
+  std::size_t N;
 
   // Vector of keypoints (original for visualization) and undistorted (actually used by the system).
   // In the stereo case, mvKeysUn is redundant as images must be rectified.
@@ -280,7 +280,7 @@ public:
   // MapPoints associated to keypoints, nullptr if no association.
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
-  int               mnCloseMPs;
+  std::size_t               mnCloseMPs; // TODO(VuHoi): currently unused
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity when projecting
   // MapPoints.
@@ -312,7 +312,7 @@ public:
   KeyFrame* mpReferenceKF = nullptr;
 
   // Scale pyramid info.
-  int                mnScaleLevels;
+  std::size_t                mnScaleLevels;
   float              mfScaleFactor;
   float              mfLogScaleFactor;
   std::vector<float> mvScaleFactors;
@@ -333,7 +333,7 @@ public:
 
   string mNameFile;
 
-  int mnDataset;
+  int mnDataset; // TODO(VuHoi): currently unused
 
 #ifdef REGISTER_TIMES
   double mTimeORB_Ext;

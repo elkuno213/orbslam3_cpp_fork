@@ -423,7 +423,7 @@ int KeyFrame::TrackedMapPoints(const int& minObs) {
 
   int        nPoints   = 0;
   const bool bCheckObs = minObs > 0;
-  for (int i = 0; i < N; i++) {
+  for (std::size_t i = 0; i < N; i++) {
     MapPoint* pMP = mvpMapPoints[i];
     if (pMP) {
       if (!pMP->isBad()) {
@@ -831,7 +831,7 @@ float KeyFrame::ComputeSceneMedianDepth(const int q) {
   vDepths.reserve(N);
   Eigen::Matrix<float, 1, 3> Rcw2 = Rcw.row(2);
   float                      zcw  = tcw(2);
-  for (int i = 0; i < N; i++) {
+  for (std::size_t i = 0; i < N; i++) {
     if (mvpMapPoints[i]) {
       MapPoint*       pMP  = mvpMapPoints[i];
       Eigen::Vector3f x3Dw = pMP->GetWorldPos();
@@ -884,7 +884,7 @@ void KeyFrame::PreSave(
   // Save the id of each MapPoint in this KF, there can be null pointer in the vector
   mvBackupMapPointsId.clear();
   mvBackupMapPointsId.reserve(N);
-  for (int i = 0; i < N; ++i) {
+  for (std::size_t i = 0; i < N; ++i) {
     if (mvpMapPoints[i] && spMP.find(mvpMapPoints[i]) != spMP.end()) { // Checks if the element is
                                                                        // not null
       mvBackupMapPointsId.push_back(mvpMapPoints[i]->mnId);
@@ -976,7 +976,7 @@ void KeyFrame::PostLoad(
   // Each MapPoint sight from this KeyFrame
   mvpMapPoints.clear();
   mvpMapPoints.resize(N);
-  for (int i = 0; i < N; ++i) {
+  for (std::size_t i = 0; i < N; ++i) {
     if (mvBackupMapPointsId[i] != -1) {
       mvpMapPoints[i] = mpMPid[mvBackupMapPointsId[i]];
     } else {

@@ -402,7 +402,7 @@ ExtractorNode::ExtractorNode() : bNoMore(false) {
 }
 
 ORBextractor::ORBextractor(
-  int _nfeatures, float _scaleFactor, int _nlevels, int _iniThFAST, int _minThFAST
+  int _nfeatures, float _scaleFactor, std::size_t _nlevels, int _iniThFAST, int _minThFAST
 )
   : nfeatures(_nfeatures)
   , scaleFactor(_scaleFactor)
@@ -413,14 +413,14 @@ ORBextractor::ORBextractor(
   mvLevelSigma2.resize(nlevels);
   mvScaleFactor[0] = 1.0f;
   mvLevelSigma2[0] = 1.0f;
-  for (int i = 1; i < nlevels; i++) {
+  for (std::size_t i = 1; i < nlevels; i++) {
     mvScaleFactor[i] = mvScaleFactor[i - 1] * scaleFactor;
     mvLevelSigma2[i] = mvScaleFactor[i] * mvScaleFactor[i];
   }
 
   mvInvScaleFactor.resize(nlevels);
   mvInvLevelSigma2.resize(nlevels);
-  for (int i = 0; i < nlevels; i++) {
+  for (std::size_t i = 0; i < nlevels; i++) {
     mvInvScaleFactor[i] = 1.0f / mvScaleFactor[i];
     mvInvLevelSigma2[i] = 1.0f / mvLevelSigma2[i];
   }
@@ -433,7 +433,7 @@ ORBextractor::ORBextractor(
     = nfeatures * (1 - factor) / (1 - (float)std::pow((double)factor, (double)nlevels));
 
   int sumFeatures = 0;
-  for (int level = 0; level < nlevels - 1; level++) {
+  for (std::size_t level = 0; level < nlevels - 1; level++) {
     mnFeaturesPerLevel[level]  = cvRound(nDesiredFeaturesPerScale);
     sumFeatures               += mnFeaturesPerLevel[level];
     nDesiredFeaturesPerScale  *= factor;
@@ -755,7 +755,7 @@ void ORBextractor::ComputeKeyPointsOctTree(std::vector<std::vector<cv::KeyPoint>
 
   const float W = 35;
 
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     const int minBorderX = EDGE_THRESHOLD - 3;
     const int minBorderY = minBorderX;
     const int maxBorderX = mvImagePyramid[level].cols - EDGE_THRESHOLD + 3;
@@ -872,7 +872,7 @@ void ORBextractor::ComputeKeyPointsOctTree(std::vector<std::vector<cv::KeyPoint>
   }
 
   // compute orientations
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     computeOrientation(mvImagePyramid[level], allKeypoints[level], umax);
   }
 }
@@ -882,7 +882,7 @@ void ORBextractor::ComputeKeyPointsOld(std::vector<std::vector<cv::KeyPoint>>& a
 
   float imageRatio = (float)mvImagePyramid[0].cols / mvImagePyramid[0].rows;
 
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     const int nDesiredFeatures = mnFeaturesPerLevel[level];
 
     const int levelCols = std::sqrt((float)nDesiredFeatures / (5 * imageRatio));
@@ -1028,7 +1028,7 @@ void ORBextractor::ComputeKeyPointsOld(std::vector<std::vector<cv::KeyPoint>>& a
   }
 
   // and compute orientations
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     computeOrientation(mvImagePyramid[level], allKeypoints[level], umax);
   }
 }
@@ -1071,7 +1071,7 @@ int ORBextractor::operator()(
   cv::Mat descriptors;
 
   int nkeypoints = 0;
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     nkeypoints += (int)allKeypoints[level].size();
   }
   if (nkeypoints == 0) {
@@ -1088,7 +1088,7 @@ int ORBextractor::operator()(
   int offset = 0;
   // Modified for speeding up stereo fisheye matching
   int monoIndex = 0, stereoIndex = nkeypoints - 1;
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     std::vector<cv::KeyPoint>& keypoints       = allKeypoints[level];
     int                        nkeypointsLevel = (int)keypoints.size();
 
@@ -1132,7 +1132,7 @@ int ORBextractor::operator()(
 }
 
 void ORBextractor::ComputePyramid(cv::Mat image) {
-  for (int level = 0; level < nlevels; ++level) {
+  for (std::size_t level = 0; level < nlevels; ++level) {
     float    scale = mvInvScaleFactor[level];
     cv::Size sz(cvRound((float)image.cols * scale), cvRound((float)image.rows * scale));
     cv::Size wholeSize(sz.width + EDGE_THRESHOLD * 2, sz.height + EDGE_THRESHOLD * 2);

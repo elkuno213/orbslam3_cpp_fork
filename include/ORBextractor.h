@@ -45,7 +45,7 @@ public:
     FAST_SCORE   = 1
   };
 
-  ORBextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST);
+  ORBextractor(int nfeatures, float scaleFactor, std::size_t nlevels, int iniThFAST, int minThFAST);
 
   ~ORBextractor();
 
@@ -60,7 +60,7 @@ public:
     std::vector<int>&          vLappingArea
   );
 
-  int inline GetLevels() {
+  std::size_t inline GetLevels() {
     return nlevels;
   }
 
@@ -104,7 +104,7 @@ protected:
 
   int    nfeatures;
   double scaleFactor;
-  int    nlevels;
+  std::size_t    nlevels;
   int    iniThFAST;
   int    minThFAST;
 

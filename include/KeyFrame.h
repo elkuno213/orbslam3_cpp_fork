@@ -115,7 +115,7 @@ class KeyFrame {
     ar& const_cast<float&>(mThDepth);
     serializeMatrix(ar, mDistCoef, version);
     // Number of Keypoints
-    ar& const_cast<int&>(N);
+    ar& const_cast<std::size_t&>(N);
     // KeyPoints
     serializeVectorKeyPoints<Archive>(ar, mvKeys, version);
     serializeVectorKeyPoints<Archive>(ar, mvKeysUn, version);
@@ -128,7 +128,7 @@ class KeyFrame {
     // Pose relative to parent
     serializeSophusSE3<Archive>(ar, mTcp, version);
     // Scale
-    ar& const_cast<int&>(mnScaleLevels);
+    ar& const_cast<std::size_t&>(mnScaleLevels);
     ar& const_cast<float&>(mfScaleFactor);
     ar& const_cast<float&>(mfLogScaleFactor);
     ar& const_cast<std::vector<float>&>(mvScaleFactors);
@@ -375,7 +375,7 @@ public:
   cv::Mat     mDistCoef;
 
   // Number of KeyPoints
-  const int N;
+  const std::size_t N;
 
   // KeyPoints, stereo coordinate and descriptors (all associated by an index)
   const std::vector<cv::KeyPoint> mvKeys;
@@ -392,7 +392,7 @@ public:
   Sophus::SE3f mTcp;
 
   // Scale
-  const int                mnScaleLevels;
+  const std::size_t                mnScaleLevels;
   const float              mfScaleFactor;
   const float              mfLogScaleFactor;
   const std::vector<float> mvScaleFactors;

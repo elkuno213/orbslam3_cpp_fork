@@ -1167,9 +1167,7 @@ Frame::Frame(
   , mpCamera(pCamera)
   , mpCamera2(pCamera2)
   , mbHasPose(false)
-  , mbHasVelocity(false)
-
-{
+  , mbHasVelocity(false) {
   imgLeft  = imLeft.clone();
   imgRight = imRight.clone();
 
